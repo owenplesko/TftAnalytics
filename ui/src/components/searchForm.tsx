@@ -1,0 +1,49 @@
+import { zodResolver } from "@hookform/resolvers/zod";
+import { useForm } from "react-hook-form";
+import { z } from "zod";
+
+import { Form, FormControl, FormField, FormItem } from "@/components/ui/form";
+import { Input } from "@/components/ui/input";
+import { useNavigate } from "@tanstack/react-router";
+
+const FormSchema = z.object({
+  playerName: z.string(),
+});
+
+export function SearchForm() {
+  const navigate = useNavigate();
+
+  const form = useForm<z.infer<typeof FormSchema>>({
+    resolver: zodResolver(FormSchema),
+    defaultValues: {
+      playerName: "",
+    },
+  });
+
+  function onSubmit({ playerName }: z.infer<typeof FormSchema>) {
+    const [name, tag] = playerName.split("#");
+    navigate({ to: "/player/$name/$tag", params: { name, tag } });
+  }
+
+  return (
+    <Form {...form}>
+      <form onSubmit={form.handleSubmit(onSubmit)} className="w-[300px]">
+        <FormField
+          control={form.control}
+          name="playerName"
+          render={({ field }) => (
+            <FormItem>
+              <FormControl>
+                <Input
+                  autoComplete="off"
+                  placeholder="Player name..."
+                  {...field}
+                />
+              </FormControl>
+            </FormItem>
+          )}
+        />
+      </form>
+    </Form>
+  );
+}
