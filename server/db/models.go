@@ -28,6 +28,7 @@ type TftMatch struct {
 
 type TftSummoner struct {
 	Puuid                     string           `json:"puuid"`
+	Region                    pgtype.Text      `json:"region"`
 	Name                      pgtype.Text      `json:"name"`
 	Tag                       pgtype.Text      `json:"tag"`
 	SummonerID                pgtype.Text      `json:"summonerId"`

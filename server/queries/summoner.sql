@@ -13,9 +13,10 @@ FROM tft_summoner WHERE name iLIKE @name::VARCHAR AND tag iLIkE @tag::VARCHAR;
 
 -- name: InsertPuuid :exec
 INSERT INTO tft_summoner (
-    puuid
+    puuid,
+    region
 ) VALUES (
-    $1
+    $1, @region::VARCHAR
 ) ON CONFLICT (puuid) DO NOTHING;
 
 -- name: InsertAccount :exec
@@ -26,6 +27,11 @@ INSERT INTO tft_summoner (
 ) VALUES (
     $1, @name::VARCHAR, @tag::VARCHAR
 );
+
+-- name: UpdateRegion :exec
+UPDATE tft_summoner
+SET region = @region::VARCHAR
+WHERE puuid = $1;
 
 -- name: UpdateSummoner :exec
 UPDATE tft_summoner

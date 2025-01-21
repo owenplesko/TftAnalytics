@@ -6,6 +6,7 @@ import (
 	"TFTAnalyticsServer/types"
 	"context"
 	"log"
+	"strings"
 	"time"
 
 	"github.com/jackc/pgx/v5/pgtype"
@@ -59,9 +60,15 @@ func (env ServiceEnv) CollectMatchHistory(ctx context.Context, cluster, puuid st
 func (env ServiceEnv) storeMatchDetails(ctx context.Context, matchDetails *riot.Match) error {
 	var err error
 
+	// parse match region
+	region := strings.Split(matchDetails.MetaData.MatchId, "_")[0]
+
 	// insert participants
 	for _, puuid := range matchDetails.MetaData.Participants {
-		err = env.Queries.InsertPuuid(ctx, puuid)
+		err = env.Queries.InsertPuuid(ctx, db.InsertPuuidParams{
+			Puuid:  puuid,
+			Region: region,
+		})
 		if err != nil {
 			return err
 		}

@@ -39,7 +39,7 @@ func main() {
 
 	go serviceEnv.MatchHistoryCollectionLoop(context.Background(), "americas")
 	go serviceEnv.AccountDataCollectionLoop(context.Background(), "americas")
-	go serviceEnv.RegionCollectionLoop(context.Background(), "na1")
+	go serviceEnv.RegionCollectionLoop(context.Background(), "NA1")
 
 	apiEnv := api.ApiEnv{
 		ServiceEnv: serviceEnv,

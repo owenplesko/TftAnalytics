@@ -13,5 +13,5 @@ sql:
         overrides:
           - column: "tft_comp.comp_data"
             go_type:
-              import: "TheCollectorDG/types"
+              import: "TFTAnalyticsServer/types"
               type: "CompData"

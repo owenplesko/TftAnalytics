@@ -1,27 +1,22 @@
 package riot
 
 var RegionToCluster = map[string]string{
-	"na1":  "americas",
-	"br1":  "americas",
-	"la1":  "americas",
-	"la2":  "americas",
-	"kr":   "asia",
-	"jp1":  "asia",
-	"eun1": "europe",
-	"euw1": "europe",
-	"tr1":  "europe",
-	"ru":   "europe",
-	"ph2":  "sea",
-	"sg2":  "sea",
-	"th2":  "sea",
-	"tw2":  "sea",
-	"vn2":  "sea",
-	"oc1":  "sea",
+	"NA1":  "americas",
+	"BR1":  "americas",
+	"LA1":  "americas",
+	"LA2":  "americas",
+	"KR":   "asia",
+	"JP1":  "asia",
+	"EUN1": "europe",
+	"EUW1": "europe",
+	"TR1":  "europe",
+	"RU":   "europe",
+	"PH2":  "sea",
+	"SG2":  "sea",
+	"TH2":  "sea",
+	"TW2":  "sea",
+	"VN2":  "sea",
+	"OC1":  "sea",
 }
 
-var ClusterToRegions = map[string][]string{
-	"americas": {"na1", "br1", "la1", "la2"},
-	"asia":     {"kr", "jp1"},
-	"europe":   {"eun1", "euw1", "tr1", "ru"},
-	"sea":      {"ph2", "sg2", "th2", "tw2", "vn2", "oc1"},
-}
+var ClusterToRegions = map[string][]string{}

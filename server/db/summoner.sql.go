@@ -99,20 +99,26 @@ func (q *Queries) InsertAccount(ctx context.Context, arg InsertAccountParams) er
 
 const insertPuuid = `-- name: InsertPuuid :exec
 INSERT INTO tft_summoner (
-    puuid
+    puuid,
+    region
 ) VALUES (
-    $1
+    $1, $2::VARCHAR
 ) ON CONFLICT (puuid) DO NOTHING
 `
 
-func (q *Queries) InsertPuuid(ctx context.Context, puuid string) error {
-	_, err := q.db.Exec(ctx, insertPuuid, puuid)
+type InsertPuuidParams struct {
+	Puuid  string `json:"puuid"`
+	Region string `json:"region"`
+}
+
+func (q *Queries) InsertPuuid(ctx context.Context, arg InsertPuuidParams) error {
+	_, err := q.db.Exec(ctx, insertPuuid, arg.Puuid, arg.Region)
 	return err
 }
 
 const summonerExistsByNameTag = `-- name: SummonerExistsByNameTag :one
 SELECT EXISTS (
-    SELECT puuid, name, tag, summoner_id, profile_icon_id, summoner_level, full_update_timestamp, background_update_timestamp, skip_account FROM tft_summoner WHERE name iLIKE $1::VARCHAR AND tag iLIKE $2::VARCHAR
+    SELECT puuid, region, name, tag, summoner_id, profile_icon_id, summoner_level, full_update_timestamp, background_update_timestamp, skip_account FROM tft_summoner WHERE name iLIKE $1::VARCHAR AND tag iLIKE $2::VARCHAR
 )
 `
 
@@ -143,6 +149,22 @@ type UpdateAccountParams struct {
 
 func (q *Queries) UpdateAccount(ctx context.Context, arg UpdateAccountParams) error {
 	_, err := q.db.Exec(ctx, updateAccount, arg.Puuid, arg.Name, arg.Tag)
+	return err
+}
+
+const updateRegion = `-- name: UpdateRegion :exec
+UPDATE tft_summoner
+SET region = $2::VARCHAR
+WHERE puuid = $1
+`
+
+type UpdateRegionParams struct {
+	Puuid  string `json:"puuid"`
+	Region string `json:"region"`
+}
+
+func (q *Queries) UpdateRegion(ctx context.Context, arg UpdateRegionParams) error {
+	_, err := q.db.Exec(ctx, updateRegion, arg.Puuid, arg.Region)
 	return err
 }
 

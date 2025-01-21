@@ -1,6 +1,7 @@
 package services
 
 import (
+	"TFTAnalyticsServer/db"
 	"context"
 	"time"
 )
@@ -9,7 +10,10 @@ func (env ServiceEnv) RegionCollectionLoop(ctx context.Context, region string) {
 	backoffTicker := time.NewTicker(time.Second * 5)
 
 	for range backoffTicker.C {
-		puuids, _ := env.Queries.GetPuuidsWithNullSummonerData(ctx, 100)
+		puuids, _ := env.Queries.GetPuuidsWithNullSummonerData(ctx, db.GetPuuidsWithNullSummonerDataParams{
+			Limit:  100,
+			Region: region,
+		})
 
 		for _, puuid := range puuids {
 			env.CollectSummonerDetails(ctx, region, puuid)

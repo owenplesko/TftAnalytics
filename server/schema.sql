@@ -11,6 +11,7 @@ CREATE TABLE tft_match (
 
 CREATE TABLE tft_summoner (
 	puuid VARCHAR PRIMARY KEY NOT NULL,
+	region VARCHAR,
 	name VARCHAR,
 	tag VARCHAR,
 	summoner_id VARCHAR,

@@ -11,6 +11,7 @@ SELECT
     puuid
 FROM tft_summoner
 WHERE summoner_id IS NULL
+AND region = @region::VARCHAR
 LIMIT $1;
 
 -- name: GetPuuidsWithNullAccountData :many

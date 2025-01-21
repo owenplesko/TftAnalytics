@@ -12,6 +12,10 @@ var key string
 var limiters map[string]*time.Ticker
 
 func init() {
+	for region, cluster := range RegionToCluster {
+		ClusterToRegions[cluster] = append(ClusterToRegions[cluster], region)
+	}
+
 	godotenv.Load()
 	key = os.Getenv("RIOT_KEY")
 
