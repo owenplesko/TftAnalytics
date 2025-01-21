@@ -1,8 +1,8 @@
 package services
 
 import (
-	"TheCollectorDG/db"
-	"TheCollectorDG/riot"
+	"TFTAnalyticsServer/db"
+	"TFTAnalyticsServer/riot"
 	"context"
 	"errors"
 	"log"

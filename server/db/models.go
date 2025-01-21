@@ -5,7 +5,7 @@
 package db
 
 import (
-	"TheCollectorDG/types"
+	"TFTAnalyticsServer/types"
 	"github.com/jackc/pgx/v5/pgtype"
 )
 

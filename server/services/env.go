@@ -1,7 +1,7 @@
 package services
 
 import (
-	"TheCollectorDG/db"
+	"TFTAnalyticsServer/db"
 
 	"github.com/jackc/pgx/v5/pgxpool"
 )

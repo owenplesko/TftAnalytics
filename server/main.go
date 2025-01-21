@@ -1,9 +1,9 @@
 package main
 
 import (
-	"TheCollectorDG/api"
-	"TheCollectorDG/db"
-	"TheCollectorDG/services"
+	"TFTAnalyticsServer/api"
+	"TFTAnalyticsServer/db"
+	"TFTAnalyticsServer/services"
 	"net/http"
 
 	"context"
@@ -19,9 +19,10 @@ func main() {
 
 	err := godotenv.Load()
 	if err != nil {
-		log.Fatal("Error loading .env file")
+		log.Println("no .env file found")
+	} else {
+		log.Println(".env file loaded")
 	}
-	log.Println("Env variables loaded")
 
 	pool, err := pgxpool.New(ctx, os.Getenv("DB_URL"))
 	if err != nil {

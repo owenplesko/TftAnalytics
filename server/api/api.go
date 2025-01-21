@@ -1,8 +1,8 @@
 package api
 
 import (
-	"TheCollectorDG/db"
-	"TheCollectorDG/services"
+	"TFTAnalyticsServer/db"
+	"TFTAnalyticsServer/services"
 	"context"
 	"encoding/json"
 	"net/http"
