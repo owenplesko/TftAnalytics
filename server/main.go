@@ -37,7 +37,8 @@ func main() {
 		Queries: queries,
 	}
 
-	go serviceEnv.ClusterCollectionLoop(context.Background(), "americas")
+	go serviceEnv.MatchHistoryCollectionLoop(context.Background(), "americas")
+	go serviceEnv.AccountDataCollectionLoop(context.Background(), "americas")
 	go serviceEnv.RegionCollectionLoop(context.Background(), "na1")
 
 	apiEnv := api.ApiEnv{
