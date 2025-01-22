@@ -11,6 +11,22 @@ import (
 	"github.com/jackc/pgx/v5/pgtype"
 )
 
+const addSummonerFlag = `-- name: AddSummonerFlag :exec
+UPDATE tft_summoner
+SET flags = array_append(flags, $2::VARCHAR)
+WHERE puuid = $1 AND 'SKIP_ACCOUNT_DATA' = ANY(flags)
+`
+
+type AddSummonerFlagParams struct {
+	Puuid string `json:"puuid"`
+	Flag  string `json:"flag"`
+}
+
+func (q *Queries) AddSummonerFlag(ctx context.Context, arg AddSummonerFlagParams) error {
+	_, err := q.db.Exec(ctx, addSummonerFlag, arg.Puuid, arg.Flag)
+	return err
+}
+
 const getOldestMatchHistories = `-- name: GetOldestMatchHistories :many
 SELECT
     puuid,
@@ -55,7 +71,7 @@ const getPuuidsWithNullAccountData = `-- name: GetPuuidsWithNullAccountData :man
 SELECT
     puuid
 FROM tft_summoner
-WHERE (name IS NULL OR tag IS NULL) AND NOT skip_account
+WHERE (name IS NULL OR tag IS NULL) AND NOT 'SKIP_ACCOUNT_DATA' = ANY(flags)
 LIMIT $1
 `
 
@@ -141,6 +157,22 @@ func (q *Queries) GetPuuidsWithNullSummonerData(ctx context.Context, arg GetPuui
 	return items, nil
 }
 
+const removeSummonerFlag = `-- name: RemoveSummonerFlag :exec
+UPDATE tft_summoner
+SET flags = array_remove(flags, $2::VARCHAR)
+WHERE puuid = $1
+`
+
+type RemoveSummonerFlagParams struct {
+	Puuid string `json:"puuid"`
+	Flag  string `json:"flag"`
+}
+
+func (q *Queries) RemoveSummonerFlag(ctx context.Context, arg RemoveSummonerFlagParams) error {
+	_, err := q.db.Exec(ctx, removeSummonerFlag, arg.Puuid, arg.Flag)
+	return err
+}
+
 const setBackgroundUpdateTimestamp = `-- name: SetBackgroundUpdateTimestamp :exec
 UPDATE tft_summoner
 SET background_update_timestamp = $2::TIMESTAMP
@@ -154,21 +186,5 @@ type SetBackgroundUpdateTimestampParams struct {
 
 func (q *Queries) SetBackgroundUpdateTimestamp(ctx context.Context, arg SetBackgroundUpdateTimestampParams) error {
 	_, err := q.db.Exec(ctx, setBackgroundUpdateTimestamp, arg.Puuid, arg.BackgroundUpdateTimestamp)
-	return err
-}
-
-const setSkipAccountFlag = `-- name: SetSkipAccountFlag :exec
-UPDATE tft_summoner
-SET skip_account = $2
-WHERE puuid = $1
-`
-
-type SetSkipAccountFlagParams struct {
-	Puuid       string `json:"puuid"`
-	SkipAccount bool   `json:"skipAccount"`
-}
-
-func (q *Queries) SetSkipAccountFlag(ctx context.Context, arg SetSkipAccountFlagParams) error {
-	_, err := q.db.Exec(ctx, setSkipAccountFlag, arg.Puuid, arg.SkipAccount)
 	return err
 }

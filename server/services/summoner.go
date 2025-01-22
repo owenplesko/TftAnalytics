@@ -29,9 +29,9 @@ func (env ServiceEnv) CollectSummonerDetails(ctx context.Context, region, puuid 
 func (env ServiceEnv) CollectAccountByPuuid(ctx context.Context, cluster, puuid string) error {
 	res, err := riot.GetAccountByPuuid(cluster, puuid)
 	if errors.Is(err, riot.NotFoundError) {
-		err = env.Queries.SetSkipAccountFlag(ctx, db.SetSkipAccountFlagParams{
-			Puuid:       puuid,
-			SkipAccount: true,
+		err = env.Queries.AddSummonerFlag(ctx, db.AddSummonerFlagParams{
+			Puuid: puuid,
+			Flag:  "SKIP_ACCOUNT_DATA",
 		})
 		return err
 	}

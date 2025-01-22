@@ -19,13 +19,19 @@ LIMIT $1;
 SELECT
     puuid
 FROM tft_summoner
-WHERE (name IS NULL OR tag IS NULL) AND NOT skip_account
+WHERE (name IS NULL OR tag IS NULL) AND NOT 'SKIP_ACCOUNT_DATA' = ANY(flags)
 LIMIT $1;
 
--- name: SetSkipAccountFlag :exec
+-- name: AddSummonerFlag :exec
 UPDATE tft_summoner
-SET skip_account = $2
+SET flags = array_append(flags, @flag::VARCHAR)
+WHERE puuid = $1 AND 'SKIP_ACCOUNT_DATA' = ANY(flags);
+
+-- name: RemoveSummonerFlag :exec
+UPDATE tft_summoner
+SET flags = array_remove(flags, @flag::VARCHAR)
 WHERE puuid = $1;
+
 
 -- name: SetBackgroundUpdateTimestamp :exec
 UPDATE tft_summoner

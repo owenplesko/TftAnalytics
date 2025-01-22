@@ -36,5 +36,5 @@ type TftSummoner struct {
 	SummonerLevel             pgtype.Int4      `json:"summonerLevel"`
 	FullUpdateTimestamp       pgtype.Timestamp `json:"fullUpdateTimestamp"`
 	BackgroundUpdateTimestamp pgtype.Timestamp `json:"backgroundUpdateTimestamp"`
-	SkipAccount               bool             `json:"skipAccount"`
+	Flags                     []string         `json:"flags"`
 }
