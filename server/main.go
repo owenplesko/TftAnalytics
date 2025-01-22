@@ -3,6 +3,7 @@ package main
 import (
 	"TFTAnalyticsServer/api"
 	"TFTAnalyticsServer/db"
+	"TFTAnalyticsServer/riot"
 	"TFTAnalyticsServer/services"
 	"net/http"
 
@@ -37,9 +38,13 @@ func main() {
 		Queries: queries,
 	}
 
-	go serviceEnv.MatchHistoryCollectionLoop(context.Background(), "americas")
-	go serviceEnv.AccountDataCollectionLoop(context.Background(), "americas")
-	go serviceEnv.SummonerDataCollectionLoop(context.Background(), "NA1")
+	for region, _ := range riot.RegionToCluster {
+		go serviceEnv.SummonerDataCollectionLoop(context.Background(), region)
+	}
+	for cluster, _ := range riot.ClusterToRegions {
+		go serviceEnv.MatchHistoryCollectionLoop(context.Background(), cluster)
+		go serviceEnv.AccountDataCollectionLoop(context.Background(), cluster)
+	}
 	go serviceEnv.SummonerRegionCollectionLoop(context.Background())
 
 	apiEnv := api.ApiEnv{
