@@ -73,6 +73,34 @@ func (q *Queries) GetPuuidsWithNullAccountData(ctx context.Context, limit int32)
 	return items, nil
 }
 
+const getPuuidsWithNullRegion = `-- name: GetPuuidsWithNullRegion :many
+SELECT
+    puuid
+FROM tft_summoner
+WHERE region IS NULL
+LIMIT $1
+`
+
+func (q *Queries) GetPuuidsWithNullRegion(ctx context.Context, limit int32) ([]string, error) {
+	rows, err := q.db.Query(ctx, getPuuidsWithNullRegion, limit)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []string
+	for rows.Next() {
+		var puuid string
+		if err := rows.Scan(&puuid); err != nil {
+			return nil, err
+		}
+		items = append(items, puuid)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
 const getPuuidsWithNullSummonerData = `-- name: GetPuuidsWithNullSummonerData :many
 SELECT
     puuid

@@ -6,7 +6,7 @@ import (
 	"time"
 )
 
-func (env ServiceEnv) RegionCollectionLoop(ctx context.Context, region string) {
+func (env ServiceEnv) SummonerDataCollectionLoop(ctx context.Context, region string) {
 	backoffTicker := time.NewTicker(time.Second * 5)
 
 	for range backoffTicker.C {
@@ -17,6 +17,18 @@ func (env ServiceEnv) RegionCollectionLoop(ctx context.Context, region string) {
 
 		for _, puuid := range puuids {
 			env.CollectSummonerDetails(ctx, region, puuid)
+		}
+	}
+}
+
+func (env ServiceEnv) SummonerRegionCollectionLoop(ctx context.Context) {
+	backoffTicker := time.NewTicker(time.Second * 5)
+
+	for range backoffTicker.C {
+		puuids, _ := env.Queries.GetPuuidsWithNullRegion(ctx, 100)
+
+		for _, puuid := range puuids {
+			env.CollectSummonerRegion(ctx, puuid)
 		}
 	}
 }

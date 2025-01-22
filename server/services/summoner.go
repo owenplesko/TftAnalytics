@@ -83,3 +83,33 @@ func (env ServiceEnv) GetOrCollectSummonerByNameTag(ctx context.Context, cluster
 
 	return env.Queries.GetSummonerByNameTag(ctx, db.GetSummonerByNameTagParams{Name: name, Tag: tag})
 }
+
+func (env ServiceEnv) CollectSummonerRegion(ctx context.Context, puuid string) error {
+	var regionMatch string
+
+	for region, _ := range riot.RegionToCluster {
+		_, err := riot.GetSummonerByPuuid(region, puuid)
+
+		if errors.Is(err, riot.NotFoundError) {
+			continue
+		}
+
+		if err != nil {
+			return err
+		}
+
+		regionMatch = region
+		break
+	}
+
+	if regionMatch == "" {
+		return errors.New("no region match found")
+	}
+
+	err := env.Queries.UpdateRegion(ctx, db.UpdateRegionParams{
+		Puuid:  puuid,
+		Region: regionMatch,
+	})
+
+	return err
+}

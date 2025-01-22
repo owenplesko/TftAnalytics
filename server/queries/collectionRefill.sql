@@ -30,3 +30,10 @@ WHERE puuid = $1;
 UPDATE tft_summoner
 SET background_update_timestamp = @background_update_timestamp::TIMESTAMP
 WHERE puuid = $1;
+
+-- name: GetPuuidsWithNullRegion :many
+SELECT
+    puuid
+FROM tft_summoner
+WHERE region IS NULL
+LIMIT $1;
