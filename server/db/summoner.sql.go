@@ -76,27 +76,6 @@ func (q *Queries) GetSummonerByPuuid(ctx context.Context, puuid string) (GetSumm
 	return i, err
 }
 
-const insertAccount = `-- name: InsertAccount :exec
-INSERT INTO tft_summoner (
-    puuid,
-    name,
-    tag
-) VALUES (
-    $1, $2::VARCHAR, $3::VARCHAR
-)
-`
-
-type InsertAccountParams struct {
-	Puuid string `json:"puuid"`
-	Name  string `json:"name"`
-	Tag   string `json:"tag"`
-}
-
-func (q *Queries) InsertAccount(ctx context.Context, arg InsertAccountParams) error {
-	_, err := q.db.Exec(ctx, insertAccount, arg.Puuid, arg.Name, arg.Tag)
-	return err
-}
-
 const insertPuuid = `-- name: InsertPuuid :exec
 INSERT INTO tft_summoner (
     puuid,
@@ -190,5 +169,26 @@ func (q *Queries) UpdateSummoner(ctx context.Context, arg UpdateSummonerParams) 
 		arg.ProfileIconID,
 		arg.SummonerLevel,
 	)
+	return err
+}
+
+const upsertAccount = `-- name: UpsertAccount :exec
+INSERT INTO tft_summoner (
+    puuid,
+    name,
+    tag
+) VALUES (
+    $1, $2::VARCHAR, $3::VARCHAR
+) ON CONFLICT(puuid) DO UPDATE SET name = $2::VARCHAR, tag = $3::VARCHAR
+`
+
+type UpsertAccountParams struct {
+	Puuid string `json:"puuid"`
+	Name  string `json:"name"`
+	Tag   string `json:"tag"`
+}
+
+func (q *Queries) UpsertAccount(ctx context.Context, arg UpsertAccountParams) error {
+	_, err := q.db.Exec(ctx, upsertAccount, arg.Puuid, arg.Name, arg.Tag)
 	return err
 }

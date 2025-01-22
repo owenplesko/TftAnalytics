@@ -19,14 +19,14 @@ INSERT INTO tft_summoner (
     $1, @region::VARCHAR
 ) ON CONFLICT (puuid) DO NOTHING;
 
--- name: InsertAccount :exec
+-- name: UpsertAccount :exec
 INSERT INTO tft_summoner (
     puuid,
     name,
     tag
 ) VALUES (
     $1, @name::VARCHAR, @tag::VARCHAR
-);
+) ON CONFLICT(puuid) DO UPDATE SET name = @name::VARCHAR, tag = @tag::VARCHAR;
 
 -- name: UpdateRegion :exec
 UPDATE tft_summoner

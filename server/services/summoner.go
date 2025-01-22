@@ -56,7 +56,7 @@ func (env ServiceEnv) CollectAccountByNameTag(ctx context.Context, cluster, name
 		return err
 	}
 
-	err = env.Queries.InsertAccount(ctx, db.InsertAccountParams{
+	err = env.Queries.UpsertAccount(ctx, db.UpsertAccountParams{
 		Puuid: res.Puuid,
 		Name:  res.Name,
 		Tag:   res.Tag,
