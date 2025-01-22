@@ -103,6 +103,10 @@ func (env ServiceEnv) CollectSummonerRegion(ctx context.Context, puuid string) e
 	}
 
 	if regionMatch == "" {
+		env.Queries.AddSummonerFlag(ctx, db.AddSummonerFlagParams{
+			Puuid: puuid,
+			Flag:  "SKIP_REGION_MATCH",
+		})
 		return errors.New("no region match found")
 	}
 

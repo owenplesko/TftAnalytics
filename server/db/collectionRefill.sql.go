@@ -99,7 +99,7 @@ const getPuuidsWithNullRegion = `-- name: GetPuuidsWithNullRegion :many
 SELECT
     puuid
 FROM tft_summoner
-WHERE region IS NULL
+WHERE region IS NULL AND NOT 'SKIP_REGION_DATA' = ANY(flags)
 LIMIT $1
 `
 
