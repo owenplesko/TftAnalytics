@@ -16,17 +16,23 @@ SELECT
     puuid,
     background_update_timestamp
 FROM tft_summoner
+WHERE region = ANY($2::VARCHAR[])
 ORDER BY background_update_timestamp ASC NULLS FIRST
 LIMIT $1
 `
+
+type GetOldestMatchHistoriesParams struct {
+	Limit   int32    `json:"limit"`
+	Regions []string `json:"regions"`
+}
 
 type GetOldestMatchHistoriesRow struct {
 	Puuid                     string           `json:"puuid"`
 	BackgroundUpdateTimestamp pgtype.Timestamp `json:"backgroundUpdateTimestamp"`
 }
 
-func (q *Queries) GetOldestMatchHistories(ctx context.Context, limit int32) ([]GetOldestMatchHistoriesRow, error) {
-	rows, err := q.db.Query(ctx, getOldestMatchHistories, limit)
+func (q *Queries) GetOldestMatchHistories(ctx context.Context, arg GetOldestMatchHistoriesParams) ([]GetOldestMatchHistoriesRow, error) {
+	rows, err := q.db.Query(ctx, getOldestMatchHistories, arg.Limit, arg.Regions)
 	if err != nil {
 		return nil, err
 	}

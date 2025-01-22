@@ -3,6 +3,7 @@ SELECT
     puuid,
     background_update_timestamp
 FROM tft_summoner
+WHERE region = ANY(@regions::VARCHAR[])
 ORDER BY background_update_timestamp ASC NULLS FIRST
 LIMIT $1;
 

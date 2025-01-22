@@ -2,6 +2,7 @@ package services
 
 import (
 	"TFTAnalyticsServer/db"
+	"TFTAnalyticsServer/riot"
 	"context"
 	"time"
 )
@@ -48,7 +49,10 @@ func (env ServiceEnv) MatchHistoryCollectionLoop(ctx context.Context, cluster st
 	backoffTicker := time.NewTicker(time.Second * 5)
 
 	for range backoffTicker.C {
-		rows, _ := env.Queries.GetOldestMatchHistories(ctx, 1)
+		rows, _ := env.Queries.GetOldestMatchHistories(ctx, db.GetOldestMatchHistoriesParams{
+			Regions: riot.ClusterToRegions[cluster],
+			Limit:   100,
+		})
 		for _, row := range rows {
 			env.CollectMatchHistory(ctx, cluster, row.Puuid, time.Now().Add(-time.Hour*24*3))
 		}
