@@ -28,6 +28,7 @@ func (env ApiEnv) getSummonerByPuuid(w http.ResponseWriter, r *http.Request) {
 	ctx := context.Background()
 
 	w.Header().Set("Access-Control-Allow-Origin", "*")
+	w.Header().Set("Content-Type", "application/json")
 
 	puuid := r.PathValue("puuid")
 
@@ -49,6 +50,7 @@ func (env ApiEnv) getSummonerByNameTag(w http.ResponseWriter, r *http.Request) {
 	ctx := context.Background()
 
 	w.Header().Set("Access-Control-Allow-Origin", "*")
+	w.Header().Set("Content-Type", "application/json")
 
 	cluster := "americas"
 	name := r.PathValue("name")
@@ -72,6 +74,7 @@ func (env ApiEnv) getSummonerMatches(w http.ResponseWriter, r *http.Request) {
 	ctx := context.Background()
 
 	w.Header().Set("Access-Control-Allow-Origin", "*")
+	w.Header().Set("Content-Type", "application/json")
 
 	puuid := r.PathValue("puuid")
 
@@ -94,6 +97,7 @@ func (env ApiEnv) getMatchComps(w http.ResponseWriter, r *http.Request) {
 	ctx := context.Background()
 
 	w.Header().Set("Access-Control-Allow-Origin", "*")
+	w.Header().Set("Content-Type", "application/json")
 
 	matchId := r.PathValue("matchid")
 

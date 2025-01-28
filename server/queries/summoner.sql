@@ -1,6 +1,7 @@
 -- name: GetSummonerByPuuid :one
-SELECT puuid, name, tag, summoner_id, profile_icon_id, summoner_level, full_update_timestamp
-FROM tft_summoner WHERE puuid = $1;
+SELECT *
+FROM tft_summoner 
+WHERE puuid = $1;
 
 -- name: SummonerExistsByNameTag :one
 SELECT EXISTS (
@@ -8,8 +9,9 @@ SELECT EXISTS (
 );
 
 -- name: GetSummonerByNameTag :one
-SELECT puuid, name, tag, summoner_id, profile_icon_id, summoner_level, full_update_timestamp
-FROM tft_summoner WHERE name iLIKE @name::VARCHAR AND tag iLIkE @tag::VARCHAR;
+SELECT *
+FROM tft_summoner 
+WHERE name iLIKE @name::VARCHAR AND tag iLIkE @tag::VARCHAR;
 
 -- name: InsertPuuid :exec
 INSERT INTO tft_summoner (

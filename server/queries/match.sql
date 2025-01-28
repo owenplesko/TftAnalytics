@@ -1,13 +1,6 @@
 -- name: GetMatchComps :many
 SELECT 
-	comp_data,
-	puuid,
-	name,
-	tag,
-	summoner_id,
-	profile_icon_id,
-	summoner_level,
-	full_update_timestamp
+	sqlc.embed(tft_summoner), comp_data
 FROM
 	tft_comp
 	JOIN tft_summoner ON summoner_puuid = puuid
@@ -42,14 +35,7 @@ SELECT EXISTS (
 );
 
 -- name: SummonerMatchHistory :many
-SELECT
-	match_id,
-	comp_data,
-	game_version,
-	queue_id,
-	game_type,
-	set_number,
-	match_date
+SELECT *
 FROM
 	tft_comp
 	JOIN tft_match ON tft_comp.match_id = tft_match.id

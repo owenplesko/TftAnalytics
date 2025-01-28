@@ -75,14 +75,7 @@ func (q *Queries) CreateMatch(ctx context.Context, arg CreateMatchParams) error 
 
 const getMatchComps = `-- name: GetMatchComps :many
 SELECT 
-	comp_data,
-	puuid,
-	name,
-	tag,
-	summoner_id,
-	profile_icon_id,
-	summoner_level,
-	full_update_timestamp
+	tft_summoner.puuid, tft_summoner.region, tft_summoner.name, tft_summoner.tag, tft_summoner.summoner_id, tft_summoner.profile_icon_id, tft_summoner.summoner_level, tft_summoner.full_update_timestamp, tft_summoner.background_update_timestamp, tft_summoner.flags, comp_data
 FROM
 	tft_comp
 	JOIN tft_summoner ON summoner_puuid = puuid
@@ -90,14 +83,8 @@ WHERE match_id = $1
 `
 
 type GetMatchCompsRow struct {
-	CompData            types.CompData   `json:"compData"`
-	Puuid               string           `json:"puuid"`
-	Name                pgtype.Text      `json:"name"`
-	Tag                 pgtype.Text      `json:"tag"`
-	SummonerID          pgtype.Text      `json:"summonerId"`
-	ProfileIconID       pgtype.Int4      `json:"profileIconId"`
-	SummonerLevel       pgtype.Int4      `json:"summonerLevel"`
-	FullUpdateTimestamp pgtype.Timestamp `json:"fullUpdateTimestamp"`
+	TftSummoner TftSummoner    `json:"tftSummoner"`
+	CompData    types.CompData `json:"compData"`
 }
 
 func (q *Queries) GetMatchComps(ctx context.Context, matchID string) ([]GetMatchCompsRow, error) {
@@ -110,14 +97,17 @@ func (q *Queries) GetMatchComps(ctx context.Context, matchID string) ([]GetMatch
 	for rows.Next() {
 		var i GetMatchCompsRow
 		if err := rows.Scan(
+			&i.TftSummoner.Puuid,
+			&i.TftSummoner.Region,
+			&i.TftSummoner.Name,
+			&i.TftSummoner.Tag,
+			&i.TftSummoner.SummonerID,
+			&i.TftSummoner.ProfileIconID,
+			&i.TftSummoner.SummonerLevel,
+			&i.TftSummoner.FullUpdateTimestamp,
+			&i.TftSummoner.BackgroundUpdateTimestamp,
+			&i.TftSummoner.Flags,
 			&i.CompData,
-			&i.Puuid,
-			&i.Name,
-			&i.Tag,
-			&i.SummonerID,
-			&i.ProfileIconID,
-			&i.SummonerLevel,
-			&i.FullUpdateTimestamp,
 		); err != nil {
 			return nil, err
 		}
@@ -143,14 +133,7 @@ func (q *Queries) MatchExists(ctx context.Context, id string) (bool, error) {
 }
 
 const summonerMatchHistory = `-- name: SummonerMatchHistory :many
-SELECT
-	match_id,
-	comp_data,
-	game_version,
-	queue_id,
-	game_type,
-	set_number,
-	match_date
+SELECT match_id, summoner_puuid, comp_data, id, data_version, game_version, queue_id, game_type, set_name, set_number, match_date
 FROM
 	tft_comp
 	JOIN tft_match ON tft_comp.match_id = tft_match.id
@@ -169,13 +152,17 @@ type SummonerMatchHistoryParams struct {
 }
 
 type SummonerMatchHistoryRow struct {
-	MatchID     string           `json:"matchId"`
-	CompData    types.CompData   `json:"compData"`
-	GameVersion string           `json:"gameVersion"`
-	QueueID     int32            `json:"queueId"`
-	GameType    string           `json:"gameType"`
-	SetNumber   int32            `json:"setNumber"`
-	MatchDate   pgtype.Timestamp `json:"matchDate"`
+	MatchID       string           `json:"matchId"`
+	SummonerPuuid string           `json:"summonerPuuid"`
+	CompData      types.CompData   `json:"compData"`
+	ID            string           `json:"id"`
+	DataVersion   string           `json:"dataVersion"`
+	GameVersion   string           `json:"gameVersion"`
+	QueueID       int32            `json:"queueId"`
+	GameType      string           `json:"gameType"`
+	SetName       string           `json:"setName"`
+	SetNumber     int32            `json:"setNumber"`
+	MatchDate     pgtype.Timestamp `json:"matchDate"`
 }
 
 func (q *Queries) SummonerMatchHistory(ctx context.Context, arg SummonerMatchHistoryParams) ([]SummonerMatchHistoryRow, error) {
@@ -189,10 +176,14 @@ func (q *Queries) SummonerMatchHistory(ctx context.Context, arg SummonerMatchHis
 		var i SummonerMatchHistoryRow
 		if err := rows.Scan(
 			&i.MatchID,
+			&i.SummonerPuuid,
 			&i.CompData,
+			&i.ID,
+			&i.DataVersion,
 			&i.GameVersion,
 			&i.QueueID,
 			&i.GameType,
+			&i.SetName,
 			&i.SetNumber,
 			&i.MatchDate,
 		); err != nil {

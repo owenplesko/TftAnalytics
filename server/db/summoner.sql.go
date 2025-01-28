@@ -7,13 +7,12 @@ package db
 
 import (
 	"context"
-
-	"github.com/jackc/pgx/v5/pgtype"
 )
 
 const getSummonerByNameTag = `-- name: GetSummonerByNameTag :one
-SELECT puuid, name, tag, summoner_id, profile_icon_id, summoner_level, full_update_timestamp
-FROM tft_summoner WHERE name iLIKE $1::VARCHAR AND tag iLIkE $2::VARCHAR
+SELECT puuid, region, name, tag, summoner_id, profile_icon_id, summoner_level, full_update_timestamp, background_update_timestamp, flags
+FROM tft_summoner 
+WHERE name iLIKE $1::VARCHAR AND tag iLIkE $2::VARCHAR
 `
 
 type GetSummonerByNameTagParams struct {
@@ -21,57 +20,44 @@ type GetSummonerByNameTagParams struct {
 	Tag  string `json:"tag"`
 }
 
-type GetSummonerByNameTagRow struct {
-	Puuid               string           `json:"puuid"`
-	Name                pgtype.Text      `json:"name"`
-	Tag                 pgtype.Text      `json:"tag"`
-	SummonerID          pgtype.Text      `json:"summonerId"`
-	ProfileIconID       pgtype.Int4      `json:"profileIconId"`
-	SummonerLevel       pgtype.Int4      `json:"summonerLevel"`
-	FullUpdateTimestamp pgtype.Timestamp `json:"fullUpdateTimestamp"`
-}
-
-func (q *Queries) GetSummonerByNameTag(ctx context.Context, arg GetSummonerByNameTagParams) (GetSummonerByNameTagRow, error) {
+func (q *Queries) GetSummonerByNameTag(ctx context.Context, arg GetSummonerByNameTagParams) (TftSummoner, error) {
 	row := q.db.QueryRow(ctx, getSummonerByNameTag, arg.Name, arg.Tag)
-	var i GetSummonerByNameTagRow
+	var i TftSummoner
 	err := row.Scan(
 		&i.Puuid,
+		&i.Region,
 		&i.Name,
 		&i.Tag,
 		&i.SummonerID,
 		&i.ProfileIconID,
 		&i.SummonerLevel,
 		&i.FullUpdateTimestamp,
+		&i.BackgroundUpdateTimestamp,
+		&i.Flags,
 	)
 	return i, err
 }
 
 const getSummonerByPuuid = `-- name: GetSummonerByPuuid :one
-SELECT puuid, name, tag, summoner_id, profile_icon_id, summoner_level, full_update_timestamp
-FROM tft_summoner WHERE puuid = $1
+SELECT puuid, region, name, tag, summoner_id, profile_icon_id, summoner_level, full_update_timestamp, background_update_timestamp, flags
+FROM tft_summoner 
+WHERE puuid = $1
 `
 
-type GetSummonerByPuuidRow struct {
-	Puuid               string           `json:"puuid"`
-	Name                pgtype.Text      `json:"name"`
-	Tag                 pgtype.Text      `json:"tag"`
-	SummonerID          pgtype.Text      `json:"summonerId"`
-	ProfileIconID       pgtype.Int4      `json:"profileIconId"`
-	SummonerLevel       pgtype.Int4      `json:"summonerLevel"`
-	FullUpdateTimestamp pgtype.Timestamp `json:"fullUpdateTimestamp"`
-}
-
-func (q *Queries) GetSummonerByPuuid(ctx context.Context, puuid string) (GetSummonerByPuuidRow, error) {
+func (q *Queries) GetSummonerByPuuid(ctx context.Context, puuid string) (TftSummoner, error) {
 	row := q.db.QueryRow(ctx, getSummonerByPuuid, puuid)
-	var i GetSummonerByPuuidRow
+	var i TftSummoner
 	err := row.Scan(
 		&i.Puuid,
+		&i.Region,
 		&i.Name,
 		&i.Tag,
 		&i.SummonerID,
 		&i.ProfileIconID,
 		&i.SummonerLevel,
 		&i.FullUpdateTimestamp,
+		&i.BackgroundUpdateTimestamp,
+		&i.Flags,
 	)
 	return i, err
 }

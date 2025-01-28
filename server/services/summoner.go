@@ -67,23 +67,23 @@ func (env ServiceEnv) CollectAccountByNameTag(ctx context.Context, cluster, name
 	return err
 }
 
-func (env ServiceEnv) GetSummonerByPuuid(ctx context.Context, puuid string) (db.GetSummonerByPuuidRow, error) {
+func (env ServiceEnv) GetSummonerByPuuid(ctx context.Context, puuid string) (db.TftSummoner, error) {
 	return env.Queries.GetSummonerByPuuid(ctx, puuid)
 }
 
-func (env ServiceEnv) GetOrCollectSummonerByNameTag(ctx context.Context, cluster, name, tag string) (db.GetSummonerByNameTagRow, error) {
+func (env ServiceEnv) GetOrCollectSummonerByNameTag(ctx context.Context, cluster, name, tag string) (db.TftSummoner, error) {
 	exists, err := env.Queries.SummonerExistsByNameTag(ctx, db.SummonerExistsByNameTagParams{
 		Name: name,
 		Tag:  tag,
 	})
 	if err != nil {
-		return db.GetSummonerByNameTagRow{}, err
+		return db.TftSummoner{}, err
 	}
 
 	if !exists {
 		err = env.CollectAccountByNameTag(ctx, cluster, name, tag)
 		if err != nil {
-			return db.GetSummonerByNameTagRow{}, err
+			return db.TftSummoner{}, err
 		}
 	}
 
