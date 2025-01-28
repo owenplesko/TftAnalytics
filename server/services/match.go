@@ -12,6 +12,10 @@ import (
 	"github.com/jackc/pgx/v5/pgtype"
 )
 
+func (env ServiceEnv) GetMatchComps(ctx context.Context, matchId string) ([]db.GetMatchCompsRow, error) {
+	return env.Queries.GetMatchComps(ctx, matchId)
+}
+
 func (env ServiceEnv) GetMatchHistory(ctx context.Context, puuid string) ([]db.SummonerMatchHistoryRow, error) {
 	return env.Queries.SummonerMatchHistory(context.Background(), db.SummonerMatchHistoryParams{
 		SummonerPuuid: puuid,

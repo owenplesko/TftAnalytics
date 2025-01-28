@@ -73,6 +73,62 @@ func (q *Queries) CreateMatch(ctx context.Context, arg CreateMatchParams) error 
 	return err
 }
 
+const getMatchComps = `-- name: GetMatchComps :many
+SELECT 
+	comp_data,
+	puuid,
+	name,
+	tag,
+	summoner_id,
+	profile_icon_id,
+	summoner_level,
+	full_update_timestamp
+FROM
+	tft_comp
+	JOIN tft_summoner ON summoner_puuid = puuid
+WHERE match_id = $1
+`
+
+type GetMatchCompsRow struct {
+	CompData            types.CompData   `json:"compData"`
+	Puuid               string           `json:"puuid"`
+	Name                pgtype.Text      `json:"name"`
+	Tag                 pgtype.Text      `json:"tag"`
+	SummonerID          pgtype.Text      `json:"summonerId"`
+	ProfileIconID       pgtype.Int4      `json:"profileIconId"`
+	SummonerLevel       pgtype.Int4      `json:"summonerLevel"`
+	FullUpdateTimestamp pgtype.Timestamp `json:"fullUpdateTimestamp"`
+}
+
+func (q *Queries) GetMatchComps(ctx context.Context, matchID string) ([]GetMatchCompsRow, error) {
+	rows, err := q.db.Query(ctx, getMatchComps, matchID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []GetMatchCompsRow
+	for rows.Next() {
+		var i GetMatchCompsRow
+		if err := rows.Scan(
+			&i.CompData,
+			&i.Puuid,
+			&i.Name,
+			&i.Tag,
+			&i.SummonerID,
+			&i.ProfileIconID,
+			&i.SummonerLevel,
+			&i.FullUpdateTimestamp,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
 const matchExists = `-- name: MatchExists :one
 SELECT EXISTS (
     SELECT id, data_version, game_version, queue_id, game_type, set_name, set_number, match_date FROM tft_match WHERE id = $1

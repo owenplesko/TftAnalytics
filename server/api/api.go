@@ -20,6 +20,7 @@ func (env ApiEnv) New() *http.ServeMux {
 	router.HandleFunc("/v1/summoner/by-puuid/{puuid}", env.getSummonerByPuuid)
 	router.HandleFunc("/v1/summoner/by-name-tag/{name}/{tag}", env.getSummonerByNameTag)
 	router.HandleFunc("/v1/summoner/by-puuid/{puuid}/matches", env.getSummonerMatches)
+	router.HandleFunc("/v1/match/{matchid}/comps", env.getMatchComps)
 	return router
 }
 
@@ -86,5 +87,27 @@ func (env ApiEnv) getSummonerMatches(w http.ResponseWriter, r *http.Request) {
 	}
 
 	bytes, _ := json.Marshal(matches)
+	w.Write(bytes)
+}
+
+func (env ApiEnv) getMatchComps(w http.ResponseWriter, r *http.Request) {
+	ctx := context.Background()
+
+	w.Header().Set("Access-Control-Allow-Origin", "*")
+
+	matchId := r.PathValue("matchid")
+
+	comps, err := env.ServiceEnv.GetMatchComps(ctx, matchId)
+	if err != nil {
+		http.Error(w, "something went wrong", 500)
+		return
+	}
+
+	// prevent returning null when list is empty
+	if comps == nil {
+		comps = []db.GetMatchCompsRow{}
+	}
+
+	bytes, _ := json.Marshal(comps)
 	w.Write(bytes)
 }

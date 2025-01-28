@@ -1,3 +1,18 @@
+-- name: GetMatchComps :many
+SELECT 
+	comp_data,
+	puuid,
+	name,
+	tag,
+	summoner_id,
+	profile_icon_id,
+	summoner_level,
+	full_update_timestamp
+FROM
+	tft_comp
+	JOIN tft_summoner ON summoner_puuid = puuid
+WHERE match_id = $1;
+
 -- name: CreateMatch :exec
 INSERT INTO tft_match (
     id,
