@@ -72,13 +72,19 @@ func (env ServiceEnv) GetSummonerByPuuid(ctx context.Context, puuid string) (db.
 }
 
 func (env ServiceEnv) GetOrCollectSummonerByNameTag(ctx context.Context, cluster, name, tag string) (db.GetSummonerByNameTagRow, error) {
-	exists, _ := env.Queries.SummonerExistsByNameTag(ctx, db.SummonerExistsByNameTagParams{
+	exists, err := env.Queries.SummonerExistsByNameTag(ctx, db.SummonerExistsByNameTagParams{
 		Name: name,
 		Tag:  tag,
 	})
+	if err != nil {
+		return db.GetSummonerByNameTagRow{}, err
+	}
 
 	if !exists {
-		env.CollectAccountByNameTag(ctx, cluster, name, tag)
+		err = env.CollectAccountByNameTag(ctx, cluster, name, tag)
+		if err != nil {
+			return db.GetSummonerByNameTagRow{}, err
+		}
 	}
 
 	return env.Queries.GetSummonerByNameTag(ctx, db.GetSummonerByNameTagParams{Name: name, Tag: tag})
