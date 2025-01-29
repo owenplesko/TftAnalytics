@@ -42,5 +42,5 @@ WHERE puuid = $1;
 SELECT
     puuid
 FROM tft_summoner
-WHERE region IS NULL AND NOT 'SKIP_REGION_MATCH' = ANY(flags)
+    WHERE region IS NULL AND NOT 'SKIP_REGION_MATCH' = ANY(flags)
 LIMIT $1;

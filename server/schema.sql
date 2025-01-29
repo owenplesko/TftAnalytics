@@ -30,3 +30,9 @@ CREATE TABLE tft_comp (
 );
 
 CREATE INDEX idx_name_tag_insensitive ON tft_summoner (REPLACE(LOWER(name), ' ', ''), REPLACE(LOWER(tag), ' ', ''));
+
+CREATE INDEX idx_name_tag_null ON tft_summoner (name, tag) WHERE (name IS NULL OR tag IS NULL) AND NOT 'SKIP_ACCOUNT_DATA' = ANY(flags);
+
+CREATE INDEX idx_region_summoner_id_null ON tft_summoner (region, puuid) WHERE summoner_id IS NULL;
+
+CREATE INDEX idx_region_null ON tft_summoner (puuid) WHERE region IS NULL AND NOT 'SKIP_REGION_MATCH' = ANY(flags);
