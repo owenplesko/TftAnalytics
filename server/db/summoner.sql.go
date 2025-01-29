@@ -12,7 +12,8 @@ import (
 const getSummonerByNameTag = `-- name: GetSummonerByNameTag :one
 SELECT puuid, region, name, tag, summoner_id, profile_icon_id, summoner_level, full_update_timestamp, background_update_timestamp, flags
 FROM tft_summoner 
-WHERE name iLIKE $1::VARCHAR AND tag iLIkE $2::VARCHAR
+WHERE REPLACE(LOWER(name), ' ', '') = REPLACE(LOWER($1::VARCHAR), ' ', '')
+AND REPLACE(LOWER(tag), ' ', '') = REPLACE(LOWER($2::VARCHAR), ' ', '')
 `
 
 type GetSummonerByNameTagParams struct {
@@ -83,7 +84,9 @@ func (q *Queries) InsertPuuid(ctx context.Context, arg InsertPuuidParams) error 
 
 const summonerExistsByNameTag = `-- name: SummonerExistsByNameTag :one
 SELECT EXISTS (
-    SELECT puuid, region, name, tag, summoner_id, profile_icon_id, summoner_level, full_update_timestamp, background_update_timestamp, flags FROM tft_summoner WHERE name iLIKE $1::VARCHAR AND tag iLIKE $2::VARCHAR
+    SELECT puuid, region, name, tag, summoner_id, profile_icon_id, summoner_level, full_update_timestamp, background_update_timestamp, flags FROM tft_summoner 
+    WHERE REPLACE(LOWER(name), ' ', '') = REPLACE(LOWER($1::VARCHAR), ' ', '')
+    AND REPLACE(LOWER(tag), ' ', '') = REPLACE(LOWER($2::VARCHAR), ' ', '')
 )
 `
 

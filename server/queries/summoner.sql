@@ -5,13 +5,16 @@ WHERE puuid = $1;
 
 -- name: SummonerExistsByNameTag :one
 SELECT EXISTS (
-    SELECT * FROM tft_summoner WHERE name iLIKE @name::VARCHAR AND tag iLIKE @tag::VARCHAR
+    SELECT * FROM tft_summoner 
+    WHERE REPLACE(LOWER(name), ' ', '') = REPLACE(LOWER(@name::VARCHAR), ' ', '')
+    AND REPLACE(LOWER(tag), ' ', '') = REPLACE(LOWER(@tag::VARCHAR), ' ', '')
 );
 
 -- name: GetSummonerByNameTag :one
 SELECT *
 FROM tft_summoner 
-WHERE name iLIKE @name::VARCHAR AND tag iLIkE @tag::VARCHAR;
+WHERE REPLACE(LOWER(name), ' ', '') = REPLACE(LOWER(@name::VARCHAR), ' ', '')
+AND REPLACE(LOWER(tag), ' ', '') = REPLACE(LOWER(@tag::VARCHAR), ' ', '');
 
 -- name: InsertPuuid :exec
 INSERT INTO tft_summoner (

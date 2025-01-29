@@ -28,3 +28,5 @@ CREATE TABLE tft_comp (
 	comp_data JSONB NOT NULL,
 	PRIMARY KEY(match_id, summoner_puuid)
 );
+
+CREATE INDEX idx_name_tag_insensitive ON tft_summoner (REPLACE(LOWER(name), ' ', ''), REPLACE(LOWER(tag), ' ', ''));
