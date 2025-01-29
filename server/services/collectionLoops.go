@@ -49,12 +49,16 @@ func (env ServiceEnv) MatchHistoryCollectionLoop(ctx context.Context, cluster st
 	backoffTicker := time.NewTicker(time.Second * 5)
 
 	for range backoffTicker.C {
-		rows, _ := env.Queries.GetOldestMatchHistories(ctx, db.GetOldestMatchHistoriesParams{
-			Regions: riot.ClusterToRegions[cluster],
-			Limit:   100,
-		})
-		for _, row := range rows {
-			env.CollectMatchHistory(ctx, cluster, row.Puuid, time.Now().Add(-time.Hour*24*3))
+		for _, region := range riot.ClusterToRegions[cluster] {
+			rows, _ := env.Queries.GetOldestMatchHistories(ctx, db.GetOldestMatchHistoriesParams{
+				Region: region,
+				Limit:  100,
+			})
+
+			for _, row := range rows {
+				env.CollectMatchHistory(ctx, cluster, row.Puuid, time.Now().Add(-time.Hour*24*3))
+			}
 		}
+
 	}
 }

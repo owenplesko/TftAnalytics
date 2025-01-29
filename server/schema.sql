@@ -36,3 +36,5 @@ CREATE INDEX idx_name_tag_null ON tft_summoner (name, tag) WHERE (name IS NULL O
 CREATE INDEX idx_region_summoner_id_null ON tft_summoner (region, puuid) WHERE summoner_id IS NULL;
 
 CREATE INDEX idx_region_null ON tft_summoner (puuid) WHERE region IS NULL AND NOT 'SKIP_REGION_MATCH' = ANY(flags);
+
+CREATE INDEX idx_region_background_update ON tft_summoner (region, background_update_timestamp ASC NULLS FIRST);

@@ -32,14 +32,14 @@ SELECT
     puuid,
     background_update_timestamp
 FROM tft_summoner
-WHERE region = ANY($2::VARCHAR[])
+WHERE region = $2::VARCHAR
 ORDER BY background_update_timestamp ASC NULLS FIRST
 LIMIT $1
 `
 
 type GetOldestMatchHistoriesParams struct {
-	Limit   int32    `json:"limit"`
-	Regions []string `json:"regions"`
+	Limit  int32  `json:"limit"`
+	Region string `json:"region"`
 }
 
 type GetOldestMatchHistoriesRow struct {
@@ -48,7 +48,7 @@ type GetOldestMatchHistoriesRow struct {
 }
 
 func (q *Queries) GetOldestMatchHistories(ctx context.Context, arg GetOldestMatchHistoriesParams) ([]GetOldestMatchHistoriesRow, error) {
-	rows, err := q.db.Query(ctx, getOldestMatchHistories, arg.Limit, arg.Regions)
+	rows, err := q.db.Query(ctx, getOldestMatchHistories, arg.Limit, arg.Region)
 	if err != nil {
 		return nil, err
 	}
@@ -99,7 +99,7 @@ const getPuuidsWithNullRegion = `-- name: GetPuuidsWithNullRegion :many
 SELECT
     puuid
 FROM tft_summoner
-WHERE region IS NULL AND NOT 'SKIP_REGION_MATCH' = ANY(flags)
+    WHERE region IS NULL AND NOT 'SKIP_REGION_MATCH' = ANY(flags)
 LIMIT $1
 `
 
