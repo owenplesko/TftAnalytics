@@ -19,7 +19,7 @@ CREATE TABLE tft_summoner (
 	summoner_level INT,
 	full_update_timestamp TIMESTAMP,
 	background_update_timestamp TIMESTAMP,
-	flags VARCHAR[]
+	flags VARCHAR[] NOT NULL DEFAULT '{}'
 );
 
 CREATE TABLE tft_comp (

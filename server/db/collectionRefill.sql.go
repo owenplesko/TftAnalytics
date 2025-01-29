@@ -13,8 +13,8 @@ import (
 
 const addSummonerFlag = `-- name: AddSummonerFlag :exec
 UPDATE tft_summoner
-SET flags = array_append(flags, $2::VARCHAR)
-WHERE puuid = $1 AND 'SKIP_ACCOUNT_DATA' = ANY(flags)
+    SET flags = array_append(flags, $2::VARCHAR)
+WHERE puuid = $1 AND NOT $2::VARCHAR = ANY(flags)
 `
 
 type AddSummonerFlagParams struct {
@@ -99,7 +99,7 @@ const getPuuidsWithNullRegion = `-- name: GetPuuidsWithNullRegion :many
 SELECT
     puuid
 FROM tft_summoner
-WHERE region IS NULL AND NOT 'SKIP_REGION_DATA' = ANY(flags)
+WHERE region IS NULL AND NOT 'SKIP_REGION_MATCH' = ANY(flags)
 LIMIT $1
 `
 
@@ -159,7 +159,7 @@ func (q *Queries) GetPuuidsWithNullSummonerData(ctx context.Context, arg GetPuui
 
 const removeSummonerFlag = `-- name: RemoveSummonerFlag :exec
 UPDATE tft_summoner
-SET flags = array_remove(flags, $2::VARCHAR)
+    SET flags = array_remove(flags, $2::VARCHAR)
 WHERE puuid = $1
 `
 

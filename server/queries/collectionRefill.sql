@@ -24,12 +24,12 @@ LIMIT $1;
 
 -- name: AddSummonerFlag :exec
 UPDATE tft_summoner
-SET flags = array_append(flags, @flag::VARCHAR)
-WHERE puuid = $1 AND 'SKIP_ACCOUNT_DATA' = ANY(flags);
+    SET flags = array_append(flags, @flag::VARCHAR)
+WHERE puuid = $1 AND NOT @flag::VARCHAR = ANY(flags);
 
 -- name: RemoveSummonerFlag :exec
 UPDATE tft_summoner
-SET flags = array_remove(flags, @flag::VARCHAR)
+    SET flags = array_remove(flags, @flag::VARCHAR)
 WHERE puuid = $1;
 
 
