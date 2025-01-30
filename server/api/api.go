@@ -40,7 +40,7 @@ func (env ApiEnv) getSummonerByPuuid(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	if err != nil {
-		http.Error(w, "something went wrong", 500)
+		http.Error(w, "the database is sad :(", 500)
 		return
 	}
 
@@ -64,7 +64,7 @@ func (env ApiEnv) getSummonerByNameTag(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	if err != nil {
-		http.Error(w, "something went wrong", 500)
+		http.Error(w, "the database is sad :(", 500)
 		return
 	}
 
@@ -110,7 +110,7 @@ func (env ApiEnv) getSummonerMatches(w http.ResponseWriter, r *http.Request) {
 
 	matches, err := env.ServiceEnv.GetMatchHistory(ctx, puuid, int32(limit), after)
 	if err != nil {
-		http.Error(w, "something went wrong", 500)
+		http.Error(w, "the database is sad :(", 500)
 		return
 	}
 
@@ -133,7 +133,7 @@ func (env ApiEnv) getMatchComps(w http.ResponseWriter, r *http.Request) {
 
 	comps, err := env.ServiceEnv.GetMatchComps(ctx, matchId)
 	if err != nil {
-		http.Error(w, "something went wrong", 500)
+		http.Error(w, "the database is sad :(", 500)
 		return
 	}
 
