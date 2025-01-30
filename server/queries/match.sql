@@ -36,13 +36,14 @@ SELECT EXISTS (
 );
 
 -- name: SummonerMatchHistory :many
-SELECT *
+SELECT 
+	comp_data, sqlc.embed(tft_match)
 FROM
-	tft_comp
-	JOIN tft_match ON tft_comp.match_id = tft_match.id
+	tft_comp JOIN tft_match 
+	ON tft_comp.match_id = tft_match.id
 WHERE
-	tft_comp.summoner_puuid = $1
+	summoner_puuid = $1 AND
+	tft_comp.match_date < @after::TIMESTAMP
 ORDER BY
-	tft_match.match_date
-LIMIT $2
-OFFSET $3;
+	tft_comp.match_date
+LIMIT $2;

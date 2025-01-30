@@ -16,11 +16,14 @@ func (env ServiceEnv) GetMatchComps(ctx context.Context, matchId string) ([]db.G
 	return env.Queries.GetMatchComps(ctx, matchId)
 }
 
-func (env ServiceEnv) GetMatchHistory(ctx context.Context, puuid string) ([]db.SummonerMatchHistoryRow, error) {
+func (env ServiceEnv) GetMatchHistory(ctx context.Context, puuid string, limit int32, after time.Time) ([]db.SummonerMatchHistoryRow, error) {
 	return env.Queries.SummonerMatchHistory(context.Background(), db.SummonerMatchHistoryParams{
 		SummonerPuuid: puuid,
-		Limit:         20,
-		Offset:        0,
+		Limit:         limit,
+		After: pgtype.Timestamp{
+			Time:  after,
+			Valid: true,
+		},
 	})
 }
 

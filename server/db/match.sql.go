@@ -140,41 +140,32 @@ func (q *Queries) MatchExists(ctx context.Context, id string) (bool, error) {
 }
 
 const summonerMatchHistory = `-- name: SummonerMatchHistory :many
-SELECT match_id, summoner_puuid, comp_data, tft_comp.match_date, id, data_version, game_version, queue_id, game_type, set_name, set_number, tft_match.match_date
+SELECT 
+	comp_data, tft_match.id, tft_match.data_version, tft_match.game_version, tft_match.queue_id, tft_match.game_type, tft_match.set_name, tft_match.set_number, tft_match.match_date
 FROM
-	tft_comp
-	JOIN tft_match ON tft_comp.match_id = tft_match.id
+	tft_comp JOIN tft_match 
+	ON tft_comp.match_id = tft_match.id
 WHERE
-	tft_comp.summoner_puuid = $1
+	summoner_puuid = $1 AND
+	tft_comp.match_date < $3::TIMESTAMP
 ORDER BY
-	tft_match.match_date
+	tft_comp.match_date
 LIMIT $2
-OFFSET $3
 `
 
 type SummonerMatchHistoryParams struct {
-	SummonerPuuid string `json:"summonerPuuid"`
-	Limit         int32  `json:"limit"`
-	Offset        int32  `json:"offset"`
+	SummonerPuuid string           `json:"summonerPuuid"`
+	Limit         int32            `json:"limit"`
+	After         pgtype.Timestamp `json:"after"`
 }
 
 type SummonerMatchHistoryRow struct {
-	MatchID       string           `json:"matchId"`
-	SummonerPuuid string           `json:"summonerPuuid"`
-	CompData      types.CompData   `json:"compData"`
-	MatchDate     pgtype.Timestamp `json:"matchDate"`
-	ID            string           `json:"id"`
-	DataVersion   string           `json:"dataVersion"`
-	GameVersion   string           `json:"gameVersion"`
-	QueueID       int32            `json:"queueId"`
-	GameType      string           `json:"gameType"`
-	SetName       string           `json:"setName"`
-	SetNumber     int32            `json:"setNumber"`
-	MatchDate_2   pgtype.Timestamp `json:"matchDate2"`
+	CompData types.CompData `json:"compData"`
+	TftMatch TftMatch       `json:"tftMatch"`
 }
 
 func (q *Queries) SummonerMatchHistory(ctx context.Context, arg SummonerMatchHistoryParams) ([]SummonerMatchHistoryRow, error) {
-	rows, err := q.db.Query(ctx, summonerMatchHistory, arg.SummonerPuuid, arg.Limit, arg.Offset)
+	rows, err := q.db.Query(ctx, summonerMatchHistory, arg.SummonerPuuid, arg.Limit, arg.After)
 	if err != nil {
 		return nil, err
 	}
@@ -183,18 +174,15 @@ func (q *Queries) SummonerMatchHistory(ctx context.Context, arg SummonerMatchHis
 	for rows.Next() {
 		var i SummonerMatchHistoryRow
 		if err := rows.Scan(
-			&i.MatchID,
-			&i.SummonerPuuid,
 			&i.CompData,
-			&i.MatchDate,
-			&i.ID,
-			&i.DataVersion,
-			&i.GameVersion,
-			&i.QueueID,
-			&i.GameType,
-			&i.SetName,
-			&i.SetNumber,
-			&i.MatchDate_2,
+			&i.TftMatch.ID,
+			&i.TftMatch.DataVersion,
+			&i.TftMatch.GameVersion,
+			&i.TftMatch.QueueID,
+			&i.TftMatch.GameType,
+			&i.TftMatch.SetName,
+			&i.TftMatch.SetNumber,
+			&i.TftMatch.MatchDate,
 		); err != nil {
 			return nil, err
 		}
