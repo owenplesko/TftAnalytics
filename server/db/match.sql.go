@@ -16,20 +16,27 @@ const createComp = `-- name: CreateComp :exec
 INSERT INTO tft_comp (
     match_id,
 	summoner_puuid,
-	comp_data
+	comp_data,
+	match_date
 ) VALUES (
-    $1, $2, $3
+    $1, $2, $3, $4
 )
 `
 
 type CreateCompParams struct {
-	MatchID       string         `json:"matchId"`
-	SummonerPuuid string         `json:"summonerPuuid"`
-	CompData      types.CompData `json:"compData"`
+	MatchID       string           `json:"matchId"`
+	SummonerPuuid string           `json:"summonerPuuid"`
+	CompData      types.CompData   `json:"compData"`
+	MatchDate     pgtype.Timestamp `json:"matchDate"`
 }
 
 func (q *Queries) CreateComp(ctx context.Context, arg CreateCompParams) error {
-	_, err := q.db.Exec(ctx, createComp, arg.MatchID, arg.SummonerPuuid, arg.CompData)
+	_, err := q.db.Exec(ctx, createComp,
+		arg.MatchID,
+		arg.SummonerPuuid,
+		arg.CompData,
+		arg.MatchDate,
+	)
 	return err
 }
 
@@ -133,7 +140,7 @@ func (q *Queries) MatchExists(ctx context.Context, id string) (bool, error) {
 }
 
 const summonerMatchHistory = `-- name: SummonerMatchHistory :many
-SELECT match_id, summoner_puuid, comp_data, id, data_version, game_version, queue_id, game_type, set_name, set_number, match_date
+SELECT match_id, summoner_puuid, comp_data, tft_comp.match_date, id, data_version, game_version, queue_id, game_type, set_name, set_number, tft_match.match_date
 FROM
 	tft_comp
 	JOIN tft_match ON tft_comp.match_id = tft_match.id
@@ -155,6 +162,7 @@ type SummonerMatchHistoryRow struct {
 	MatchID       string           `json:"matchId"`
 	SummonerPuuid string           `json:"summonerPuuid"`
 	CompData      types.CompData   `json:"compData"`
+	MatchDate     pgtype.Timestamp `json:"matchDate"`
 	ID            string           `json:"id"`
 	DataVersion   string           `json:"dataVersion"`
 	GameVersion   string           `json:"gameVersion"`
@@ -162,7 +170,7 @@ type SummonerMatchHistoryRow struct {
 	GameType      string           `json:"gameType"`
 	SetName       string           `json:"setName"`
 	SetNumber     int32            `json:"setNumber"`
-	MatchDate     pgtype.Timestamp `json:"matchDate"`
+	MatchDate_2   pgtype.Timestamp `json:"matchDate2"`
 }
 
 func (q *Queries) SummonerMatchHistory(ctx context.Context, arg SummonerMatchHistoryParams) ([]SummonerMatchHistoryRow, error) {
@@ -178,6 +186,7 @@ func (q *Queries) SummonerMatchHistory(ctx context.Context, arg SummonerMatchHis
 			&i.MatchID,
 			&i.SummonerPuuid,
 			&i.CompData,
+			&i.MatchDate,
 			&i.ID,
 			&i.DataVersion,
 			&i.GameVersion,
@@ -185,7 +194,7 @@ func (q *Queries) SummonerMatchHistory(ctx context.Context, arg SummonerMatchHis
 			&i.GameType,
 			&i.SetName,
 			&i.SetNumber,
-			&i.MatchDate,
+			&i.MatchDate_2,
 		); err != nil {
 			return nil, err
 		}

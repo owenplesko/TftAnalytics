@@ -10,9 +10,10 @@ import (
 )
 
 type TftComp struct {
-	MatchID       string         `json:"matchId"`
-	SummonerPuuid string         `json:"summonerPuuid"`
-	CompData      types.CompData `json:"compData"`
+	MatchID       string           `json:"matchId"`
+	SummonerPuuid string           `json:"summonerPuuid"`
+	CompData      types.CompData   `json:"compData"`
+	MatchDate     pgtype.Timestamp `json:"matchDate"`
 }
 
 type TftMatch struct {

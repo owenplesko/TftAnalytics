@@ -26,6 +26,7 @@ CREATE TABLE tft_comp (
 	match_id VARCHAR NOT NULL REFERENCES tft_match,
 	summoner_puuid VARCHAR NOT NULL REFERENCES tft_summoner,
 	comp_data JSONB NOT NULL,
+	match_date TIMESTAMP NOT NULL,
 	PRIMARY KEY(match_id, summoner_puuid)
 );
 
@@ -38,3 +39,5 @@ CREATE INDEX idx_region_summoner_id_null ON tft_summoner (region, puuid) WHERE s
 CREATE INDEX idx_region_null ON tft_summoner (puuid) WHERE region IS NULL AND NOT 'SKIP_REGION_MATCH' = ANY(flags);
 
 CREATE INDEX idx_region_background_update ON tft_summoner (region, background_update_timestamp ASC NULLS FIRST);
+
+CREATE INDEX idx_match_history ON tft_comp (summoner_puuid, match_date DESC);

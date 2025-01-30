@@ -87,6 +87,11 @@ func (env ServiceEnv) storeMatchDetails(ctx context.Context, matchDetails *riot.
 	qtx := env.Queries.WithTx(tx)
 
 	// create match
+	matchDate := pgtype.Timestamp{
+		Time:  time.UnixMilli(matchDetails.Info.Date),
+		Valid: true,
+	}
+
 	err = qtx.CreateMatch(ctx, db.CreateMatchParams{
 		ID:          matchDetails.MetaData.MatchId,
 		DataVersion: matchDetails.MetaData.DataVersion,
@@ -95,10 +100,7 @@ func (env ServiceEnv) storeMatchDetails(ctx context.Context, matchDetails *riot.
 		GameType:    matchDetails.Info.GameType,
 		SetName:     matchDetails.Info.SetName,
 		SetNumber:   matchDetails.Info.SetNumber,
-		MatchDate: pgtype.Timestamp{
-			Time:  time.UnixMilli(matchDetails.Info.Date),
-			Valid: true,
-		},
+		MatchDate:   matchDate,
 	})
 	if err != nil {
 		return err
@@ -110,6 +112,7 @@ func (env ServiceEnv) storeMatchDetails(ctx context.Context, matchDetails *riot.
 			MatchID:       matchDetails.MetaData.MatchId,
 			SummonerPuuid: compDetails.Puuid,
 			CompData:      types.CompData(compDetails),
+			MatchDate:     matchDate,
 		})
 		if err != nil {
 			return err
