@@ -23,7 +23,6 @@ const unitSchema = z.object({
 });
 
 const compDataSchema = z.object({
-  augments: z.string().array(),
   companion: companionSchema,
   goldLeft: z.number().int(),
   lastRound: z.number().int(),
@@ -38,7 +37,7 @@ const compDataSchema = z.object({
 });
 
 const matchSchema = z.object({
-  matchId: z.string(),
+  id: z.string(),
   gameVersion: z.string(),
   queueId: z.number(),
   gameType: z.string(),
@@ -46,14 +45,15 @@ const matchSchema = z.object({
   matchDate: z.string().datetime(),
 });
 
-const summonerMatchSchema = matchSchema.merge(
-  z.object({ compData: compDataSchema }),
-);
+const summonerMatchSchema = z.object({
+  compData: compDataSchema,
+  tftMatch: matchSchema
+})
 
 type Params = { puuid: string };
 
-export async function GetPlayerMatches({ puuid }: Params) {
-  const res = await fetch(`http://localhost:8080/summoner/${puuid}/matches`);
+export async function getPlayerMatchHistory({ puuid }: Params) {
+  const res = await fetch(`http://localhost:8080/v1/summoner/by-puuid/${puuid}/matches`);
   const data = await res.json();
   return summonerMatchSchema.array().parse(data);
 }

@@ -20,6 +20,7 @@ type ApiEnv struct {
 func (env ApiEnv) New() *http.ServeMux {
 	router := http.NewServeMux()
 	router.HandleFunc("/v1/summoner/by-puuid/{puuid}", env.getSummonerByPuuid)
+	router.HandleFunc("/v1/summoner/by-puuid/{puuid}/update", env.updateSummoner)
 	router.HandleFunc("/v1/summoner/by-name-tag/{name}/{tag}", env.getSummonerByNameTag)
 	router.HandleFunc("/v1/summoner/by-puuid/{puuid}/matches", env.getSummonerMatches)
 	router.HandleFunc("/v1/match/{matchid}/comps", env.getMatchComps)
@@ -30,7 +31,6 @@ func (env ApiEnv) getSummonerByPuuid(w http.ResponseWriter, r *http.Request) {
 	ctx := context.Background()
 
 	w.Header().Set("Access-Control-Allow-Origin", "*")
-	w.Header().Set("Content-Type", "application/json")
 
 	puuid := r.PathValue("puuid")
 
@@ -44,6 +44,7 @@ func (env ApiEnv) getSummonerByPuuid(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	w.Header().Set("Content-Type", "application/json")
 	bytes, _ := json.Marshal(summoner)
 	w.Write(bytes)
 }
@@ -52,7 +53,6 @@ func (env ApiEnv) getSummonerByNameTag(w http.ResponseWriter, r *http.Request) {
 	ctx := context.Background()
 
 	w.Header().Set("Access-Control-Allow-Origin", "*")
-	w.Header().Set("Content-Type", "application/json")
 
 	cluster := "americas"
 	name := r.PathValue("name")
@@ -68,15 +68,38 @@ func (env ApiEnv) getSummonerByNameTag(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	w.Header().Set("Content-Type", "application/json")
 	bytes, _ := json.Marshal(summoner)
 	w.Write(bytes)
+}
+
+func (env ApiEnv) updateSummoner(w http.ResponseWriter, r *http.Request) {
+	ctx := context.Background()
+
+	w.Header().Set("Access-Control-Allow-Origin", "*")
+
+	puuid := r.PathValue("puuid")
+
+	summoner, err := env.ServiceEnv.GetSummonerByPuuid(ctx, puuid)
+	if err == pgx.ErrNoRows {
+		http.Error(w, "summoner not found", 404)
+		return
+	}
+	if err != nil {
+		http.Error(w, "the database is sad :(", 500)
+		return
+	}
+
+	// TODO: detect when region is null / when to search for region
+	go env.ServiceEnv.CollectSummonerDetails(ctx, summoner.Region.String, puuid)
+	go env.ServiceEnv.CollectAccountByPuuid(ctx, "americas", puuid)
+	go env.ServiceEnv.CollectMatchHistory(ctx, riot.RegionToCluster[summoner.Region.String], puuid, summoner.FullUpdateTimestamp.Time)
 }
 
 func (env ApiEnv) getSummonerMatches(w http.ResponseWriter, r *http.Request) {
 	ctx := context.Background()
 
 	w.Header().Set("Access-Control-Allow-Origin", "*")
-	w.Header().Set("Content-Type", "application/json")
 
 	puuid := r.PathValue("puuid")
 
@@ -119,6 +142,7 @@ func (env ApiEnv) getSummonerMatches(w http.ResponseWriter, r *http.Request) {
 		matches = []db.SummonerMatchHistoryRow{}
 	}
 
+	w.Header().Set("Content-Type", "application/json")
 	bytes, _ := json.Marshal(matches)
 	w.Write(bytes)
 }
@@ -127,7 +151,6 @@ func (env ApiEnv) getMatchComps(w http.ResponseWriter, r *http.Request) {
 	ctx := context.Background()
 
 	w.Header().Set("Access-Control-Allow-Origin", "*")
-	w.Header().Set("Content-Type", "application/json")
 
 	matchId := r.PathValue("matchid")
 
@@ -142,6 +165,7 @@ func (env ApiEnv) getMatchComps(w http.ResponseWriter, r *http.Request) {
 		comps = []db.GetMatchCompsRow{}
 	}
 
+	w.Header().Set("Content-Type", "application/json")
 	bytes, _ := json.Marshal(comps)
 	w.Write(bytes)
 }
