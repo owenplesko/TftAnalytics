@@ -31,14 +31,12 @@ CREATE TABLE tft_comp (
 );
 
 CREATE TABLE tft_rank (
-	summoner_puuid VARCHAR NOT NULL REFERENCES tft_summoner,
-	queue_type VARCHAR NOT NULL,
+	summoner_puuid VARCHAR NOT NULL PRIMARY KEY REFERENCES tft_summoner,
 	tier VARCHAR NOT NULL,
 	rank VARCHAR NOT NULL,
 	league_points INT NOT NULL,
 	wins INT NOT NULL,
-	losses INT NOT NULL,
-	PRIMARY KEY(summoner_puuid, queue_type)
+	losses INT NOT NULL
 );
 
 CREATE INDEX idx_name_tag_insensitive ON tft_summoner (REPLACE(LOWER(name), ' ', ''), REPLACE(LOWER(tag), ' ', ''));

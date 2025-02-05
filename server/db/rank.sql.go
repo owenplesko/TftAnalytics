@@ -10,21 +10,15 @@ import (
 )
 
 const getSummonerRank = `-- name: GetSummonerRank :one
-SELECT summoner_puuid, queue_type, tier, rank, league_points, wins, losses FROM tft_rank
-WHERE summoner_puuid = $1 AND queue_type = $2
+SELECT summoner_puuid, tier, rank, league_points, wins, losses FROM tft_rank
+WHERE summoner_puuid = $1
 `
 
-type GetSummonerRankParams struct {
-	SummonerPuuid string `json:"summonerPuuid"`
-	QueueType     string `json:"queueType"`
-}
-
-func (q *Queries) GetSummonerRank(ctx context.Context, arg GetSummonerRankParams) (TftRank, error) {
-	row := q.db.QueryRow(ctx, getSummonerRank, arg.SummonerPuuid, arg.QueueType)
+func (q *Queries) GetSummonerRank(ctx context.Context, summonerPuuid string) (TftRank, error) {
+	row := q.db.QueryRow(ctx, getSummonerRank, summonerPuuid)
 	var i TftRank
 	err := row.Scan(
 		&i.SummonerPuuid,
-		&i.QueueType,
 		&i.Tier,
 		&i.Rank,
 		&i.LeaguePoints,
@@ -37,18 +31,16 @@ func (q *Queries) GetSummonerRank(ctx context.Context, arg GetSummonerRankParams
 const insertSummonerRank = `-- name: InsertSummonerRank :exec
 INSERT INTO tft_rank (
     summoner_puuid,
-    queue_type,
     tier,
     rank,
     league_points,
     wins,
     losses
-) VALUES ( $1, $2, $3, $4, $5, $6, $7)
+) VALUES ( $1, $2, $3, $4, $5, $6)
 `
 
 type InsertSummonerRankParams struct {
 	SummonerPuuid string `json:"summonerPuuid"`
-	QueueType     string `json:"queueType"`
 	Tier          string `json:"tier"`
 	Rank          string `json:"rank"`
 	LeaguePoints  int32  `json:"leaguePoints"`
@@ -59,7 +51,6 @@ type InsertSummonerRankParams struct {
 func (q *Queries) InsertSummonerRank(ctx context.Context, arg InsertSummonerRankParams) error {
 	_, err := q.db.Exec(ctx, insertSummonerRank,
 		arg.SummonerPuuid,
-		arg.QueueType,
 		arg.Tier,
 		arg.Rank,
 		arg.LeaguePoints,

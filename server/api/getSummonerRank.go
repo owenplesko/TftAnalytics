@@ -14,9 +14,8 @@ func (env ApiEnv) getSummonerRank(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Access-Control-Allow-Origin", "*")
 
 	puuid := r.PathValue("puuid")
-	queueType := r.PathValue("type")
 
-	rankEntry, err := env.ServiceEnv.GetSummonerRank(ctx, puuid, queueType)
+	rankEntry, err := env.ServiceEnv.GetSummonerRank(ctx, puuid)
 	if err == pgx.ErrNoRows {
 		http.Error(w, "rank not found", 404)
 		return
