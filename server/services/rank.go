@@ -6,6 +6,13 @@ import (
 	"context"
 )
 
+func (env ServiceEnv) GetSummonerRank(ctx context.Context, puuid, queueType string) (db.TftRank, error) {
+	return env.Queries.GetSummonerRank(ctx, db.GetSummonerRankParams{
+		SummonerPuuid: puuid,
+		QueueType:     queueType,
+	})
+}
+
 func (env ServiceEnv) CollectSummonerRank(ctx context.Context, region, summonerId string) error {
 	rankEntry, err := riot.GetRank(region, summonerId)
 	if err != nil {
