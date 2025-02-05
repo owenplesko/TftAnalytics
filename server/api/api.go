@@ -1,7 +1,6 @@
 package api
 
 import (
-	"TFTAnalyticsServer/db"
 	"TFTAnalyticsServer/riot"
 	"TFTAnalyticsServer/services"
 	"context"
@@ -20,8 +19,8 @@ type ApiEnv struct {
 func (env ApiEnv) New() *http.ServeMux {
 	router := http.NewServeMux()
 	router.HandleFunc("/v1/summoner/by-puuid/{puuid}", env.getSummonerByPuuid)
-	router.HandleFunc("/v1/summoner/by-puuid/{puuid}/update", env.updateSummoner)
 	router.HandleFunc("/v1/summoner/by-name-tag/{name}/{tag}", env.getSummonerByNameTag)
+	router.HandleFunc("/v1/summoner/by-puuid/{puuid}/update", env.updateSummoner)
 	router.HandleFunc("/v1/summoner/by-puuid/{puuid}/matches", env.getSummonerMatches)
 	router.HandleFunc("/v1/match/{matchid}/comps", env.getMatchComps)
 	return router
@@ -40,7 +39,7 @@ func (env ApiEnv) getSummonerByPuuid(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	if err != nil {
-		http.Error(w, "the database is sad :(", 500)
+		http.Error(w, "something went wrong", 500)
 		return
 	}
 
@@ -64,7 +63,7 @@ func (env ApiEnv) getSummonerByNameTag(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	if err != nil {
-		http.Error(w, "the database is sad :(", 500)
+		http.Error(w, "something went wrong", 500)
 		return
 	}
 
@@ -80,20 +79,12 @@ func (env ApiEnv) updateSummoner(w http.ResponseWriter, r *http.Request) {
 
 	puuid := r.PathValue("puuid")
 
-	summoner, err := env.ServiceEnv.GetSummonerByPuuid(ctx, puuid)
+	err := env.ServiceEnv.UpdateAllSummonerInfo(ctx, puuid)
 	if err == pgx.ErrNoRows {
 		http.Error(w, "summoner not found", 404)
-		return
+	} else if err != nil {
+		http.Error(w, "something went wrong", 500)
 	}
-	if err != nil {
-		http.Error(w, "the database is sad :(", 500)
-		return
-	}
-
-	go env.ServiceEnv.CollectSummonerRank(ctx, summoner.Region.String, summoner.SummonerID.String)
-	go env.ServiceEnv.CollectSummonerDetails(ctx, summoner.Region.String, puuid)
-	go env.ServiceEnv.CollectAccountByPuuid(ctx, "americas", puuid)
-	go env.ServiceEnv.CollectMatchHistory(ctx, riot.RegionToCluster[summoner.Region.String], puuid, summoner.FullUpdateTimestamp.Time)
 }
 
 func (env ApiEnv) getSummonerMatches(w http.ResponseWriter, r *http.Request) {
@@ -133,13 +124,8 @@ func (env ApiEnv) getSummonerMatches(w http.ResponseWriter, r *http.Request) {
 
 	matches, err := env.ServiceEnv.GetMatchHistory(ctx, puuid, int32(limit), after)
 	if err != nil {
-		http.Error(w, "the database is sad :(", 500)
+		http.Error(w, "something went wrong", 500)
 		return
-	}
-
-	// prevent returning null when list is empty
-	if matches == nil {
-		matches = []db.SummonerMatchHistoryRow{}
 	}
 
 	w.Header().Set("Content-Type", "application/json")
@@ -156,13 +142,8 @@ func (env ApiEnv) getMatchComps(w http.ResponseWriter, r *http.Request) {
 
 	comps, err := env.ServiceEnv.GetMatchComps(ctx, matchId)
 	if err != nil {
-		http.Error(w, "the database is sad :(", 500)
+		http.Error(w, "something went wrong", 500)
 		return
-	}
-
-	// prevent returning null when list is empty
-	if comps == nil {
-		comps = []db.GetMatchCompsRow{}
 	}
 
 	w.Header().Set("Content-Type", "application/json")

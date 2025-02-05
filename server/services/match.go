@@ -13,11 +13,18 @@ import (
 )
 
 func (env ServiceEnv) GetMatchComps(ctx context.Context, matchId string) ([]db.GetMatchCompsRow, error) {
-	return env.Queries.GetMatchComps(ctx, matchId)
+	comps, err := env.Queries.GetMatchComps(ctx, matchId)
+
+	// prevent returning nil when list is empty
+	if comps == nil {
+		comps = []db.GetMatchCompsRow{}
+	}
+
+	return comps, err
 }
 
 func (env ServiceEnv) GetMatchHistory(ctx context.Context, puuid string, limit int32, after time.Time) ([]db.SummonerMatchHistoryRow, error) {
-	return env.Queries.SummonerMatchHistory(context.Background(), db.SummonerMatchHistoryParams{
+	matches, err := env.Queries.SummonerMatchHistory(context.Background(), db.SummonerMatchHistoryParams{
 		SummonerPuuid: puuid,
 		Limit:         limit,
 		After: pgtype.Timestamp{
@@ -25,6 +32,13 @@ func (env ServiceEnv) GetMatchHistory(ctx context.Context, puuid string, limit i
 			Valid: true,
 		},
 	})
+
+	// prevent returning nil when list is empty
+	if matches == nil {
+		matches = []db.SummonerMatchHistoryRow{}
+	}
+
+	return matches, err
 }
 
 func (env ServiceEnv) CollectMatchHistory(ctx context.Context, cluster, puuid string, matchesAfter time.Time) error {
