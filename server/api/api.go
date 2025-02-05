@@ -90,7 +90,7 @@ func (env ApiEnv) updateSummoner(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// TODO: detect when region is null / when to search for region
+	go env.ServiceEnv.CollectSummonerRank(ctx, summoner.Region.String, summoner.SummonerID.String)
 	go env.ServiceEnv.CollectSummonerDetails(ctx, summoner.Region.String, puuid)
 	go env.ServiceEnv.CollectAccountByPuuid(ctx, "americas", puuid)
 	go env.ServiceEnv.CollectMatchHistory(ctx, riot.RegionToCluster[summoner.Region.String], puuid, summoner.FullUpdateTimestamp.Time)

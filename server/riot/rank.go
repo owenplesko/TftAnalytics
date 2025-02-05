@@ -4,24 +4,25 @@ import (
 	"fmt"
 )
 
-type Rank struct {
+type RankEntry struct {
+	Puuid        string `json:"puuid"`
 	LeagueId     string `json:"leagueId"`
 	QueueType    string `json:"queueType"`
 	Tier         string `json:"tier"`
 	Rank         string `json:"rank"`
 	SummonerId   string `json:"summonerId"`
 	SummonerName string `json:"summonerName"`
-	LeaguePoints int    `json:"leaguePoints"`
-	Wins         int    `json:"wins"`
-	Losses       int    `json:"losses"`
+	LeaguePoints int32  `json:"leaguePoints"`
+	Wins         int32  `json:"wins"`
+	Losses       int32  `json:"losses"`
 	Veteran      bool   `json:"veteran"`
 	Inactive     bool   `json:"inactive"`
 	FreshBlood   bool   `json:"freshBlood"`
 	HotStreak    bool   `json:"hotStreak"`
 }
 
-func GetRank(region string, summonerId string) (*Rank, error) {
-	var rankRes []Rank
+func GetRank(region string, summonerId string) (*RankEntry, error) {
+	var rankRes []RankEntry
 	route := fmt.Sprintf("tft/league/v1/entries/by-summoner/%v", summonerId)
 	err := getJson(region, route, &rankRes)
 	if err != nil {
