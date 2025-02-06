@@ -33,22 +33,23 @@ func main() {
 
 	queries := db.New(pool)
 
-	serviceEnv := services.Service{
+	service := services.Service{
 		Pool:    pool,
 		Queries: queries,
 	}
 
 	for region, _ := range riot.RegionToCluster {
-		go serviceEnv.SummonerDataCollectionLoop(context.Background(), region)
+		go service.SummonerDataCollectionLoop(context.Background(), region)
+		go service.RankEntryCollectionLoop(context.Background(), region)
 	}
 	for cluster, _ := range riot.ClusterToRegions {
-		go serviceEnv.MatchHistoryCollectionLoop(context.Background(), cluster)
-		go serviceEnv.AccountDataCollectionLoop(context.Background(), cluster)
+		go service.MatchHistoryCollectionLoop(context.Background(), cluster)
+		go service.AccountDataCollectionLoop(context.Background(), cluster)
 	}
-	go serviceEnv.SummonerRegionCollectionLoop(context.Background())
+	go service.SummonerRegionCollectionLoop(context.Background())
 
 	apiEnv := api.Controller{
-		Service: serviceEnv,
+		Service: service,
 	}
 	http.ListenAndServe(":8080", apiEnv.New())
 }
