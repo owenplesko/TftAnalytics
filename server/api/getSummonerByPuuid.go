@@ -8,14 +8,14 @@ import (
 	"github.com/jackc/pgx/v5"
 )
 
-func (env ApiEnv) getSummonerByPuuid(w http.ResponseWriter, r *http.Request) {
+func (env Controller) getSummonerByPuuid(w http.ResponseWriter, r *http.Request) {
 	ctx := context.Background()
 
 	w.Header().Set("Access-Control-Allow-Origin", "*")
 
 	puuid := r.PathValue("puuid")
 
-	summoner, err := env.ServiceEnv.GetSummonerByPuuid(ctx, puuid)
+	summoner, err := env.Service.GetSummonerByPuuid(ctx, puuid)
 	if err == pgx.ErrNoRows {
 		http.Error(w, "summoner not found", 404)
 		return

@@ -7,7 +7,7 @@ import (
 	"time"
 )
 
-func (env ServiceEnv) SummonerDataCollectionLoop(ctx context.Context, region string) {
+func (env Service) SummonerDataCollectionLoop(ctx context.Context, region string) {
 	backoffTicker := time.NewTicker(time.Second * 5)
 
 	for range backoffTicker.C {
@@ -22,7 +22,7 @@ func (env ServiceEnv) SummonerDataCollectionLoop(ctx context.Context, region str
 	}
 }
 
-func (env ServiceEnv) SummonerRegionCollectionLoop(ctx context.Context) {
+func (env Service) SummonerRegionCollectionLoop(ctx context.Context) {
 	backoffTicker := time.NewTicker(time.Second * 5)
 
 	for range backoffTicker.C {
@@ -34,7 +34,7 @@ func (env ServiceEnv) SummonerRegionCollectionLoop(ctx context.Context) {
 	}
 }
 
-func (env ServiceEnv) AccountDataCollectionLoop(ctx context.Context, cluster string) {
+func (env Service) AccountDataCollectionLoop(ctx context.Context, cluster string) {
 	backoffTicker := time.NewTicker(time.Second * 5)
 
 	for range backoffTicker.C {
@@ -45,7 +45,7 @@ func (env ServiceEnv) AccountDataCollectionLoop(ctx context.Context, cluster str
 	}
 }
 
-func (env ServiceEnv) MatchHistoryCollectionLoop(ctx context.Context, cluster string) {
+func (env Service) MatchHistoryCollectionLoop(ctx context.Context, cluster string) {
 	backoffTicker := time.NewTicker(time.Second * 5)
 
 	for range backoffTicker.C {
@@ -61,4 +61,12 @@ func (env ServiceEnv) MatchHistoryCollectionLoop(ctx context.Context, cluster st
 		}
 
 	}
+}
+
+func (env Service) SummonerRankCollectionLoop(ctx context.Context, region string) {
+	//for {
+	//	for _, tier := range riot.Tiers {
+	//
+	//	}
+	//}
 }

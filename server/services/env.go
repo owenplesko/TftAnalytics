@@ -6,7 +6,7 @@ import (
 	"github.com/jackc/pgx/v5/pgxpool"
 )
 
-type ServiceEnv struct {
+type Service struct {
 	Pool    *pgxpool.Pool
 	Queries *db.Queries
 }

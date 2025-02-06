@@ -61,15 +61,15 @@ var Divisions = []string{
 	"IV",
 }
 
-func GetRankPage(region string, tier string, division string) ([]RankEntry, error) {
+func GetRankEntries(region string, tier string, division string, page int) ([]RankEntry, error) {
 	var rankPageRes []RankEntry
-	route := fmt.Sprintf("tft/league/v1/entries/%v/%v?queue=RANKED_TFT", tier)
+	route := fmt.Sprintf("tft/league/v1/entries/%v/%v?queue=RANKED_TFT&page=%v", tier, division, page)
 	err := getJson(region, route, &rankPageRes)
 
 	return rankPageRes, err
 }
 
-func GetApexRankPage(region string, tier string) ([]RankEntry, error) {
+func GetApexRankEntries(region string, tier string) ([]RankEntry, error) {
 	var rankPageRes []RankEntry
 	route := fmt.Sprintf("tft/league/v1/%v?queue=RANKED_TFT", tier)
 	err := getJson(region, route, &rankPageRes)

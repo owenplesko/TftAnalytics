@@ -5,7 +5,7 @@ import (
 	"context"
 )
 
-func (env ServiceEnv) UpdateAllSummonerInfo(ctx context.Context, puuid string) error {
+func (env Service) UpdateAllSummonerInfo(ctx context.Context, puuid string) error {
 	summoner, err := env.GetSummonerByPuuid(ctx, puuid)
 	if err != nil {
 		return err

@@ -12,7 +12,7 @@ import (
 	"github.com/jackc/pgx/v5/pgtype"
 )
 
-func (env ServiceEnv) GetMatchComps(ctx context.Context, matchId string) ([]db.GetMatchCompsRow, error) {
+func (env Service) GetMatchComps(ctx context.Context, matchId string) ([]db.GetMatchCompsRow, error) {
 	comps, err := env.Queries.GetMatchComps(ctx, matchId)
 
 	// prevent returning nil when list is empty
@@ -23,7 +23,7 @@ func (env ServiceEnv) GetMatchComps(ctx context.Context, matchId string) ([]db.G
 	return comps, err
 }
 
-func (env ServiceEnv) GetMatchHistory(ctx context.Context, puuid string, limit int32, after time.Time) ([]db.SummonerMatchHistoryRow, error) {
+func (env Service) GetMatchHistory(ctx context.Context, puuid string, limit int32, after time.Time) ([]db.SummonerMatchHistoryRow, error) {
 	matches, err := env.Queries.SummonerMatchHistory(context.Background(), db.SummonerMatchHistoryParams{
 		SummonerPuuid: puuid,
 		Limit:         limit,
@@ -41,7 +41,7 @@ func (env ServiceEnv) GetMatchHistory(ctx context.Context, puuid string, limit i
 	return matches, err
 }
 
-func (env ServiceEnv) CollectMatchHistory(ctx context.Context, cluster, puuid string, matchesAfter time.Time) error {
+func (env Service) CollectMatchHistory(ctx context.Context, cluster, puuid string, matchesAfter time.Time) error {
 	updatedAt := time.Now()
 
 	res, err := riot.GetMatchHistory(cluster, puuid, matchesAfter)
@@ -78,7 +78,7 @@ func (env ServiceEnv) CollectMatchHistory(ctx context.Context, cluster, puuid st
 	return err
 }
 
-func (env ServiceEnv) storeMatchDetails(ctx context.Context, matchDetails *riot.Match) error {
+func (env Service) storeMatchDetails(ctx context.Context, matchDetails *riot.Match) error {
 	var err error
 
 	// parse match region

@@ -8,7 +8,7 @@ import (
 	"log"
 )
 
-func (env ServiceEnv) CollectSummonerDetails(ctx context.Context, region, puuid string) error {
+func (env Service) CollectSummonerDetails(ctx context.Context, region, puuid string) error {
 	res, err := riot.GetSummonerByPuuid(region, puuid)
 	if err != nil {
 		return err
@@ -26,7 +26,7 @@ func (env ServiceEnv) CollectSummonerDetails(ctx context.Context, region, puuid 
 	return err
 }
 
-func (env ServiceEnv) CollectAccountByPuuid(ctx context.Context, cluster, puuid string) error {
+func (env Service) CollectAccountByPuuid(ctx context.Context, cluster, puuid string) error {
 	res, err := riot.GetAccountByPuuid(cluster, puuid)
 	if errors.Is(err, riot.NotFoundError) {
 		err = env.Queries.AddSummonerFlag(ctx, db.AddSummonerFlagParams{
@@ -50,7 +50,7 @@ func (env ServiceEnv) CollectAccountByPuuid(ctx context.Context, cluster, puuid 
 	return err
 }
 
-func (env ServiceEnv) CollectAccountByNameTag(ctx context.Context, cluster, name, tag string) error {
+func (env Service) CollectAccountByNameTag(ctx context.Context, cluster, name, tag string) error {
 	res, err := riot.GetAccountByName(cluster, name, tag)
 	if err != nil {
 		return err
@@ -67,11 +67,11 @@ func (env ServiceEnv) CollectAccountByNameTag(ctx context.Context, cluster, name
 	return err
 }
 
-func (env ServiceEnv) GetSummonerByPuuid(ctx context.Context, puuid string) (db.TftSummoner, error) {
+func (env Service) GetSummonerByPuuid(ctx context.Context, puuid string) (db.TftSummoner, error) {
 	return env.Queries.GetSummonerByPuuid(ctx, puuid)
 }
 
-func (env ServiceEnv) GetOrCollectSummonerByNameTag(ctx context.Context, cluster, name, tag string) (db.TftSummoner, error) {
+func (env Service) GetOrCollectSummonerByNameTag(ctx context.Context, cluster, name, tag string) (db.TftSummoner, error) {
 	exists, err := env.Queries.SummonerExistsByNameTag(ctx, db.SummonerExistsByNameTagParams{
 		Name: name,
 		Tag:  tag,
@@ -90,7 +90,7 @@ func (env ServiceEnv) GetOrCollectSummonerByNameTag(ctx context.Context, cluster
 	return env.Queries.GetSummonerByNameTag(ctx, db.GetSummonerByNameTagParams{Name: name, Tag: tag})
 }
 
-func (env ServiceEnv) CollectSummonerRegion(ctx context.Context, puuid string) error {
+func (env Service) CollectSummonerRegion(ctx context.Context, puuid string) error {
 	var regionMatch string
 
 	for region, _ := range riot.RegionToCluster {

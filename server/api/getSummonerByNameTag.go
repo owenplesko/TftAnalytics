@@ -7,7 +7,7 @@ import (
 	"net/http"
 )
 
-func (env ApiEnv) getSummonerByNameTag(w http.ResponseWriter, r *http.Request) {
+func (env Controller) getSummonerByNameTag(w http.ResponseWriter, r *http.Request) {
 	ctx := context.Background()
 
 	w.Header().Set("Access-Control-Allow-Origin", "*")
@@ -16,7 +16,7 @@ func (env ApiEnv) getSummonerByNameTag(w http.ResponseWriter, r *http.Request) {
 	name := r.PathValue("name")
 	tag := r.PathValue("tag")
 
-	summoner, err := env.ServiceEnv.GetOrCollectSummonerByNameTag(ctx, cluster, name, tag)
+	summoner, err := env.Service.GetOrCollectSummonerByNameTag(ctx, cluster, name, tag)
 	if err == riot.NotFoundError {
 		http.Error(w, "summoner not found", 404)
 		return

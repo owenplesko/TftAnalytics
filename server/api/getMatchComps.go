@@ -6,14 +6,14 @@ import (
 	"net/http"
 )
 
-func (env ApiEnv) getMatchComps(w http.ResponseWriter, r *http.Request) {
+func (env Controller) getMatchComps(w http.ResponseWriter, r *http.Request) {
 	ctx := context.Background()
 
 	w.Header().Set("Access-Control-Allow-Origin", "*")
 
 	matchId := r.PathValue("matchid")
 
-	comps, err := env.ServiceEnv.GetMatchComps(ctx, matchId)
+	comps, err := env.Service.GetMatchComps(ctx, matchId)
 	if err != nil {
 		http.Error(w, "something went wrong", 500)
 		return

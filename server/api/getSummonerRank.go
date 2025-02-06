@@ -8,14 +8,14 @@ import (
 	"github.com/jackc/pgx/v5"
 )
 
-func (env ApiEnv) getSummonerRank(w http.ResponseWriter, r *http.Request) {
+func (env Controller) getSummonerRank(w http.ResponseWriter, r *http.Request) {
 	ctx := context.Background()
 
 	w.Header().Set("Access-Control-Allow-Origin", "*")
 
 	puuid := r.PathValue("puuid")
 
-	rankEntry, err := env.ServiceEnv.GetSummonerRank(ctx, puuid)
+	rankEntry, err := env.Service.GetSummonerRank(ctx, puuid)
 	if err == pgx.ErrNoRows {
 		http.Error(w, "rank not found", 404)
 		return

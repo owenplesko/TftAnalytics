@@ -7,7 +7,54 @@ package db
 
 import (
 	"context"
+
+	"github.com/jackc/pgx/v5/pgtype"
 )
+
+const getSummonerAndRankByPuuid = `-- name: GetSummonerAndRankByPuuid :one
+SELECT tft_summoner.puuid, tft_summoner.region, tft_summoner.name, tft_summoner.tag, tft_summoner.summoner_id, tft_summoner.profile_icon_id, tft_summoner.summoner_level, tft_summoner.full_update_timestamp, tft_summoner.background_update_timestamp, tft_summoner.flags, tft_rank.summoner_puuid, tft_rank.tier, tft_rank.rank, tft_rank.league_points, tft_rank.wins, tft_rank.losses
+FROM tft_summoner LEFT JOIN tft_rank 
+ON puuid = summoner_puuid
+WHERE puuid = $1
+`
+
+type GetSummonerAndRankByPuuidRow struct {
+	Puuid                     string           `json:"puuid"`
+	Region                    pgtype.Text      `json:"region"`
+	Name                      pgtype.Text      `json:"name"`
+	Tag                       pgtype.Text      `json:"tag"`
+	SummonerID                pgtype.Text      `json:"summonerId"`
+	ProfileIconID             pgtype.Int4      `json:"profileIconId"`
+	SummonerLevel             pgtype.Int4      `json:"summonerLevel"`
+	FullUpdateTimestamp       pgtype.Timestamp `json:"fullUpdateTimestamp"`
+	BackgroundUpdateTimestamp pgtype.Timestamp `json:"backgroundUpdateTimestamp"`
+	Flags                     []string         `json:"flags"`
+	TftRank                   TftRank          `json:"tftRank"`
+}
+
+func (q *Queries) GetSummonerAndRankByPuuid(ctx context.Context, puuid string) (GetSummonerAndRankByPuuidRow, error) {
+	row := q.db.QueryRow(ctx, getSummonerAndRankByPuuid, puuid)
+	var i GetSummonerAndRankByPuuidRow
+	err := row.Scan(
+		&i.Puuid,
+		&i.Region,
+		&i.Name,
+		&i.Tag,
+		&i.SummonerID,
+		&i.ProfileIconID,
+		&i.SummonerLevel,
+		&i.FullUpdateTimestamp,
+		&i.BackgroundUpdateTimestamp,
+		&i.Flags,
+		&i.TftRank.SummonerPuuid,
+		&i.TftRank.Tier,
+		&i.TftRank.Rank,
+		&i.TftRank.LeaguePoints,
+		&i.TftRank.Wins,
+		&i.TftRank.Losses,
+	)
+	return i, err
+}
 
 const getSummonerByNameTag = `-- name: GetSummonerByNameTag :one
 SELECT puuid, region, name, tag, summoner_id, profile_icon_id, summoner_level, full_update_timestamp, background_update_timestamp, flags

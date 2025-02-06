@@ -33,7 +33,7 @@ func main() {
 
 	queries := db.New(pool)
 
-	serviceEnv := services.ServiceEnv{
+	serviceEnv := services.Service{
 		Pool:    pool,
 		Queries: queries,
 	}
@@ -47,8 +47,8 @@ func main() {
 	}
 	go serviceEnv.SummonerRegionCollectionLoop(context.Background())
 
-	apiEnv := api.ApiEnv{
-		ServiceEnv: serviceEnv,
+	apiEnv := api.Controller{
+		Service: serviceEnv,
 	}
 	http.ListenAndServe(":8080", apiEnv.New())
 }

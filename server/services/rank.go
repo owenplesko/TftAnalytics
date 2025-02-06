@@ -6,11 +6,11 @@ import (
 	"context"
 )
 
-func (env ServiceEnv) GetSummonerRank(ctx context.Context, puuid string) (db.TftRank, error) {
+func (env Service) GetSummonerRank(ctx context.Context, puuid string) (db.TftRank, error) {
 	return env.Queries.GetSummonerRank(ctx, puuid)
 }
 
-func (env ServiceEnv) CollectSummonerRank(ctx context.Context, region, summonerId string) error {
+func (env Service) CollectSummonerRank(ctx context.Context, region, summonerId string) error {
 	rankEntry, err := riot.GetRank(region, summonerId)
 	if err != nil {
 		return err
@@ -19,8 +19,8 @@ func (env ServiceEnv) CollectSummonerRank(ctx context.Context, region, summonerI
 	return env.storeSummonerRank(ctx, rankEntry)
 }
 
-func (env ServiceEnv) storeSummonerRank(ctx context.Context, rankEntry riot.RankEntry) error {
-	return env.Queries.InsertSummonerRank(ctx, db.InsertSummonerRankParams{
+func (env Service) storeSummonerRank(ctx context.Context, rankEntry riot.RankEntry) error {
+	return env.Queries.UpsertSummonerRank(ctx, db.UpsertSummonerRankParams{
 		SummonerPuuid: rankEntry.Puuid,
 		Tier:          rankEntry.Tier,
 		Rank:          rankEntry.Rank,
@@ -30,6 +30,14 @@ func (env ServiceEnv) storeSummonerRank(ctx context.Context, rankEntry riot.Rank
 	})
 }
 
-func (env ServiceEnv) CollectSummonerRankPage(ctx context.Context) {
+func (env Service) CollectRankEntries(ctx context.Context, region, tier, division string) {
+	page := 0
+	for {
+		page++
+		rankEntries, err := riot.GetRankEntries(region, tier, division, page)
+		if err != nil || len(rankEntries) == 0 {
+			break
+		}
 
+	}
 }

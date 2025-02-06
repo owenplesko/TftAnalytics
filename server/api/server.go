@@ -5,16 +5,17 @@ import (
 	"net/http"
 )
 
-type ApiEnv struct {
-	ServiceEnv services.ServiceEnv
+type Controller struct {
+	Service services.Service
 }
 
-func (env ApiEnv) New() *http.ServeMux {
+func (controller Controller) New() *http.ServeMux {
 	router := http.NewServeMux()
-	router.HandleFunc("/v1/summoner/by-puuid/{puuid}", env.getSummonerByPuuid)
-	router.HandleFunc("/v1/summoner/by-name-tag/{name}/{tag}", env.getSummonerByNameTag)
-	router.HandleFunc("/v1/summoner/by-puuid/{puuid}/update", env.updateSummoner)
-	router.HandleFunc("/v1/summoner/by-puuid/{puuid}/matches", env.getSummonerMatches)
-	router.HandleFunc("/v1/match/{matchid}/comps", env.getMatchComps)
+	router.HandleFunc("/v1/summoner/by-puuid/{puuid}", controller.getSummonerByPuuid)
+	router.HandleFunc("/v1/summoner/by-name-tag/{name}/{tag}", controller.getSummonerByNameTag)
+	router.HandleFunc("/v1/summoner/by-puuid/{puuid}/rank", controller.getSummonerRank)
+	router.HandleFunc("/v1/summoner/by-puuid/{puuid}/update", controller.updateSummoner)
+	router.HandleFunc("/v1/summoner/by-puuid/{puuid}/matches", controller.getSummonerMatches)
+	router.HandleFunc("/v1/match/{matchid}/comps", controller.getMatchComps)
 	return router
 }

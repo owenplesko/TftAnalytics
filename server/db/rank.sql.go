@@ -28,7 +28,7 @@ func (q *Queries) GetSummonerRank(ctx context.Context, summonerPuuid string) (Tf
 	return i, err
 }
 
-const insertSummonerRank = `-- name: InsertSummonerRank :exec
+const upsertSummonerRank = `-- name: UpsertSummonerRank :exec
 INSERT INTO tft_rank (
     summoner_puuid,
     tier,
@@ -36,10 +36,17 @@ INSERT INTO tft_rank (
     league_points,
     wins,
     losses
-) VALUES ( $1, $2, $3, $4, $5, $6)
+) VALUES ($1, $2, $3, $4, $5, $6)
+ON CONFLICT (summoner_puuid) 
+DO UPDATE SET 
+    tier = EXCLUDED.tier,
+    rank = EXCLUDED.rank,
+    league_points = EXCLUDED.league_points,
+    wins = EXCLUDED.wins,
+    losses = EXCLUDED.losses
 `
 
-type InsertSummonerRankParams struct {
+type UpsertSummonerRankParams struct {
 	SummonerPuuid string `json:"summonerPuuid"`
 	Tier          string `json:"tier"`
 	Rank          string `json:"rank"`
@@ -48,8 +55,8 @@ type InsertSummonerRankParams struct {
 	Losses        int32  `json:"losses"`
 }
 
-func (q *Queries) InsertSummonerRank(ctx context.Context, arg InsertSummonerRankParams) error {
-	_, err := q.db.Exec(ctx, insertSummonerRank,
+func (q *Queries) UpsertSummonerRank(ctx context.Context, arg UpsertSummonerRankParams) error {
+	_, err := q.db.Exec(ctx, upsertSummonerRank,
 		arg.SummonerPuuid,
 		arg.Tier,
 		arg.Rank,

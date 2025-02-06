@@ -8,7 +8,7 @@ import (
 	"time"
 )
 
-func (env ApiEnv) getSummonerMatches(w http.ResponseWriter, r *http.Request) {
+func (env Controller) getSummonerMatches(w http.ResponseWriter, r *http.Request) {
 	ctx := context.Background()
 
 	w.Header().Set("Access-Control-Allow-Origin", "*")
@@ -43,7 +43,7 @@ func (env ApiEnv) getSummonerMatches(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
-	matches, err := env.ServiceEnv.GetMatchHistory(ctx, puuid, int32(limit), after)
+	matches, err := env.Service.GetMatchHistory(ctx, puuid, int32(limit), after)
 	if err != nil {
 		http.Error(w, "something went wrong", 500)
 		return
