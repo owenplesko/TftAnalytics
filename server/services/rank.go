@@ -17,10 +17,6 @@ func (service Service) CollectSummonerRank(ctx context.Context, region, summoner
 		return err
 	}
 
-	return service.storeSummonerRank(ctx, rankEntry)
-}
-
-func (service Service) storeSummonerRank(ctx context.Context, rankEntry riot.RankEntry) error {
 	return service.Queries.UpsertSummonerRank(ctx, db.UpsertSummonerRankParams{
 		SummonerPuuid: rankEntry.Puuid,
 		Tier:          rankEntry.Tier,
@@ -43,16 +39,49 @@ func (service Service) CollectRankEntries(ctx context.Context, region, tier, div
 			break
 		}
 
-		for _, rankEntry := range rankEntries {
-			service.Queries.InsertPuuid(ctx, db.InsertPuuidParams{
-				Puuid:  rankEntry.Puuid,
-				Region: region,
-			})
-			service.storeSummonerRank(ctx, rankEntry)
-		}
+		service.batchStoreSummonerPuuid(ctx, extractPuuidsFromRankEntries(rankEntries, region))
+		service.batchStoreRankEntries(ctx, rankEntries)
 	}
 
 	log.Printf("Rank entries collected for %v %v %v\n", region, tier, division)
+
+	return nil
+}
+
+func extractPuuidsFromRankEntries(rankEntries []riot.RankEntry, region string) []db.BatchUpsertPuuidsParams {
+	upsertParams := make([]db.BatchUpsertPuuidsParams, len(rankEntries))
+
+	for i, rankEntry := range rankEntries {
+		upsertParams[i] = db.BatchUpsertPuuidsParams{
+			Puuid:  rankEntry.Puuid,
+			Region: region,
+		}
+	}
+
+	return upsertParams
+}
+
+func (service Service) batchStoreRankEntries(ctx context.Context, rankEntries []riot.RankEntry) error {
+	// transform data
+	upsertParams := make([]db.BatchUpsertSummonerRankParams, len(rankEntries))
+
+	for i, rankEntry := range rankEntries {
+		upsertParams[i] = db.BatchUpsertSummonerRankParams{
+			SummonerPuuid: rankEntry.Puuid,
+			Tier:          rankEntry.Tier,
+			Rank:          rankEntry.Rank,
+			LeaguePoints:  rankEntry.LeaguePoints,
+			Wins:          rankEntry.Wins,
+			Losses:        rankEntry.Losses,
+		}
+	}
+
+	// batch upsert
+	service.Queries.BatchUpsertSummonerRank(ctx, upsertParams).Exec(func(i int, err error) {
+		if err != nil {
+			// do some error handling here..
+		}
+	})
 
 	return nil
 }

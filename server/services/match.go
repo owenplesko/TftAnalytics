@@ -78,22 +78,24 @@ func (env Service) CollectMatchHistory(ctx context.Context, cluster, puuid strin
 	return err
 }
 
+func extractPuuidsFromMatchDetails(matchDetails *riot.Match) []db.BatchUpsertPuuidsParams {
+	region := strings.Split(matchDetails.MetaData.MatchId, "_")[0]
+	upsertParams := make([]db.BatchUpsertPuuidsParams, len(matchDetails.MetaData.Participants))
+
+	for i, puuid := range matchDetails.MetaData.Participants {
+		upsertParams[i] = db.BatchUpsertPuuidsParams{
+			Puuid:  puuid,
+			Region: region,
+		}
+	}
+
+	return upsertParams
+}
+
 func (env Service) storeMatchDetails(ctx context.Context, matchDetails *riot.Match) error {
 	var err error
 
-	// parse match region
-	region := strings.Split(matchDetails.MetaData.MatchId, "_")[0]
-
-	// insert participants
-	for _, puuid := range matchDetails.MetaData.Participants {
-		err = env.Queries.InsertPuuid(ctx, db.InsertPuuidParams{
-			Puuid:  puuid,
-			Region: region,
-		})
-		if err != nil {
-			return err
-		}
-	}
+	env.batchStoreSummonerPuuid(ctx, extractPuuidsFromMatchDetails(matchDetails))
 
 	tx, err := env.Pool.Begin(ctx)
 	if err != nil {

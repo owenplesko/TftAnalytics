@@ -123,3 +123,13 @@ func (env Service) CollectSummonerRegion(ctx context.Context, puuid string) erro
 
 	return err
 }
+
+func (service Service) batchStoreSummonerPuuid(ctx context.Context, upsertParams []db.BatchUpsertPuuidsParams) error {
+	service.Queries.BatchUpsertPuuids(ctx, upsertParams).Exec(func(i int, err error) {
+		if err != nil {
+			// do some error handling here..
+		}
+	})
+
+	return nil
+}

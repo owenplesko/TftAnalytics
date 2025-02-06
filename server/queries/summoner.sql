@@ -16,7 +16,7 @@ FROM tft_summoner
 WHERE REPLACE(LOWER(name), ' ', '') = REPLACE(LOWER(@name::VARCHAR), ' ', '')
 AND REPLACE(LOWER(tag), ' ', '') = REPLACE(LOWER(@tag::VARCHAR), ' ', '');
 
--- name: InsertPuuid :exec
+-- name: BatchUpsertPuuids :batchexec
 INSERT INTO tft_summoner (
     puuid,
     region
