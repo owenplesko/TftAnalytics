@@ -39,49 +39,38 @@ func (service Service) CollectRankEntries(ctx context.Context, region, tier, div
 			break
 		}
 
-		service.batchStoreSummonerPuuid(ctx, extractPuuidsFromRankEntries(rankEntries, region))
-		service.batchStoreRankEntries(ctx, rankEntries)
+		// transform rank entries to upsert puuid params
+		upsertPuuidParams := make([]db.BatchUpsertPuuidsParams, len(rankEntries))
+
+		for i, rankEntry := range rankEntries {
+			upsertPuuidParams[i] = db.BatchUpsertPuuidsParams{
+				Puuid:  rankEntry.Puuid,
+				Region: region,
+			}
+		}
+
+		// batch insert puuids
+		service.Queries.BatchUpsertPuuids(ctx, upsertPuuidParams).Exec(nil)
+
+		// transform rank entries to upsert rank entry params
+		upsertRankEntryParams := make([]db.BatchUpsertSummonerRankParams, len(rankEntries))
+
+		for i, rankEntry := range rankEntries {
+			upsertRankEntryParams[i] = db.BatchUpsertSummonerRankParams{
+				SummonerPuuid: rankEntry.Puuid,
+				Tier:          rankEntry.Tier,
+				Rank:          rankEntry.Rank,
+				LeaguePoints:  rankEntry.LeaguePoints,
+				Wins:          rankEntry.Wins,
+				Losses:        rankEntry.Losses,
+			}
+		}
+
+		// batch upsert rank entries
+		service.Queries.BatchUpsertSummonerRank(ctx, upsertRankEntryParams).Exec(nil)
 	}
 
 	log.Printf("Rank entries collected for %v %v %v\n", region, tier, division)
-
-	return nil
-}
-
-func extractPuuidsFromRankEntries(rankEntries []riot.RankEntry, region string) []db.BatchUpsertPuuidsParams {
-	upsertParams := make([]db.BatchUpsertPuuidsParams, len(rankEntries))
-
-	for i, rankEntry := range rankEntries {
-		upsertParams[i] = db.BatchUpsertPuuidsParams{
-			Puuid:  rankEntry.Puuid,
-			Region: region,
-		}
-	}
-
-	return upsertParams
-}
-
-func (service Service) batchStoreRankEntries(ctx context.Context, rankEntries []riot.RankEntry) error {
-	// transform data
-	upsertParams := make([]db.BatchUpsertSummonerRankParams, len(rankEntries))
-
-	for i, rankEntry := range rankEntries {
-		upsertParams[i] = db.BatchUpsertSummonerRankParams{
-			SummonerPuuid: rankEntry.Puuid,
-			Tier:          rankEntry.Tier,
-			Rank:          rankEntry.Rank,
-			LeaguePoints:  rankEntry.LeaguePoints,
-			Wins:          rankEntry.Wins,
-			Losses:        rankEntry.Losses,
-		}
-	}
-
-	// batch upsert
-	service.Queries.BatchUpsertSummonerRank(ctx, upsertParams).Exec(func(i int, err error) {
-		if err != nil {
-			// do some error handling here..
-		}
-	})
 
 	return nil
 }
