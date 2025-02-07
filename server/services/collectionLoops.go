@@ -65,6 +65,9 @@ func (service Service) MatchHistoryCollectionLoop(ctx context.Context, cluster s
 
 func (service Service) RankEntryCollectionLoop(ctx context.Context, region string) {
 	for {
+		//for _, tier := range riot.ApexTiers {
+		//	service.CollectApexRankEntries(ctx, region, tier)
+		//}
 		for _, tier := range riot.Tiers {
 			for _, division := range riot.Divisions {
 				service.CollectRankEntries(ctx, region, tier, division)

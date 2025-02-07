@@ -74,3 +74,44 @@ func (service Service) CollectRankEntries(ctx context.Context, region, tier, div
 
 	return nil
 }
+
+func (service Service) CollectApexRankEntries(ctx context.Context, region, tier string) error {
+	rankPage, err := riot.GetApexRankPage(region, tier)
+	if err != nil {
+		log.Println(err.Error())
+		return err
+	}
+
+	// transform rank entries to upsert puuid params
+	upsertPuuidParams := make([]db.BatchUpsertPuuidsParams, len(rankPage.Entries))
+
+	for i, rankEntry := range rankPage.Entries {
+		upsertPuuidParams[i] = db.BatchUpsertPuuidsParams{
+			Puuid:  rankEntry.Puuid,
+			Region: region,
+		}
+	}
+
+	// batch insert puuids
+	service.Queries.BatchUpsertPuuids(ctx, upsertPuuidParams).Exec(nil)
+
+	// transform rank entries to upsert rank entry params
+	upsertRankEntryParams := make([]db.BatchUpsertSummonerRankParams, len(rankPage.Entries))
+
+	for i, rankEntry := range rankPage.Entries {
+		upsertRankEntryParams[i] = db.BatchUpsertSummonerRankParams{
+			SummonerPuuid: rankEntry.Puuid,
+			Tier:          rankEntry.Tier,
+			Rank:          rankEntry.Rank,
+			LeaguePoints:  rankEntry.LeaguePoints,
+			Wins:          rankEntry.Wins,
+			Losses:        rankEntry.Losses,
+		}
+	}
+
+	// batch upsert rank entries
+	service.Queries.BatchUpsertSummonerRank(ctx, upsertRankEntryParams).Exec(nil)
+
+	log.Printf("Rank entries collected for %v %v\n", region, tier)
+	return nil
+}

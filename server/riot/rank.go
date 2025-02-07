@@ -4,6 +4,14 @@ import (
 	"fmt"
 )
 
+type RankPage struct {
+	Tier      string      `json:"tier"`
+	LeagueId  string      `json:"leagueId"`
+	QueueType string      `json:"queue"`
+	Name      string      `json:"name"`
+	Entries   []RankEntry `json:"entries"`
+}
+
 type RankEntry struct {
 	Puuid        string `json:"puuid"`
 	LeagueId     string `json:"leagueId"`
@@ -69,8 +77,8 @@ func GetRankEntries(region string, tier string, division string, page int) ([]Ra
 	return rankPageRes, err
 }
 
-func GetApexRankEntries(region string, tier string) ([]RankEntry, error) {
-	var rankPageRes []RankEntry
+func GetApexRankPage(region string, tier string) (RankPage, error) {
+	var rankPageRes RankPage
 	route := fmt.Sprintf("tft/league/v1/%v?queue=RANKED_TFT", tier)
 	err := getJson(region, route, &rankPageRes)
 
