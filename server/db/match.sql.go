@@ -13,6 +13,11 @@ import (
 )
 
 const createComp = `-- name: CreateComp :exec
+WITH insert_summoner AS (
+    INSERT INTO tft_summoner (puuid, region)
+    VALUES ($2, $5::VARCHAR)
+    ON CONFLICT (puuid) DO NOTHING
+)
 INSERT INTO tft_comp (
     match_id,
 	summoner_puuid,
@@ -28,6 +33,7 @@ type CreateCompParams struct {
 	SummonerPuuid string           `json:"summonerPuuid"`
 	CompData      types.CompData   `json:"compData"`
 	MatchDate     pgtype.Timestamp `json:"matchDate"`
+	Region        string           `json:"region"`
 }
 
 func (q *Queries) CreateComp(ctx context.Context, arg CreateCompParams) error {
@@ -36,6 +42,7 @@ func (q *Queries) CreateComp(ctx context.Context, arg CreateCompParams) error {
 		arg.SummonerPuuid,
 		arg.CompData,
 		arg.MatchDate,
+		arg.Region,
 	)
 	return err
 }

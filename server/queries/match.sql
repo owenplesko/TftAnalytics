@@ -21,6 +21,11 @@ INSERT INTO tft_match (
 );
 
 -- name: CreateComp :exec
+WITH insert_summoner AS (
+    INSERT INTO tft_summoner (puuid, region)
+    VALUES ($2, @region::VARCHAR)
+    ON CONFLICT (puuid) DO NOTHING
+)
 INSERT INTO tft_comp (
     match_id,
 	summoner_puuid,

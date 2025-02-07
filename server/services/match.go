@@ -78,19 +78,7 @@ func (service Service) CollectMatchHistory(ctx context.Context, cluster, puuid s
 func (service Service) storeMatchDetails(ctx context.Context, matchDetails *riot.Match) error {
 	var err error
 
-	// transform match details to upsert puuid params
 	region := strings.Split(matchDetails.MetaData.MatchId, "_")[0]
-	upsertPuuidParams := make([]db.BatchUpsertPuuidsParams, len(matchDetails.MetaData.Participants))
-
-	for i, puuid := range matchDetails.MetaData.Participants {
-		upsertPuuidParams[i] = db.BatchUpsertPuuidsParams{
-			Puuid:  puuid,
-			Region: region,
-		}
-	}
-
-	// batch upsert puuids
-	service.Queries.BatchUpsertPuuids(ctx, upsertPuuidParams).Exec(nil)
 
 	// comp and matches inserted in one transaction
 	tx, err := service.Pool.Begin(ctx)
@@ -128,6 +116,7 @@ func (service Service) storeMatchDetails(ctx context.Context, matchDetails *riot
 			SummonerPuuid: compDetails.Puuid,
 			CompData:      types.CompData(compDetails),
 			MatchDate:     matchDate,
+			Region:        region,
 		})
 		if err != nil {
 			return err

@@ -16,61 +16,12 @@ var (
 	ErrBatchAlreadyClosed = errors.New("batch already closed")
 )
 
-const batchUpsertPuuids = `-- name: BatchUpsertPuuids :batchexec
-INSERT INTO tft_summoner (
-    puuid,
-    region
-) VALUES (
-    $1, $2::VARCHAR
-) ON CONFLICT (puuid) DO NOTHING
-`
-
-type BatchUpsertPuuidsBatchResults struct {
-	br     pgx.BatchResults
-	tot    int
-	closed bool
-}
-
-type BatchUpsertPuuidsParams struct {
-	Puuid  string `json:"puuid"`
-	Region string `json:"region"`
-}
-
-func (q *Queries) BatchUpsertPuuids(ctx context.Context, arg []BatchUpsertPuuidsParams) *BatchUpsertPuuidsBatchResults {
-	batch := &pgx.Batch{}
-	for _, a := range arg {
-		vals := []interface{}{
-			a.Puuid,
-			a.Region,
-		}
-		batch.Queue(batchUpsertPuuids, vals...)
-	}
-	br := q.db.SendBatch(ctx, batch)
-	return &BatchUpsertPuuidsBatchResults{br, len(arg), false}
-}
-
-func (b *BatchUpsertPuuidsBatchResults) Exec(f func(int, error)) {
-	defer b.br.Close()
-	for t := 0; t < b.tot; t++ {
-		if b.closed {
-			if f != nil {
-				f(t, ErrBatchAlreadyClosed)
-			}
-			continue
-		}
-		_, err := b.br.Exec()
-		if f != nil {
-			f(t, err)
-		}
-	}
-}
-
-func (b *BatchUpsertPuuidsBatchResults) Close() error {
-	b.closed = true
-	return b.br.Close()
-}
-
 const batchUpsertSummonerRank = `-- name: BatchUpsertSummonerRank :batchexec
+WITH insert_summoner AS (
+    INSERT INTO tft_summoner (puuid, region)
+    VALUES ($1, $7::VARCHAR)
+    ON CONFLICT (puuid) DO NOTHING
+)
 INSERT INTO tft_rank (
     summoner_puuid,
     tier,
@@ -101,6 +52,7 @@ type BatchUpsertSummonerRankParams struct {
 	LeaguePoints  int32  `json:"leaguePoints"`
 	Wins          int32  `json:"wins"`
 	Losses        int32  `json:"losses"`
+	Region        string `json:"region"`
 }
 
 func (q *Queries) BatchUpsertSummonerRank(ctx context.Context, arg []BatchUpsertSummonerRankParams) *BatchUpsertSummonerRankBatchResults {
@@ -113,6 +65,7 @@ func (q *Queries) BatchUpsertSummonerRank(ctx context.Context, arg []BatchUpsert
 			a.LeaguePoints,
 			a.Wins,
 			a.Losses,
+			a.Region,
 		}
 		batch.Queue(batchUpsertSummonerRank, vals...)
 	}

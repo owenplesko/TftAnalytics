@@ -20,6 +20,11 @@ DO UPDATE SET
     losses = EXCLUDED.losses;
 
 -- name: BatchUpsertSummonerRank :batchexec
+WITH insert_summoner AS (
+    INSERT INTO tft_summoner (puuid, region)
+    VALUES ($1, @region::VARCHAR)
+    ON CONFLICT (puuid) DO NOTHING
+)
 INSERT INTO tft_rank (
     summoner_puuid,
     tier,

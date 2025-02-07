@@ -39,19 +39,6 @@ func (service Service) CollectRankEntries(ctx context.Context, region, tier, div
 			break
 		}
 
-		// transform rank entries to upsert puuid params
-		upsertPuuidParams := make([]db.BatchUpsertPuuidsParams, len(rankEntries))
-
-		for i, rankEntry := range rankEntries {
-			upsertPuuidParams[i] = db.BatchUpsertPuuidsParams{
-				Puuid:  rankEntry.Puuid,
-				Region: region,
-			}
-		}
-
-		// batch insert puuids
-		service.Queries.BatchUpsertPuuids(ctx, upsertPuuidParams).Exec(nil)
-
 		// transform rank entries to upsert rank entry params
 		upsertRankEntryParams := make([]db.BatchUpsertSummonerRankParams, len(rankEntries))
 
@@ -63,6 +50,7 @@ func (service Service) CollectRankEntries(ctx context.Context, region, tier, div
 				LeaguePoints:  rankEntry.LeaguePoints,
 				Wins:          rankEntry.Wins,
 				Losses:        rankEntry.Losses,
+				Region:        region,
 			}
 		}
 
@@ -82,19 +70,6 @@ func (service Service) CollectApexRankEntries(ctx context.Context, region, tier 
 		return err
 	}
 
-	// transform rank entries to upsert puuid params
-	upsertPuuidParams := make([]db.BatchUpsertPuuidsParams, len(rankPage.Entries))
-
-	for i, rankEntry := range rankPage.Entries {
-		upsertPuuidParams[i] = db.BatchUpsertPuuidsParams{
-			Puuid:  rankEntry.Puuid,
-			Region: region,
-		}
-	}
-
-	// batch insert puuids
-	service.Queries.BatchUpsertPuuids(ctx, upsertPuuidParams).Exec(nil)
-
 	// transform rank entries to upsert rank entry params
 	upsertRankEntryParams := make([]db.BatchUpsertSummonerRankParams, len(rankPage.Entries))
 
@@ -106,6 +81,7 @@ func (service Service) CollectApexRankEntries(ctx context.Context, region, tier 
 			LeaguePoints:  rankEntry.LeaguePoints,
 			Wins:          rankEntry.Wins,
 			Losses:        rankEntry.Losses,
+			Region:        region,
 		}
 	}
 
