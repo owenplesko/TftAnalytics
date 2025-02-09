@@ -2,14 +2,27 @@ package riot
 
 import (
 	"fmt"
+	"strings"
 )
 
 type RankPage struct {
-	Tier      string      `json:"tier"`
-	LeagueId  string      `json:"leagueId"`
-	QueueType string      `json:"queue"`
-	Name      string      `json:"name"`
-	Entries   []RankEntry `json:"entries"`
+	Tier      string          `json:"tier"`
+	LeagueId  string          `json:"leagueId"`
+	QueueType string          `json:"queue"`
+	Name      string          `json:"name"`
+	Entries   []ApexRankEntry `json:"entries"`
+}
+
+type ApexRankEntry struct {
+	Rank         string `json:"rank"`
+	SummonerId   string `json:"summonerId"`
+	LeaguePoints int32  `json:"leaguePoints"`
+	Wins         int32  `json:"wins"`
+	Losses       int32  `json:"losses"`
+	Veteran      bool   `json:"veteran"`
+	Inactive     bool   `json:"inactive"`
+	FreshBlood   bool   `json:"freshBlood"`
+	HotStreak    bool   `json:"hotStreak"`
 }
 
 type RankEntry struct {
@@ -19,7 +32,6 @@ type RankEntry struct {
 	Tier         string `json:"tier"`
 	Rank         string `json:"rank"`
 	SummonerId   string `json:"summonerId"`
-	SummonerName string `json:"summonerName"`
 	LeaguePoints int32  `json:"leaguePoints"`
 	Wins         int32  `json:"wins"`
 	Losses       int32  `json:"losses"`
@@ -79,7 +91,7 @@ func GetRankEntries(region string, tier string, division string, page int) ([]Ra
 
 func GetApexRankPage(region string, tier string) (RankPage, error) {
 	var rankPageRes RankPage
-	route := fmt.Sprintf("tft/league/v1/%v?queue=RANKED_TFT", tier)
+	route := fmt.Sprintf("tft/league/v1/%v?queue=RANKED_TFT", strings.ToLower(tier))
 	err := getJson(region, route, &rankPageRes)
 
 	return rankPageRes, err

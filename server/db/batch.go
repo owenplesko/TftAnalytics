@@ -16,21 +16,16 @@ var (
 	ErrBatchAlreadyClosed = errors.New("batch already closed")
 )
 
-const batchUpsertSummonerRank = `-- name: BatchUpsertSummonerRank :batchexec
-WITH insert_summoner AS (
-    INSERT INTO tft_summoner (puuid, region)
-    VALUES ($1, $7::VARCHAR)
-    ON CONFLICT (puuid) DO NOTHING
-)
+const batchUpsertRank = `-- name: BatchUpsertRank :batchexec
 INSERT INTO tft_rank (
-    summoner_puuid,
+    summoner_id,
     tier,
     rank,
     league_points,
     wins,
     losses
 ) VALUES ($1, $2, $3, $4, $5, $6)
-ON CONFLICT (summoner_puuid) 
+ON CONFLICT (summoner_id) 
 DO UPDATE SET 
     tier = EXCLUDED.tier,
     rank = EXCLUDED.rank,
@@ -39,41 +34,39 @@ DO UPDATE SET
     losses = EXCLUDED.losses
 `
 
-type BatchUpsertSummonerRankBatchResults struct {
+type BatchUpsertRankBatchResults struct {
 	br     pgx.BatchResults
 	tot    int
 	closed bool
 }
 
-type BatchUpsertSummonerRankParams struct {
-	SummonerPuuid string `json:"summonerPuuid"`
-	Tier          string `json:"tier"`
-	Rank          string `json:"rank"`
-	LeaguePoints  int32  `json:"leaguePoints"`
-	Wins          int32  `json:"wins"`
-	Losses        int32  `json:"losses"`
-	Region        string `json:"region"`
+type BatchUpsertRankParams struct {
+	SummonerID   string `json:"summonerId"`
+	Tier         string `json:"tier"`
+	Rank         string `json:"rank"`
+	LeaguePoints int32  `json:"leaguePoints"`
+	Wins         int32  `json:"wins"`
+	Losses       int32  `json:"losses"`
 }
 
-func (q *Queries) BatchUpsertSummonerRank(ctx context.Context, arg []BatchUpsertSummonerRankParams) *BatchUpsertSummonerRankBatchResults {
+func (q *Queries) BatchUpsertRank(ctx context.Context, arg []BatchUpsertRankParams) *BatchUpsertRankBatchResults {
 	batch := &pgx.Batch{}
 	for _, a := range arg {
 		vals := []interface{}{
-			a.SummonerPuuid,
+			a.SummonerID,
 			a.Tier,
 			a.Rank,
 			a.LeaguePoints,
 			a.Wins,
 			a.Losses,
-			a.Region,
 		}
-		batch.Queue(batchUpsertSummonerRank, vals...)
+		batch.Queue(batchUpsertRank, vals...)
 	}
 	br := q.db.SendBatch(ctx, batch)
-	return &BatchUpsertSummonerRankBatchResults{br, len(arg), false}
+	return &BatchUpsertRankBatchResults{br, len(arg), false}
 }
 
-func (b *BatchUpsertSummonerRankBatchResults) Exec(f func(int, error)) {
+func (b *BatchUpsertRankBatchResults) Exec(f func(int, error)) {
 	defer b.br.Close()
 	for t := 0; t < b.tot; t++ {
 		if b.closed {
@@ -89,7 +82,7 @@ func (b *BatchUpsertSummonerRankBatchResults) Exec(f func(int, error)) {
 	}
 }
 
-func (b *BatchUpsertSummonerRankBatchResults) Close() error {
+func (b *BatchUpsertRankBatchResults) Close() error {
 	b.closed = true
 	return b.br.Close()
 }

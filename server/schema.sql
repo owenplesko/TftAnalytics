@@ -31,7 +31,7 @@ CREATE TABLE tft_comp (
 );
 
 CREATE TABLE tft_rank (
-	summoner_puuid VARCHAR NOT NULL PRIMARY KEY REFERENCES tft_summoner,
+	summoner_id VARCHAR NOT NULL PRIMARY KEY,
 	tier VARCHAR NOT NULL,
 	rank VARCHAR NOT NULL,
 	league_points INT NOT NULL,

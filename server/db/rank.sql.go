@@ -10,15 +10,15 @@ import (
 )
 
 const getSummonerRank = `-- name: GetSummonerRank :one
-SELECT summoner_puuid, tier, rank, league_points, wins, losses FROM tft_rank
-WHERE summoner_puuid = $1
+SELECT summoner_id, tier, rank, league_points, wins, losses FROM tft_rank
+WHERE summoner_id = $1
 `
 
-func (q *Queries) GetSummonerRank(ctx context.Context, summonerPuuid string) (TftRank, error) {
-	row := q.db.QueryRow(ctx, getSummonerRank, summonerPuuid)
+func (q *Queries) GetSummonerRank(ctx context.Context, summonerID string) (TftRank, error) {
+	row := q.db.QueryRow(ctx, getSummonerRank, summonerID)
 	var i TftRank
 	err := row.Scan(
-		&i.SummonerPuuid,
+		&i.SummonerID,
 		&i.Tier,
 		&i.Rank,
 		&i.LeaguePoints,
@@ -28,16 +28,16 @@ func (q *Queries) GetSummonerRank(ctx context.Context, summonerPuuid string) (Tf
 	return i, err
 }
 
-const upsertSummonerRank = `-- name: UpsertSummonerRank :exec
+const upsertRank = `-- name: UpsertRank :exec
 INSERT INTO tft_rank (
-    summoner_puuid,
+    summoner_id,
     tier,
     rank,
     league_points,
     wins,
     losses
 ) VALUES ($1, $2, $3, $4, $5, $6)
-ON CONFLICT (summoner_puuid) 
+ON CONFLICT (summoner_id) 
 DO UPDATE SET 
     tier = EXCLUDED.tier,
     rank = EXCLUDED.rank,
@@ -46,18 +46,18 @@ DO UPDATE SET
     losses = EXCLUDED.losses
 `
 
-type UpsertSummonerRankParams struct {
-	SummonerPuuid string `json:"summonerPuuid"`
-	Tier          string `json:"tier"`
-	Rank          string `json:"rank"`
-	LeaguePoints  int32  `json:"leaguePoints"`
-	Wins          int32  `json:"wins"`
-	Losses        int32  `json:"losses"`
+type UpsertRankParams struct {
+	SummonerID   string `json:"summonerId"`
+	Tier         string `json:"tier"`
+	Rank         string `json:"rank"`
+	LeaguePoints int32  `json:"leaguePoints"`
+	Wins         int32  `json:"wins"`
+	Losses       int32  `json:"losses"`
 }
 
-func (q *Queries) UpsertSummonerRank(ctx context.Context, arg UpsertSummonerRankParams) error {
-	_, err := q.db.Exec(ctx, upsertSummonerRank,
-		arg.SummonerPuuid,
+func (q *Queries) UpsertRank(ctx context.Context, arg UpsertRankParams) error {
+	_, err := q.db.Exec(ctx, upsertRank,
+		arg.SummonerID,
 		arg.Tier,
 		arg.Rank,
 		arg.LeaguePoints,

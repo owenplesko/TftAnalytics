@@ -13,9 +13,9 @@ func (env Controller) getSummonerRank(w http.ResponseWriter, r *http.Request) {
 
 	w.Header().Set("Access-Control-Allow-Origin", "*")
 
-	puuid := r.PathValue("puuid")
+	summonerId := r.PathValue("summonerId")
 
-	rankEntry, err := env.Service.GetSummonerRank(ctx, puuid)
+	rankEntry, err := env.Service.GetSummonerRank(ctx, summonerId)
 	if err == pgx.ErrNoRows {
 		http.Error(w, "rank not found", 404)
 		return

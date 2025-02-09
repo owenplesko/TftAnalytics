@@ -1,17 +1,17 @@
 -- name: GetSummonerRank :one
 SELECT * FROM tft_rank
-WHERE summoner_puuid = $1;
+WHERE summoner_id = $1;
 
--- name: UpsertSummonerRank :exec
+-- name: UpsertRank :exec
 INSERT INTO tft_rank (
-    summoner_puuid,
+    summoner_id,
     tier,
     rank,
     league_points,
     wins,
     losses
 ) VALUES ($1, $2, $3, $4, $5, $6)
-ON CONFLICT (summoner_puuid) 
+ON CONFLICT (summoner_id) 
 DO UPDATE SET 
     tier = EXCLUDED.tier,
     rank = EXCLUDED.rank,
@@ -19,21 +19,16 @@ DO UPDATE SET
     wins = EXCLUDED.wins,
     losses = EXCLUDED.losses;
 
--- name: BatchUpsertSummonerRank :batchexec
-WITH insert_summoner AS (
-    INSERT INTO tft_summoner (puuid, region)
-    VALUES ($1, @region::VARCHAR)
-    ON CONFLICT (puuid) DO NOTHING
-)
+-- name: BatchUpsertRank :batchexec
 INSERT INTO tft_rank (
-    summoner_puuid,
+    summoner_id,
     tier,
     rank,
     league_points,
     wins,
     losses
 ) VALUES ($1, $2, $3, $4, $5, $6)
-ON CONFLICT (summoner_puuid) 
+ON CONFLICT (summoner_id) 
 DO UPDATE SET 
     tier = EXCLUDED.tier,
     rank = EXCLUDED.rank,

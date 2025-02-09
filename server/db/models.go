@@ -28,12 +28,12 @@ type TftMatch struct {
 }
 
 type TftRank struct {
-	SummonerPuuid string `json:"summonerPuuid"`
-	Tier          string `json:"tier"`
-	Rank          string `json:"rank"`
-	LeaguePoints  int32  `json:"leaguePoints"`
-	Wins          int32  `json:"wins"`
-	Losses        int32  `json:"losses"`
+	SummonerID   string `json:"summonerId"`
+	Tier         string `json:"tier"`
+	Rank         string `json:"rank"`
+	LeaguePoints int32  `json:"leaguePoints"`
+	Wins         int32  `json:"wins"`
+	Losses       int32  `json:"losses"`
 }
 
 type TftSummoner struct {
