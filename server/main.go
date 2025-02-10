@@ -38,9 +38,9 @@ func main() {
 		Queries: queries,
 	}
 
+	go service.RankEntryCollectionLoop(context.Background())
 	for region, _ := range riot.RegionToCluster {
 		go service.SummonerDataCollectionLoop(context.Background(), region)
-		go service.RankEntryCollectionLoop(context.Background(), region)
 	}
 	for cluster, _ := range riot.ClusterToRegions {
 		go service.MatchHistoryCollectionLoop(context.Background(), cluster)

@@ -67,9 +67,9 @@ func (service Service) CollectRankEntries(ctx context.Context, region, tier, div
 
 		// batch upsert rank entries
 		service.Queries.BatchUpsertRank(ctx, upsertRankEntryParams).Exec(nil)
-	}
 
-	log.Printf("Rank entries collected for %v %v %v\n", region, tier, division)
+		log.Printf("Rank entries collected for %v %v %v page %v\n", region, tier, division, page)
+	}
 
 	return nil
 }
