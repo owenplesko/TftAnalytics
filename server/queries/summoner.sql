@@ -10,6 +10,13 @@ SELECT EXISTS (
     AND REPLACE(LOWER(tag), ' ', '') = REPLACE(LOWER(@tag::VARCHAR), ' ', '')
 );
 
+-- name: BatchUpsertPuuid :batchexec
+INSERT INTO tft_summoner (
+    puuid,
+    region
+) VALUES ($1, @region::VARCHAR)
+ON CONFLICT (puuid) DO NOTHING;
+
 -- name: GetSummonerByNameTag :one
 SELECT *
 FROM tft_summoner 

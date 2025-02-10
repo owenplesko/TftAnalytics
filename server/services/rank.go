@@ -39,6 +39,18 @@ func (service Service) CollectRankEntries(ctx context.Context, region, tier, div
 			break
 		}
 
+		// batch upsert puuids
+		upsertPuuidParams := make([]db.BatchUpsertPuuidParams, len(rankEntries))
+
+		for i, rankEntry := range rankEntries {
+			upsertPuuidParams[i] = db.BatchUpsertPuuidParams{
+				Puuid:  rankEntry.Puuid,
+				Region: region,
+			}
+		}
+
+		service.Queries.BatchUpsertPuuid(ctx, upsertPuuidParams).Exec(nil)
+
 		// transform rank entries to upsert rank entry params
 		upsertRankEntryParams := make([]db.BatchUpsertRankParams, len(rankEntries))
 
