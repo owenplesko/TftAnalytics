@@ -29,6 +29,9 @@ func main() {
 	if err != nil {
 		panic(err)
 	}
+	if err = pool.Ping(context.Background()); err != nil {
+		panic(err)
+	}
 	log.Println("Db connection successful")
 
 	queries := db.New(pool)
