@@ -15,27 +15,17 @@ type Leaderboard struct {
 }
 
 type SetLeaderboardScoresParams struct {
-	SummonerId string
-	RankScore  int
+	Id    string
+	Score int
 }
 
-func (leaderboard Leaderboard) SetLeaderboardScore(ctx context.Context, param SetLeaderboardScoresParams) error {
-	zParam := redis.Z{
-		Member: param.SummonerId,
-		Score:  float64(param.RankScore),
-	}
-
-	err := leaderboard.rdb.ZAdd(ctx, "leaderboard:global", zParam).Err()
-	return err
-}
-
-func (leaderboard Leaderboard) BatchSetLeaderboardScores(ctx context.Context, params []SetLeaderboardScoresParams) error {
+func (leaderboard Leaderboard) SetLeaderboardScores(ctx context.Context, params ...SetLeaderboardScoresParams) error {
 	zParams := make([]redis.Z, len(params))
 
 	for i, param := range params {
 		zParams[i] = redis.Z{
-			Member: param.SummonerId,
-			Score:  float64(param.RankScore),
+			Member: param.Id,
+			Score:  float64(param.Score),
 		}
 	}
 

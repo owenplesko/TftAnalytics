@@ -76,8 +76,8 @@ func (service Service) CollectRankEntries(ctx context.Context, region, tier, div
 			//}
 
 			setLeaderboardScoresParams[i] = leaderboard.SetLeaderboardScoresParams{
-				SummonerId: rankEntry.SummonerId,
-				RankScore:  getRankScore(int(rankEntry.LeaguePoints), rankEntry.Tier, rankEntry.Rank),
+				Id:    rankEntry.SummonerId,
+				Score: getRankScore(int(rankEntry.LeaguePoints), rankEntry.Tier, rankEntry.Rank),
 			}
 
 			upsertRankEntryParams[i] = db.BatchUpsertRankParams{
@@ -91,7 +91,7 @@ func (service Service) CollectRankEntries(ctx context.Context, region, tier, div
 		}
 
 		//service.Queries.BatchUpsertPuuid(ctx, upsertPuuidParams).Exec(nil)
-		_ = service.Leaderboard.BatchSetLeaderboardScores(ctx, setLeaderboardScoresParams)
+		_ = service.Leaderboard.SetLeaderboardScores(ctx, setLeaderboardScoresParams...)
 		service.Queries.BatchUpsertRank(ctx, upsertRankEntryParams).Exec(nil)
 
 		log.Printf("Rank entries collected for %v %v %v page %v\n", region, tier, division, page)
@@ -113,8 +113,8 @@ func (service Service) CollectApexRankEntries(ctx context.Context, region, tier 
 
 	for i, rankEntry := range rankPage.Entries {
 		setLeaderboardScoresParams[i] = leaderboard.SetLeaderboardScoresParams{
-			SummonerId: rankEntry.SummonerId,
-			RankScore:  getRankScore(int(rankEntry.LeaguePoints), rankPage.Tier, rankEntry.Rank),
+			Id:    rankEntry.SummonerId,
+			Score: getRankScore(int(rankEntry.LeaguePoints), rankPage.Tier, rankEntry.Rank),
 		}
 
 		upsertRankEntryParams[i] = db.BatchUpsertRankParams{
@@ -128,7 +128,7 @@ func (service Service) CollectApexRankEntries(ctx context.Context, region, tier 
 	}
 
 	// batch upsert rank entries
-	_ = service.Leaderboard.BatchSetLeaderboardScores(ctx, setLeaderboardScoresParams)
+	_ = service.Leaderboard.SetLeaderboardScores(ctx, setLeaderboardScoresParams...)
 	service.Queries.BatchUpsertRank(ctx, upsertRankEntryParams).Exec(nil)
 
 	log.Printf("Rank entries collected for %v %v\n", region, tier)
