@@ -19,7 +19,7 @@ type SetLeaderboardScoresParams struct {
 	Score int
 }
 
-func (leaderboard Leaderboard) SetLeaderboardScores(ctx context.Context, params ...SetLeaderboardScoresParams) error {
+func (leaderboard Leaderboard) SetLeaderboardScores(ctx context.Context, leaderboardName string, params ...SetLeaderboardScoresParams) error {
 	zParams := make([]redis.Z, len(params))
 
 	for i, param := range params {
@@ -29,6 +29,13 @@ func (leaderboard Leaderboard) SetLeaderboardScores(ctx context.Context, params 
 		}
 	}
 
-	err := leaderboard.rdb.ZAdd(ctx, "leaderboard:global", zParams...).Err()
+	err := leaderboard.rdb.ZAdd(ctx, "leaderboard:"+leaderboardName, zParams...).Err()
 	return err
+}
+
+func (leaderboard Leaderboard) GetLeaderboardRank(ctx context.Context, leaderboardName string, id string) (int, error) {
+	res := leaderboard.rdb.ZRevRank(ctx, "leaderboard:"+leaderboardName, id)
+	rank := int(res.Val()) + 1
+
+	return rank, res.Err()
 }
