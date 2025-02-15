@@ -6,7 +6,6 @@ import (
 	"TFTAnalyticsServer/types"
 	"context"
 	"log"
-	"strings"
 	"time"
 
 	"github.com/jackc/pgx/v5/pgtype"
@@ -41,10 +40,10 @@ func (service Service) GetMatchHistory(ctx context.Context, puuid string, limit 
 	return matches, err
 }
 
-func (service Service) CollectMatchHistory(ctx context.Context, cluster, puuid string, matchesAfter time.Time) error {
+func (service Service) CollectMatchHistory(ctx context.Context, region, puuid string, matchesAfter time.Time) error {
 	updatedAt := time.Now()
 
-	res, err := riot.GetMatchHistory(cluster, puuid, matchesAfter)
+	res, err := riot.GetMatchHistory(region, puuid, matchesAfter)
 	if err != nil {
 		return err
 	}
@@ -54,7 +53,7 @@ func (service Service) CollectMatchHistory(ctx context.Context, cluster, puuid s
 			continue
 		}
 
-		res, err := riot.GetMatchDetails(cluster, matchId)
+		res, err := riot.GetMatchDetails(region, matchId)
 		if err != nil {
 			continue
 		}
@@ -78,7 +77,7 @@ func (service Service) CollectMatchHistory(ctx context.Context, cluster, puuid s
 func (service Service) storeMatchDetails(ctx context.Context, matchDetails *riot.Match) error {
 	var err error
 
-	region := strings.Split(matchDetails.MetaData.MatchId, "_")[0]
+	region := riot.GetMatchRegion(matchDetails.MetaData.MatchId)
 
 	// comp and matches inserted in one transaction
 	tx, err := service.Pool.Begin(ctx)

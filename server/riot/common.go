@@ -4,19 +4,21 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"log"
 	"net/http"
+	"strings"
 )
 
 var NotFoundError = errors.New("404 Not Found")
 
-func getJson(server string, route string, target interface{}) error {
-	url := fmt.Sprintf("https://%v.api.riotgames.com/%v", server, route)
+func getJson(server string, limitServer string, route string, target interface{}) error {
+	url := fmt.Sprintf("https://%v.api.riotgames.com/%v", strings.ToLower(server), route)
 
 	client := &http.Client{}
 	req, _ := http.NewRequest("GET", url, nil)
 	req.Header.Set("X-Riot-Token", key)
 
-	limiter, ok := limiters[server]
+	limiter, ok := limiters[limitServer]
 	if !ok {
 		return fmt.Errorf("no limiter defined %v", server)
 	}
@@ -32,6 +34,7 @@ func getJson(server string, route string, target interface{}) error {
 		return NotFoundError
 	}
 	if res.StatusCode != http.StatusOK {
+		log.Printf("Status: %v URL: %v\n", res.Status, url)
 		return errors.New(res.Status)
 	}
 

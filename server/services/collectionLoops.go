@@ -56,23 +56,23 @@ func (service Service) MatchHistoryCollectionLoop(ctx context.Context, cluster s
 			})
 
 			for _, row := range rows {
-				service.CollectMatchHistory(ctx, cluster, row.Puuid, time.Now().Add(-time.Hour*24*3))
+				service.CollectMatchHistory(ctx, region, row.Puuid, time.Now().Add(-time.Hour*24*3))
 			}
 		}
 
 	}
 }
 
-func (service Service) RankEntryCollectionLoop(ctx context.Context) {
-	for {
-		for region, _ := range riot.RegionToCluster {
-			for _, tier := range riot.ApexTiers {
-				service.CollectApexRankEntries(ctx, region, tier)
-			}
-			for _, tier := range riot.Tiers {
-				for _, division := range riot.Divisions {
-					service.CollectRankEntries(ctx, region, tier, division)
-				}
+func (service Service) RankEntryCollectionLoop(ctx context.Context, region string) {
+	//backoffTicker := time.NewTicker(time.Minute * 20)
+
+	for /*range backoffTicker.C*/ {
+		for _, tier := range riot.ApexTiers {
+			service.CollectApexRankEntries(ctx, region, tier)
+		}
+		for _, tier := range riot.Tiers {
+			for _, division := range riot.Divisions {
+				service.CollectRankEntries(ctx, region, tier, division)
 			}
 		}
 	}
