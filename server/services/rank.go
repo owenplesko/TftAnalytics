@@ -1,9 +1,9 @@
 package services
 
 import (
-	"TFTAnalyticsServer/db"
 	"TFTAnalyticsServer/leaderboard"
 	"TFTAnalyticsServer/riot"
+	"TFTAnalyticsServer/types"
 	"context"
 	"log"
 )
@@ -32,8 +32,8 @@ func getRankScore(lp int, tier, division string) int {
 	return lp + tierScoreMap[tier] + tierScoreMap[division]
 }
 
-func (service Service) GetSummonerRank(ctx context.Context, puuid string) (db.TftRank, error) {
-	return service.Queries.GetSummonerRank(ctx, puuid)
+func (service Service) GetSummonerRank(ctx context.Context, summonerId string) (types.RankData, error) {
+	return service.Leaderboard.GetRankData(ctx, summonerId)
 }
 
 func (service Service) CollectSummonerRank(ctx context.Context, region, summonerId string) error {
@@ -42,14 +42,28 @@ func (service Service) CollectSummonerRank(ctx context.Context, region, summoner
 		return err
 	}
 
-	return service.Queries.UpsertRank(ctx, db.UpsertRankParams{
-		SummonerID:   rankEntry.SummonerId,
-		Tier:         rankEntry.Tier,
-		Rank:         rankEntry.Rank,
-		LeaguePoints: rankEntry.LeaguePoints,
-		Wins:         rankEntry.Wins,
-		Losses:       rankEntry.Losses,
+	_ = service.Leaderboard.SetLeaderboardScores(ctx, "global", leaderboard.SetLeaderboardScoresParams{
+		Id:    rankEntry.SummonerId,
+		Score: getRankScore(int(rankEntry.LeaguePoints), rankEntry.Tier, rankEntry.Rank),
 	})
+
+	_ = service.Leaderboard.SetLeaderboardScores(ctx, region, leaderboard.SetLeaderboardScoresParams{
+		Id:    rankEntry.SummonerId,
+		Score: getRankScore(int(rankEntry.LeaguePoints), rankEntry.Tier, rankEntry.Rank),
+	})
+
+	err = service.Leaderboard.SetRankData(ctx, leaderboard.SetRankDataParams{
+		Id: rankEntry.SummonerId,
+		Data: types.RankData{
+			Tier:         rankEntry.Tier,
+			Rank:         rankEntry.Rank,
+			LeaguePoints: rankEntry.LeaguePoints,
+			Wins:         rankEntry.Wins,
+			Losses:       rankEntry.Losses,
+		},
+	})
+
+	return err
 }
 
 func (service Service) CollectRankEntries(ctx context.Context, region, tier, division string) error {
@@ -66,8 +80,8 @@ func (service Service) CollectRankEntries(ctx context.Context, region, tier, div
 
 		// create datastore params
 		//upsertPuuidParams := make([]db.BatchUpsertPuuidParams, len(rankEntries))
-		upsertRankEntryParams := make([]db.BatchUpsertRankParams, len(rankEntries))
 		setLeaderboardScoresParams := make([]leaderboard.SetLeaderboardScoresParams, len(rankEntries))
+		setRankDataParams := make([]leaderboard.SetRankDataParams, len(rankEntries))
 
 		for i, rankEntry := range rankEntries {
 			//upsertPuuidParams[i] = db.BatchUpsertPuuidParams{
@@ -80,22 +94,24 @@ func (service Service) CollectRankEntries(ctx context.Context, region, tier, div
 				Score: getRankScore(int(rankEntry.LeaguePoints), rankEntry.Tier, rankEntry.Rank),
 			}
 
-			upsertRankEntryParams[i] = db.BatchUpsertRankParams{
-				SummonerID:   rankEntry.SummonerId,
-				Tier:         rankEntry.Tier,
-				Rank:         rankEntry.Rank,
-				LeaguePoints: rankEntry.LeaguePoints,
-				Wins:         rankEntry.Wins,
-				Losses:       rankEntry.Losses,
+			setRankDataParams[i] = leaderboard.SetRankDataParams{
+				Id: rankEntry.SummonerId,
+				Data: types.RankData{
+					Tier:         tier,
+					Rank:         rankEntry.Rank,
+					LeaguePoints: rankEntry.LeaguePoints,
+					Wins:         rankEntry.Wins,
+					Losses:       rankEntry.Losses,
+				},
 			}
 		}
 
 		//service.Queries.BatchUpsertPuuid(ctx, upsertPuuidParams).Exec(nil)
 		_ = service.Leaderboard.SetLeaderboardScores(ctx, "global", setLeaderboardScoresParams...)
 		_ = service.Leaderboard.SetLeaderboardScores(ctx, region, setLeaderboardScoresParams...)
-		service.Queries.BatchUpsertRank(ctx, upsertRankEntryParams).Exec(nil)
+		_ = service.Leaderboard.SetRankData(ctx, setRankDataParams...)
 
-		log.Printf("Rank entries collected for %v %v %v page %v\n", region, tier, division, page)
+		//log.Printf("Rank entries collected for %v %v %v page %v\n", region, tier, division, page)
 	}
 
 	return nil
@@ -110,7 +126,7 @@ func (service Service) CollectApexRankEntries(ctx context.Context, region, tier 
 
 	// create datastore params
 	setLeaderboardScoresParams := make([]leaderboard.SetLeaderboardScoresParams, len(rankPage.Entries))
-	upsertRankEntryParams := make([]db.BatchUpsertRankParams, len(rankPage.Entries))
+	setRankDataParams := make([]leaderboard.SetRankDataParams, len(rankPage.Entries))
 
 	for i, rankEntry := range rankPage.Entries {
 		setLeaderboardScoresParams[i] = leaderboard.SetLeaderboardScoresParams{
@@ -118,21 +134,23 @@ func (service Service) CollectApexRankEntries(ctx context.Context, region, tier 
 			Score: getRankScore(int(rankEntry.LeaguePoints), rankPage.Tier, rankEntry.Rank),
 		}
 
-		upsertRankEntryParams[i] = db.BatchUpsertRankParams{
-			SummonerID:   rankEntry.SummonerId,
-			Tier:         rankPage.Tier,
-			Rank:         rankEntry.Rank,
-			LeaguePoints: rankEntry.LeaguePoints,
-			Wins:         rankEntry.Wins,
-			Losses:       rankEntry.Losses,
+		setRankDataParams[i] = leaderboard.SetRankDataParams{
+			Id: rankEntry.SummonerId,
+			Data: types.RankData{
+				Tier:         tier,
+				Rank:         rankEntry.Rank,
+				LeaguePoints: rankEntry.LeaguePoints,
+				Wins:         rankEntry.Wins,
+				Losses:       rankEntry.Losses,
+			},
 		}
 	}
 
 	// batch upsert rank entries
 	_ = service.Leaderboard.SetLeaderboardScores(ctx, "global", setLeaderboardScoresParams...)
 	_ = service.Leaderboard.SetLeaderboardScores(ctx, region, setLeaderboardScoresParams...)
-	service.Queries.BatchUpsertRank(ctx, upsertRankEntryParams).Exec(nil)
+	_ = service.Leaderboard.SetRankData(ctx, setRankDataParams...)
 
-	log.Printf("Rank entries collected for %v %v\n", region, tier)
+	//log.Printf("Rank entries collected for %v %v\n", region, tier)
 	return nil
 }

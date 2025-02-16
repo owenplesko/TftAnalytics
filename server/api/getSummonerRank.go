@@ -3,6 +3,7 @@ package api
 import (
 	"context"
 	"encoding/json"
+	"log"
 	"net/http"
 
 	"github.com/jackc/pgx/v5"
@@ -21,6 +22,7 @@ func (env Controller) getSummonerRank(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	if err != nil {
+		log.Println(err.Error())
 		http.Error(w, "something went wrong", 500)
 		return
 	}

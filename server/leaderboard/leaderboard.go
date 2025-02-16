@@ -1,7 +1,9 @@
 package leaderboard
 
 import (
+	"TFTAnalyticsServer/types"
 	"context"
+	"encoding/json"
 
 	"github.com/redis/go-redis/v9"
 )
@@ -38,4 +40,32 @@ func (leaderboard Leaderboard) GetLeaderboardRank(ctx context.Context, leaderboa
 	rank := int(res.Val()) + 1
 
 	return rank, res.Err()
+}
+
+type SetRankDataParams struct {
+	Id   string
+	Data types.RankData
+}
+
+func (leaderboard Leaderboard) SetRankData(ctx context.Context, params ...SetRankDataParams) error {
+	pipe := leaderboard.rdb.Pipeline()
+	for _, param := range params {
+		bytes, _ := json.Marshal(param.Data)
+		pipe.Do(ctx, "JSON.SET", "rank:"+param.Id, "$", bytes)
+	}
+	_, err := pipe.Exec(ctx)
+	return err
+}
+
+func (leaderboard Leaderboard) GetRankData(ctx context.Context, id string) (types.RankData, error) {
+	var rankData types.RankData
+
+	jsonRaw, err := leaderboard.rdb.JSONGet(ctx, "rank:"+id).Result()
+	if err != nil {
+		return rankData, err
+	}
+
+	err = json.Unmarshal([]byte(jsonRaw), &rankData)
+
+	return rankData, err
 }
