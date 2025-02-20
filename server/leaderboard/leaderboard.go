@@ -16,22 +16,49 @@ type Leaderboard struct {
 	rdb *redis.Client
 }
 
-type SetLeaderboardScoresParams struct {
-	Id    string
-	Score int
+type SetRankParams struct {
+	SummonerId string
+	RankData   types.RankData
 }
 
-func (leaderboard Leaderboard) SetLeaderboardScores(ctx context.Context, leaderboardName string, params ...SetLeaderboardScoresParams) error {
+func (leaderboard Leaderboard) SetLeaderboardAndRankData(ctx context.Context, leaderboardName string, params ...SetRankParams) error {
+	err := leaderboard.setLeaderboardScores(ctx, leaderboardName, params...)
+	if err != nil {
+		return err
+	}
+
+	err = leaderboard.setRankData(ctx, params...)
+
+	return err
+}
+
+func (leaderboard Leaderboard) setLeaderboardScores(ctx context.Context, leaderboardName string, params ...SetRankParams) error {
 	zParams := make([]redis.Z, len(params))
 
 	for i, param := range params {
 		zParams[i] = redis.Z{
-			Member: param.Id,
-			Score:  float64(param.Score),
+			Member: param.SummonerId,
+			Score:  float64(getRankScore(param.RankData)),
 		}
 	}
 
-	err := leaderboard.rdb.ZAdd(ctx, "leaderboard:"+leaderboardName, zParams...).Err()
+	err := leaderboard.rdb.ZAdd(ctx, "leaderboard:global", zParams...).Err()
+	if err != nil {
+		return err
+	}
+
+	err = leaderboard.rdb.ZAdd(ctx, "leaderboard:"+leaderboardName, zParams...).Err()
+
+	return err
+}
+
+func (leaderboard Leaderboard) setRankData(ctx context.Context, params ...SetRankParams) error {
+	pipe := leaderboard.rdb.Pipeline()
+	for _, param := range params {
+		bytes, _ := json.Marshal(param.RankData)
+		pipe.Do(ctx, "JSON.SET", "rank:"+param.SummonerId, "$", bytes)
+	}
+	_, err := pipe.Exec(ctx)
 	return err
 }
 
@@ -40,21 +67,6 @@ func (leaderboard Leaderboard) GetLeaderboardRank(ctx context.Context, leaderboa
 	rank := int(res.Val()) + 1
 
 	return rank, res.Err()
-}
-
-type SetRankDataParams struct {
-	Id   string
-	Data types.RankData
-}
-
-func (leaderboard Leaderboard) SetRankData(ctx context.Context, params ...SetRankDataParams) error {
-	pipe := leaderboard.rdb.Pipeline()
-	for _, param := range params {
-		bytes, _ := json.Marshal(param.Data)
-		pipe.Do(ctx, "JSON.SET", "rank:"+param.Id, "$", bytes)
-	}
-	_, err := pipe.Exec(ctx)
-	return err
 }
 
 func (leaderboard Leaderboard) GetRankData(ctx context.Context, id string) (types.RankData, error) {
