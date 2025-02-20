@@ -7,8 +7,8 @@ import (
 	"log"
 )
 
-func (service Service) GetSummonerRank(ctx context.Context, summonerId string) (types.RankData, error) {
-	return service.Leaderboard.GetRankData(ctx, summonerId)
+func (service Service) GetSummonerRank(ctx context.Context, region string, summonerId string) (types.Rank, error) {
+	return service.Leaderboard.GetRank(ctx, region, summonerId)
 }
 
 func (service Service) CollectSummonerRank(ctx context.Context, region, summonerId string) error {
@@ -22,10 +22,10 @@ func (service Service) CollectSummonerRank(ctx context.Context, region, summoner
 		RankData: types.RankData{
 			Tier:         rankEntry.Tier,
 			Rank:         rankEntry.Rank,
-			LeaguePoints: rankEntry.LeaguePoints,
+			LeaguePoints: int(rankEntry.LeaguePoints),
 		}}
 
-	err = service.Leaderboard.SetLeaderboardAndRankData(ctx, region, setRankParam)
+	err = service.Leaderboard.SetRank(ctx, region, setRankParam)
 
 	return err
 }
@@ -57,12 +57,12 @@ func (service Service) CollectRankEntries(ctx context.Context, region, tier, div
 				RankData: types.RankData{
 					Tier:         rankEntry.Tier,
 					Rank:         rankEntry.Rank,
-					LeaguePoints: rankEntry.LeaguePoints,
+					LeaguePoints: int(rankEntry.LeaguePoints),
 				}}
 		}
 
 		//service.Queries.BatchUpsertPuuid(ctx, upsertPuuidParams).Exec(nil)
-		_ = service.Leaderboard.SetLeaderboardAndRankData(ctx, region, setRankParams...)
+		_ = service.Leaderboard.SetRank(ctx, region, setRankParams...)
 
 		log.Printf("Rank entries collected for %v %v %v page %v\n", region, tier, division, page)
 	}
@@ -86,13 +86,13 @@ func (service Service) CollectApexRankEntries(ctx context.Context, region, tier 
 			RankData: types.RankData{
 				Tier:         tier,
 				Rank:         rankEntry.Rank,
-				LeaguePoints: rankEntry.LeaguePoints,
+				LeaguePoints: int(rankEntry.LeaguePoints),
 			},
 		}
 	}
 
 	// batch upsert rank entries
-	_ = service.Leaderboard.SetLeaderboardAndRankData(ctx, region, setRankParams...)
+	_ = service.Leaderboard.SetRank(ctx, region, setRankParams...)
 
 	log.Printf("Rank entries collected for %v %v\n", region, tier)
 	return nil
