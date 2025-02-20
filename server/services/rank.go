@@ -2,7 +2,6 @@ package services
 
 import (
 	"TFTAnalyticsServer/leaderboard"
-	"TFTAnalyticsServer/riot"
 	"TFTAnalyticsServer/types"
 	"context"
 	"log"
@@ -37,7 +36,7 @@ func (service Service) GetSummonerRank(ctx context.Context, summonerId string) (
 }
 
 func (service Service) CollectSummonerRank(ctx context.Context, region, summonerId string) error {
-	rankEntry, err := riot.GetRank(region, summonerId)
+	rankEntry, err := service.Riot.GetRank(region, summonerId)
 	if err != nil {
 		return err
 	}
@@ -70,7 +69,7 @@ func (service Service) CollectRankEntries(ctx context.Context, region, tier, div
 	page := 0
 	for {
 		page++
-		rankEntries, err := riot.GetRankEntries(region, tier, division, page)
+		rankEntries, err := service.Riot.GetRankEntries(region, tier, division, page)
 		if err != nil {
 			return err
 		}
@@ -111,14 +110,14 @@ func (service Service) CollectRankEntries(ctx context.Context, region, tier, div
 		_ = service.Leaderboard.SetLeaderboardScores(ctx, region, setLeaderboardScoresParams...)
 		_ = service.Leaderboard.SetRankData(ctx, setRankDataParams...)
 
-		//log.Printf("Rank entries collected for %v %v %v page %v\n", region, tier, division, page)
+		log.Printf("Rank entries collected for %v %v %v page %v\n", region, tier, division, page)
 	}
 
 	return nil
 }
 
 func (service Service) CollectApexRankEntries(ctx context.Context, region, tier string) error {
-	rankPage, err := riot.GetApexRankPage(region, tier)
+	rankPage, err := service.Riot.GetApexRankPage(region, tier)
 	if err != nil {
 		log.Println(err.Error())
 		return err
@@ -151,6 +150,6 @@ func (service Service) CollectApexRankEntries(ctx context.Context, region, tier 
 	_ = service.Leaderboard.SetLeaderboardScores(ctx, region, setLeaderboardScoresParams...)
 	_ = service.Leaderboard.SetRankData(ctx, setRankDataParams...)
 
-	//log.Printf("Rank entries collected for %v %v\n", region, tier)
+	log.Printf("Rank entries collected for %v %v\n", region, tier)
 	return nil
 }

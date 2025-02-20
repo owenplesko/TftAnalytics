@@ -10,10 +10,10 @@ type Account struct {
 	Tag   string `json:"tagLine"`
 }
 
-func GetAccountByName(cluster string, name string, tag string) (*Account, error) {
+func (c *Riot) GetAccountByName(cluster string, name string, tag string) (*Account, error) {
 	accountRes := new(Account)
 	route := fmt.Sprintf("riot/account/v1/accounts/by-riot-id/%v/%v", name, tag)
-	err := getJson(cluster, cluster, route, accountRes)
+	err := c.request(cluster, cluster, route, accountRes)
 	if err != nil {
 		return nil, err
 	}
@@ -21,10 +21,10 @@ func GetAccountByName(cluster string, name string, tag string) (*Account, error)
 	return accountRes, err
 }
 
-func GetAccountByPuuid(cluster string, puuid string) (*Account, error) {
+func (c *Riot) GetAccountByPuuid(cluster string, puuid string) (*Account, error) {
 	accountRes := new(Account)
 	route := fmt.Sprintf("riot/account/v1/accounts/by-puuid/%v", puuid)
-	err := getJson(cluster, cluster, route, accountRes)
+	err := c.request(cluster, cluster, route, accountRes)
 	if err != nil {
 		return nil, err
 	}

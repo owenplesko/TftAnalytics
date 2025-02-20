@@ -63,14 +63,14 @@ func getTftMatchCluster(region string) string {
 	return RegionToCluster[region]
 }
 
-func GetMatchRegion(matchId string) string {
+func (c *Riot) GetMatchRegion(matchId string) string {
 	return strings.Split(matchId, "_")[0]
 }
 
-func GetMatchDetails(region, matchId string) (*Match, error) {
+func (c *Riot) GetMatchDetails(region, matchId string) (*Match, error) {
 	matchRes := new(Match)
 	route := fmt.Sprintf("tft/match/v1/matches/%v", matchId)
-	err := getJson(getTftMatchCluster(region), RegionToCluster[region], route, matchRes)
+	err := c.request(getTftMatchCluster(region), RegionToCluster[region], route, matchRes)
 	if err != nil {
 		return nil, err
 	}
@@ -78,11 +78,11 @@ func GetMatchDetails(region, matchId string) (*Match, error) {
 	return matchRes, err
 }
 
-func GetMatchHistory(region string, puuid string, matchesAfter time.Time) ([]string, error) {
+func (c *Riot) GetMatchHistory(region string, puuid string, matchesAfter time.Time) ([]string, error) {
 	var history []string
 	count := 200
 
 	route := fmt.Sprintf("tft/match/v1/matches/by-puuid/%v/ids?count=%v&startTime=%v", puuid, count, matchesAfter.Unix())
-	err := getJson(getTftMatchCluster(region), RegionToCluster[region], route, &history)
+	err := c.request(getTftMatchCluster(region), RegionToCluster[region], route, &history)
 	return history, err
 }

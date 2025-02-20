@@ -13,10 +13,10 @@ type RiotSummonerRes struct {
 	SummonerLevel int32  `json:"summonerLevel"`
 }
 
-func GetSummonerByPuuid(region string, puuid string) (*RiotSummonerRes, error) {
+func (c *Riot) GetSummonerByPuuid(region string, puuid string) (*RiotSummonerRes, error) {
 	summonerRes := new(RiotSummonerRes)
 	route := fmt.Sprintf("tft/summoner/v1/summoners/by-puuid/%v", puuid)
-	err := getJson(region, RegionToCluster[region], route, summonerRes)
+	err := c.request(region, RegionToCluster[region], route, summonerRes)
 	if err != nil {
 		return nil, err
 	}

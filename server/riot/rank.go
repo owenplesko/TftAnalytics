@@ -41,23 +41,6 @@ type RankEntry struct {
 	HotStreak    bool   `json:"hotStreak"`
 }
 
-func GetRank(region string, summonerId string) (RankEntry, error) {
-	var rankRes []RankEntry
-	route := fmt.Sprintf("tft/league/v1/entries/by-summoner/%v", summonerId)
-	err := getJson(region, region, route, &rankRes)
-	if err != nil {
-		return RankEntry{}, err
-	}
-
-	for _, rank := range rankRes {
-		if rank.QueueType == "RANKED_TFT" {
-			return rank, nil
-		}
-	}
-
-	return RankEntry{}, NotFoundError
-}
-
 var ApexTiers = []string{
 	"CHALLENGER",
 	"GRANDMASTER",
@@ -81,18 +64,35 @@ var Divisions = []string{
 	"IV",
 }
 
-func GetRankEntries(region string, tier string, division string, page int) ([]RankEntry, error) {
+func (c *Riot) GetRank(region string, summonerId string) (RankEntry, error) {
+	var rankRes []RankEntry
+	route := fmt.Sprintf("tft/league/v1/entries/by-summoner/%v", summonerId)
+	err := c.request(region, region, route, &rankRes)
+	if err != nil {
+		return RankEntry{}, err
+	}
+
+	for _, rank := range rankRes {
+		if rank.QueueType == "RANKED_TFT" {
+			return rank, nil
+		}
+	}
+
+	return RankEntry{}, NotFoundError
+}
+
+func (c *Riot) GetRankEntries(region string, tier string, division string, page int) ([]RankEntry, error) {
 	var rankPageRes []RankEntry
 	route := fmt.Sprintf("tft/league/v1/entries/%v/%v?queue=RANKED_TFT&page=%v", tier, division, page)
-	err := getJson(region, region, route, &rankPageRes)
+	err := c.request(region, region, route, &rankPageRes)
 
 	return rankPageRes, err
 }
 
-func GetApexRankPage(region string, tier string) (RankPage, error) {
+func (c *Riot) GetApexRankPage(region string, tier string) (RankPage, error) {
 	var rankPageRes RankPage
 	route := fmt.Sprintf("tft/league/v1/%v?queue=RANKED_TFT", strings.ToLower(tier))
-	err := getJson(region, region, route, &rankPageRes)
+	err := c.request(region, region, route, &rankPageRes)
 
 	return rankPageRes, err
 }

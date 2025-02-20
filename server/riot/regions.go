@@ -27,4 +27,14 @@ var RegionToCluster = map[string]string{
 	"RU":   "europe",
 }
 
-var ClusterToRegions = map[string][]string{}
+var ClusterToRegions map[string][]string
+
+func init() {
+	ClusterToRegions = make(map[string][]string)
+
+	for region, cluster := range RegionToCluster {
+		arr, _ := ClusterToRegions[cluster]
+		arr = append(arr, region)
+		ClusterToRegions[cluster] = arr
+	}
+}

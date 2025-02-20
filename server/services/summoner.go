@@ -8,13 +8,13 @@ import (
 	"log"
 )
 
-func (env Service) CollectSummonerDetails(ctx context.Context, region, puuid string) error {
-	res, err := riot.GetSummonerByPuuid(region, puuid)
+func (service Service) CollectSummonerDetails(ctx context.Context, region, puuid string) error {
+	res, err := service.Riot.GetSummonerByPuuid(region, puuid)
 	if err != nil {
 		return err
 	}
 
-	err = env.Queries.UpdateSummoner(ctx, db.UpdateSummonerParams{
+	err = service.Queries.UpdateSummoner(ctx, db.UpdateSummonerParams{
 		Puuid:         puuid,
 		SummonerID:    res.SummonerId,
 		ProfileIconID: res.ProfileIconId,
@@ -26,10 +26,10 @@ func (env Service) CollectSummonerDetails(ctx context.Context, region, puuid str
 	return err
 }
 
-func (env Service) CollectAccountByPuuid(ctx context.Context, cluster, puuid string) error {
-	res, err := riot.GetAccountByPuuid(cluster, puuid)
+func (service Service) CollectAccountByPuuid(ctx context.Context, cluster, puuid string) error {
+	res, err := service.Riot.GetAccountByPuuid(cluster, puuid)
 	if errors.Is(err, riot.NotFoundError) {
-		err = env.Queries.AddSummonerFlag(ctx, db.AddSummonerFlagParams{
+		err = service.Queries.AddSummonerFlag(ctx, db.AddSummonerFlagParams{
 			Puuid: puuid,
 			Flag:  "SKIP_ACCOUNT_DATA",
 		})
@@ -39,7 +39,7 @@ func (env Service) CollectAccountByPuuid(ctx context.Context, cluster, puuid str
 		return err
 	}
 
-	err = env.Queries.UpdateAccount(ctx, db.UpdateAccountParams{
+	err = service.Queries.UpdateAccount(ctx, db.UpdateAccountParams{
 		Puuid: puuid,
 		Name:  res.Name,
 		Tag:   res.Tag,
@@ -50,13 +50,13 @@ func (env Service) CollectAccountByPuuid(ctx context.Context, cluster, puuid str
 	return err
 }
 
-func (env Service) CollectAccountByNameTag(ctx context.Context, cluster, name, tag string) error {
-	res, err := riot.GetAccountByName(cluster, name, tag)
+func (service Service) CollectAccountByNameTag(ctx context.Context, cluster, name, tag string) error {
+	res, err := service.Riot.GetAccountByName(cluster, name, tag)
 	if err != nil {
 		return err
 	}
 
-	err = env.Queries.UpsertAccount(ctx, db.UpsertAccountParams{
+	err = service.Queries.UpsertAccount(ctx, db.UpsertAccountParams{
 		Puuid: res.Puuid,
 		Name:  res.Name,
 		Tag:   res.Tag,
@@ -90,11 +90,11 @@ func (env Service) GetOrCollectSummonerByNameTag(ctx context.Context, cluster, n
 	return env.Queries.GetSummonerByNameTag(ctx, db.GetSummonerByNameTagParams{Name: name, Tag: tag})
 }
 
-func (env Service) CollectSummonerRegion(ctx context.Context, puuid string) error {
+func (service Service) CollectSummonerRegion(ctx context.Context, puuid string) error {
 	var regionMatch string
 
 	for region, _ := range riot.RegionToCluster {
-		_, err := riot.GetSummonerByPuuid(region, puuid)
+		_, err := service.Riot.GetSummonerByPuuid(region, puuid)
 
 		if errors.Is(err, riot.NotFoundError) {
 			continue
@@ -109,14 +109,14 @@ func (env Service) CollectSummonerRegion(ctx context.Context, puuid string) erro
 	}
 
 	if regionMatch == "" {
-		env.Queries.AddSummonerFlag(ctx, db.AddSummonerFlagParams{
+		service.Queries.AddSummonerFlag(ctx, db.AddSummonerFlagParams{
 			Puuid: puuid,
 			Flag:  "SKIP_REGION_MATCH",
 		})
 		return errors.New("no region match found")
 	}
 
-	err := env.Queries.UpdateRegion(ctx, db.UpdateRegionParams{
+	err := service.Queries.UpdateRegion(ctx, db.UpdateRegionParams{
 		Puuid:  puuid,
 		Region: regionMatch,
 	})

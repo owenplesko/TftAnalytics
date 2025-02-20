@@ -7,6 +7,8 @@ import (
 	"TFTAnalyticsServer/riot"
 	"TFTAnalyticsServer/services"
 	"net/http"
+	"strconv"
+	"time"
 
 	"context"
 	"log"
@@ -48,10 +50,21 @@ func main() {
 
 	leaderboard := leaderboard.New(rdb)
 
+	riotApiKey := os.Getenv("RIOT_KEY")
+
+	rate, err := strconv.ParseFloat(os.Getenv("RIOT_RATE"), 32)
+	if err != nil {
+		panic("RIOT_RATE not set properly")
+	}
+	rateDuration := time.Duration(rate) * time.Millisecond
+
+	riotClient := riot.NewClient(riotApiKey, rateDuration)
+
 	service := services.Service{
 		Pool:        pool,
 		Queries:     queries,
 		Leaderboard: leaderboard,
+		Riot:        riotClient,
 	}
 
 	for region, _ := range riot.RegionToCluster {
