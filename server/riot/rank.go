@@ -67,7 +67,7 @@ var Divisions = []string{
 func (c *Riot) GetRank(region string, summonerId string) (RankEntry, error) {
 	var rankRes []RankEntry
 	route := fmt.Sprintf("tft/league/v1/entries/by-summoner/%v", summonerId)
-	err := c.request(region, region, route, &rankRes)
+	err := c.request(region, route, &rankRes)
 	if err != nil {
 		return RankEntry{}, err
 	}
@@ -84,7 +84,7 @@ func (c *Riot) GetRank(region string, summonerId string) (RankEntry, error) {
 func (c *Riot) GetRankEntries(region string, tier string, division string, page int) ([]RankEntry, error) {
 	var rankPageRes []RankEntry
 	route := fmt.Sprintf("tft/league/v1/entries/%v/%v?queue=RANKED_TFT&page=%v", tier, division, page)
-	err := c.request(region, region, route, &rankPageRes)
+	err := c.request(region, route, &rankPageRes)
 
 	return rankPageRes, err
 }
@@ -92,7 +92,7 @@ func (c *Riot) GetRankEntries(region string, tier string, division string, page 
 func (c *Riot) GetApexRankPage(region string, tier string) (RankPage, error) {
 	var rankPageRes RankPage
 	route := fmt.Sprintf("tft/league/v1/%v?queue=RANKED_TFT", strings.ToLower(tier))
-	err := c.request(region, region, route, &rankPageRes)
+	err := c.request(region, route, &rankPageRes)
 
 	return rankPageRes, err
 }

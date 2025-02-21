@@ -25,9 +25,6 @@ func NewClient(apiKey string, rateDuration time.Duration) *Riot {
 func newLimiters(rateDuration time.Duration) map[string]*time.Ticker {
 	limiters := make(map[string]*time.Ticker)
 
-	for region := range RegionToCluster {
-		limiters[region] = time.NewTicker(rateDuration)
-	}
 	for cluster := range ClusterToRegions {
 		limiters[cluster] = time.NewTicker(rateDuration)
 	}
@@ -35,16 +32,16 @@ func newLimiters(rateDuration time.Duration) map[string]*time.Ticker {
 	return limiters
 }
 
-func (riot *Riot) request(server string, limitServer string, route string, target interface{}) error {
+func (riot *Riot) request(server string, route string, target interface{}) error {
 	url := fmt.Sprintf("https://%v.api.riotgames.com/%v", strings.ToLower(server), route)
 
 	client := &http.Client{}
 	req, _ := http.NewRequest("GET", url, nil)
 	req.Header.Set("X-Riot-Token", riot.apiKey)
 
-	limiter, ok := riot.limiters[limitServer]
-	if !ok {
-		return fmt.Errorf("no limiter defined %v", server)
+	limiter, err := riot.getLimiter(server)
+	if err != nil {
+		return err
 	}
 	<-limiter.C
 
@@ -63,4 +60,18 @@ func (riot *Riot) request(server string, limitServer string, route string, targe
 	}
 
 	return json.NewDecoder(res.Body).Decode(target)
+}
+
+func (riot *Riot) getLimiter(server string) (*time.Ticker, error) {
+	cluster, ok := RegionToCluster[server]
+	if !ok {
+		cluster = server
+	}
+
+	limiter, ok := riot.limiters[cluster]
+	if !ok {
+		return limiter, NoLimiterError
+	}
+
+	return limiter, nil
 }
