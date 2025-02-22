@@ -1,8 +1,8 @@
 package types
 
 type Rank struct {
-	Data                 RankData              `json:"rankData"`
-	LeaderboardPositions []LeaderboardPosition `json:"leaderboardPositions"`
+	Data                RankData            `json:"rankData"`
+	LeaderboardPosition LeaderboardPosition `json:"leaderboardPosition"`
 }
 
 type LeaderboardPosition struct {

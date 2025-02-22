@@ -6,20 +6,21 @@ import (
 	"encoding/json"
 )
 
-func (leaderboard Leaderboard) GetRank(ctx context.Context, leaderboardName string, summonerId string) (types.Rank, error) {
-	rank := types.Rank{}
-
+func (leaderboard Leaderboard) GetRank(ctx context.Context, region string, summonerId string) (types.Rank, error) {
 	rankData, err := leaderboard.getRankData(ctx, summonerId)
 	if err != nil {
-		return rank, err
+		return types.Rank{}, err
 	}
-	rank.Data = rankData
 
-	leaderboardPositions, err := leaderboard.getLeaderboardPositions(ctx, leaderboardName, summonerId)
+	leaderboardPosition, err := leaderboard.getLeaderboardPosition(ctx, region, summonerId)
 	if err != nil {
-		return rank, err
+		return types.Rank{}, err
 	}
-	rank.LeaderboardPositions = leaderboardPositions
+
+	rank := types.Rank{
+		Data:                rankData,
+		LeaderboardPosition: leaderboardPosition,
+	}
 
 	return rank, nil
 }
@@ -37,27 +38,16 @@ func (leaderboard Leaderboard) getRankData(ctx context.Context, summonerId strin
 	return rankData, err
 }
 
-func (leaderboard Leaderboard) getLeaderboardPositions(ctx context.Context, learderboardName string, summonerId string) ([]types.LeaderboardPosition, error) {
-	gloablPosition, err := leaderboard.rdb.ZRevRank(ctx, "leaderboard:global", summonerId).Result()
+func (leaderboard Leaderboard) getLeaderboardPosition(ctx context.Context, region string, summonerId string) (types.LeaderboardPosition, error) {
+	position, err := leaderboard.rdb.ZRevRank(ctx, "leaderboard:"+region, summonerId).Result()
 	if err != nil {
-		return nil, err
+		return types.LeaderboardPosition{}, err
 	}
 
-	regionPosition, err := leaderboard.rdb.ZRevRank(ctx, "leaderboard:"+learderboardName, summonerId).Result()
-	if err != nil {
-		return nil, err
+	leaderboardPosition := types.LeaderboardPosition{
+		Leaderboard: region,
+		Position:    int(position) + 1,
 	}
 
-	leaderboardPositions := []types.LeaderboardPosition{
-		types.LeaderboardPosition{
-			Leaderboard: "global",
-			Position:    int(gloablPosition) + 1,
-		},
-		types.LeaderboardPosition{
-			Leaderboard: learderboardName,
-			Position:    int(regionPosition) + 1,
-		},
-	}
-
-	return leaderboardPositions, nil
+	return leaderboardPosition, nil
 }

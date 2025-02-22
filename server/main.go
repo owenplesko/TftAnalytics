@@ -41,7 +41,7 @@ func main() {
 	queries := db.New(pool)
 
 	rdb := redis.NewClient(&redis.Options{
-		Addr: "localhost:6379",
+		Addr: os.Getenv("LEADERBOARD_URL"),
 	})
 	if err = rdb.Ping(context.Background()).Err(); err != nil {
 		panic(err)
