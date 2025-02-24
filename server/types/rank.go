@@ -5,13 +5,14 @@ type Rank struct {
 	LeaderboardPosition LeaderboardPosition `json:"leaderboardPosition"`
 }
 
-type LeaderboardPosition struct {
-	Leaderboard string `json:"leaderboard"`
-	Position    int    `json:"position"`
-}
-
 type RankData struct {
 	Tier         string `json:"tier"`
 	Rank         string `json:"rank"`
 	LeaguePoints int    `json:"leaguePoints"`
+}
+
+type LeaderboardPosition struct {
+	Leaderboard string  `json:"leaderboard"`
+	Position    int     `json:"position"`
+	Top         float32 `json:"top"`
 }

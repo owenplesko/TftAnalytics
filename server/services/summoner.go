@@ -6,6 +6,7 @@ import (
 	"context"
 	"errors"
 	"log"
+	"sync"
 )
 
 func (service Service) CollectSummonerDetails(ctx context.Context, region, puuid string) error {
@@ -91,24 +92,26 @@ func (env Service) GetOrCollectSummonerByNameTag(ctx context.Context, cluster, n
 }
 
 func (service Service) CollectSummonerRegion(ctx context.Context, puuid string) error {
-	var regionMatch string
-
+	wg := sync.WaitGroup{}
+	successChan := make(chan string)
 	for region, _ := range riot.RegionToCluster {
-		_, err := service.Riot.GetSummonerByPuuid(region, puuid)
+		wg.Add(1)
 
-		if errors.Is(err, riot.NotFoundError) {
-			continue
-		}
-
-		if err != nil {
-			return err
-		}
-
-		regionMatch = region
-		break
+		go func(region string) {
+			defer wg.Done()
+			if _, err := service.Riot.GetSummonerByPuuid(region, puuid); err == nil {
+				successChan <- region
+			}
+		}(region)
 	}
+	go func() {
+		wg.Wait()
+		close(successChan)
+	}()
 
-	if regionMatch == "" {
+	region := <-successChan
+
+	if region == "" {
 		service.Queries.AddSummonerFlag(ctx, db.AddSummonerFlagParams{
 			Puuid: puuid,
 			Flag:  "SKIP_REGION_MATCH",
@@ -118,7 +121,7 @@ func (service Service) CollectSummonerRegion(ctx context.Context, puuid string) 
 
 	err := service.Queries.UpdateRegion(ctx, db.UpdateRegionParams{
 		Puuid:  puuid,
-		Region: regionMatch,
+		Region: region,
 	})
 
 	return err

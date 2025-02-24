@@ -39,14 +39,22 @@ func (leaderboard Leaderboard) getRankData(ctx context.Context, summonerId strin
 }
 
 func (leaderboard Leaderboard) getLeaderboardPosition(ctx context.Context, region string, summonerId string) (types.LeaderboardPosition, error) {
-	position, err := leaderboard.rdb.ZRevRank(ctx, "leaderboard:"+region, summonerId).Result()
+	leaderboardName := "leaderboard:" + region
+
+	position, err := leaderboard.rdb.ZRevRank(ctx, leaderboardName, summonerId).Result()
+	if err != nil {
+		return types.LeaderboardPosition{}, err
+	}
+
+	cardinality, err := leaderboard.rdb.ZCard(ctx, leaderboardName).Result()
 	if err != nil {
 		return types.LeaderboardPosition{}, err
 	}
 
 	leaderboardPosition := types.LeaderboardPosition{
 		Leaderboard: region,
-		Position:    int(position) + 1,
+		Position:    int(position + 1),
+		Top:         float32(position+1) / float32(cardinality) * 100,
 	}
 
 	return leaderboardPosition, nil

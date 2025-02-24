@@ -1,6 +1,7 @@
 import { Button } from "@/components/ui/button";
 import { getPlayer } from "@/services/getPlayer";
 import { getPlayerMatchHistory } from "@/services/getPlayerMatches";
+import { getRank } from "@/services/getRank";
 import { updatePlayer } from "@/services/updatePlayer";
 import { createFileRoute } from "@tanstack/react-router";
 
@@ -8,13 +9,17 @@ export const Route = createFileRoute("/player/$name/$tag")({
   component: Player,
   loader: async ({ params }) => {
     const player = await getPlayer(params);
+    const rank = await getRank({
+      summonerId: player.summonerId,
+      region: player.region,
+    });
     const matches = await getPlayerMatchHistory(player);
-    return { player, matches };
+    return { player, rank, matches };
   },
 });
 
 function Player() {
-  const { player, matches } = Route.useLoaderData();
+  const { player, rank, matches } = Route.useLoaderData();
 
   return (
     <>
@@ -33,7 +38,11 @@ function Player() {
             <span>{player.name}</span>
             <span className="text-muted">#{player.tag}</span>
           </h1>
-          <span className="text-sm">Rank info here</span>
+          <span className="text-sm">
+            {rank.rankData.tier} {rank.rankData.rank}{" "}
+            {rank.rankData.leaguePoints} #{rank.leaderboardPosition.position}{" "}
+            Top {rank.leaderboardPosition.top.toPrecision(2)}%
+          </span>
           <Button
             variant="outline"
             onClick={() => updatePlayer({ puuid: player.puuid })}
