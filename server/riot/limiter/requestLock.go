@@ -1,10 +1,10 @@
 package limiter
 
-type rateLock struct {
+type requestLock struct {
 	lockChan chan any
 	priority int
 }
 
-func (rl rateLock) Compare(other rateLock) bool {
+func (rl requestLock) Compare(other requestLock) bool {
 	return rl.priority > other.priority
 }

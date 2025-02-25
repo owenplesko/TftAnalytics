@@ -58,7 +58,8 @@ func main() {
 	}
 	rateDuration := time.Duration(rate) * time.Millisecond
 
-	riotClient := riot.NewClient(riotApiKey, rateDuration)
+	riotRateLimiter := riot.NewRateLimiter(rateDuration)
+	riotClient := riot.New(riotApiKey, riotRateLimiter, 0)
 
 	service := services.Service{
 		Pool:        pool,
@@ -67,16 +68,17 @@ func main() {
 		Riot:        riotClient,
 	}
 
-	for region, _ := range riot.RegionToCluster {
+	for region := range riot.RegionToCluster {
 		go service.RankEntryCollectionLoop(context.Background(), region)
 		go service.SummonerDataCollectionLoop(context.Background(), region)
 	}
-	for cluster, _ := range riot.ClusterToRegions {
+	for cluster := range riot.ClusterToRegions {
 		go service.MatchHistoryCollectionLoop(context.Background(), cluster)
 		go service.AccountDataCollectionLoop(context.Background(), cluster)
 	}
 	go service.SummonerRegionCollectionLoop(context.Background())
 
+	service.Riot = riot.New(riotApiKey, riotRateLimiter, 10)
 	apiEnv := api.Controller{
 		Service: service,
 	}

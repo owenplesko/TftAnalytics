@@ -8,29 +8,20 @@ import (
 	"log"
 	"net/http"
 	"strings"
-	"time"
 )
 
 type Riot struct {
-	apiKey   string
-	limiters map[string]*limiter.Limiter
+	apiKey          string
+	rateLimiter     RateLimiter
+	requestPriority int
 }
 
-func NewClient(apiKey string, rateDuration time.Duration) *Riot {
+func New(apiKey string, rateLimiter RateLimiter, requestPriority int) *Riot {
 	return &Riot{
-		apiKey:   apiKey,
-		limiters: newLimiters(rateDuration),
+		apiKey:          apiKey,
+		rateLimiter:     rateLimiter,
+		requestPriority: requestPriority,
 	}
-}
-
-func newLimiters(rateDuration time.Duration) map[string]*limiter.Limiter {
-	limiters := make(map[string]*limiter.Limiter)
-
-	for cluster := range ClusterToRegions {
-		limiters[cluster] = limiter.New(rateDuration)
-	}
-
-	return limiters
 }
 
 func (riot *Riot) request(server string, route string, target interface{}) error {
@@ -44,7 +35,7 @@ func (riot *Riot) request(server string, route string, target interface{}) error
 	if err != nil {
 		return err
 	}
-	<-limiter.Wait(1)
+	<-limiter.Wait(riot.requestPriority)
 
 	res, err := client.Do(req)
 	if err != nil {
@@ -69,7 +60,7 @@ func (riot *Riot) getLimiter(server string) (*limiter.Limiter, error) {
 		cluster = server
 	}
 
-	limiter, ok := riot.limiters[cluster]
+	limiter, ok := riot.rateLimiter[cluster]
 	if !ok {
 		return limiter, NoLimiterError
 	}

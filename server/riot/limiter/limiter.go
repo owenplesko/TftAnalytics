@@ -6,12 +6,12 @@ import (
 )
 
 type Limiter struct {
-	pq *collections.PriorityQueue[rateLock]
+	pq *collections.PriorityQueue[requestLock]
 }
 
 func New(rate time.Duration) *Limiter {
 	lim := &Limiter{
-		pq: collections.NewPriorityQueue[rateLock](),
+		pq: collections.NewPriorityQueue[requestLock](),
 	}
 
 	go lim.dripper(rate)
@@ -22,7 +22,7 @@ func New(rate time.Duration) *Limiter {
 func (lim *Limiter) Wait(priority int) chan any {
 	lockChan := make(chan any)
 
-	lim.pq.Push(rateLock{
+	lim.pq.Push(requestLock{
 		lockChan: lockChan,
 		priority: priority,
 	})
