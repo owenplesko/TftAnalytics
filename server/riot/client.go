@@ -1,6 +1,7 @@
 package riot
 
 import (
+	"TFTAnalyticsServer/riot/limiter"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -12,7 +13,7 @@ import (
 
 type Riot struct {
 	apiKey   string
-	limiters map[string]*time.Ticker
+	limiters map[string]*limiter.Limiter
 }
 
 func NewClient(apiKey string, rateDuration time.Duration) *Riot {
@@ -22,11 +23,11 @@ func NewClient(apiKey string, rateDuration time.Duration) *Riot {
 	}
 }
 
-func newLimiters(rateDuration time.Duration) map[string]*time.Ticker {
-	limiters := make(map[string]*time.Ticker)
+func newLimiters(rateDuration time.Duration) map[string]*limiter.Limiter {
+	limiters := make(map[string]*limiter.Limiter)
 
 	for cluster := range ClusterToRegions {
-		limiters[cluster] = time.NewTicker(rateDuration)
+		limiters[cluster] = limiter.New(rateDuration)
 	}
 
 	return limiters
@@ -43,7 +44,7 @@ func (riot *Riot) request(server string, route string, target interface{}) error
 	if err != nil {
 		return err
 	}
-	<-limiter.C
+	<-limiter.Wait(1)
 
 	res, err := client.Do(req)
 	if err != nil {
@@ -62,7 +63,7 @@ func (riot *Riot) request(server string, route string, target interface{}) error
 	return json.NewDecoder(res.Body).Decode(target)
 }
 
-func (riot *Riot) getLimiter(server string) (*time.Ticker, error) {
+func (riot *Riot) getLimiter(server string) (*limiter.Limiter, error) {
 	cluster, ok := RegionToCluster[server]
 	if !ok {
 		cluster = server
