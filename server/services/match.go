@@ -77,7 +77,11 @@ func (service Service) CollectMatchDetails(ctx context.Context, region, matchId 
 		}
 	}
 
-	service.storeMatchDetails(ctx, region, match)
+	err = service.storeMatchDetails(ctx, region, match)
+	if err != nil {
+		log.Println(err.Error())
+		return err
+	}
 
 	log.Printf("Stored match %v!\n", matchId)
 
@@ -123,7 +127,6 @@ func (service Service) storeMatchDetails(ctx context.Context, region string, mat
 			SummonerPuuid: compDetails.Puuid,
 			CompData:      types.CompData(compDetails),
 			MatchDate:     matchDate,
-			Region:        region,
 		})
 		if err != nil {
 			return err
