@@ -24,7 +24,7 @@ func New(apiKey string, rateLimiter RateLimiter, requestPriority int) *Riot {
 	}
 }
 
-func (riot *Riot) request(server string, route string, target interface{}) error {
+func (riot *Riot) request(server string, route string, target any) error {
 	url := fmt.Sprintf("https://%v.api.riotgames.com/%v", strings.ToLower(server), route)
 
 	client := &http.Client{}

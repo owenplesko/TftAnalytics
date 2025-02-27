@@ -3,19 +3,10 @@ SELECT *
 FROM tft_summoner 
 WHERE puuid = $1;
 
--- name: SummonerExistsByNameTag :one
-SELECT EXISTS (
-    SELECT * FROM tft_summoner 
-    WHERE REPLACE(LOWER(name), ' ', '') = REPLACE(LOWER(@name::VARCHAR), ' ', '')
-    AND REPLACE(LOWER(tag), ' ', '') = REPLACE(LOWER(@tag::VARCHAR), ' ', '')
-);
-
--- name: BatchUpsertPuuid :batchexec
-INSERT INTO tft_summoner (
-    puuid,
-    region
-) VALUES ($1, @region::VARCHAR)
-ON CONFLICT (puuid) DO NOTHING;
+-- name: GetSummonerBySummonerId :one
+SELECT *
+FROM tft_summoner
+WHERE summoner_id = $1;
 
 -- name: GetSummonerByNameTag :one
 SELECT *
@@ -23,29 +14,59 @@ FROM tft_summoner
 WHERE REPLACE(LOWER(name), ' ', '') = REPLACE(LOWER(@name::VARCHAR), ' ', '')
 AND REPLACE(LOWER(tag), ' ', '') = REPLACE(LOWER(@tag::VARCHAR), ' ', '');
 
--- name: UpsertAccount :exec
+-- name: SummonerExistsByPuuid :one
+SELECT EXISTS (
+    SELECT * FROM tft_summoner WHERE puuid = $1
+);
+
+-- name: UpsertSummoner :exec
 INSERT INTO tft_summoner (
     puuid,
+    region,
     name,
-    tag
+    tag,
+    summoner_id,
+    profile_icon_id,
+    summoner_level
 ) VALUES (
-    $1, @name::VARCHAR, @tag::VARCHAR
-) ON CONFLICT(puuid) DO UPDATE SET name = @name::VARCHAR, tag = @tag::VARCHAR;
+    $1, $2, $3, $4, $5, $6, $7
+) ON CONFLICT (puuid) DO UPDATE
+SET name = EXCLUDED.name,
+    tag = EXCLUDED.tag,
+    summoner_id = EXCLUDED.summoner_id,
+    profile_icon_id = EXCLUDED.profile_icon_id,
+    summoner_level = EXCLUDED.summoner_level;
 
 -- name: UpdateRegion :exec
 UPDATE tft_summoner
 SET region = @region::VARCHAR
 WHERE puuid = $1;
 
--- name: UpdateSummoner :exec
+-- name: GetOldestMatchesAfter :many
+SELECT
+    puuid,
+    matches_after_timestamp
+FROM tft_summoner
+WHERE region = @region::VARCHAR
+ORDER BY matches_after_timestamp ASC NULLS FIRST
+LIMIT $1;
+
+-- name: AddSummonerFlag :exec
 UPDATE tft_summoner
-SET summoner_id = @summoner_id::VARCHAR,
-    profile_icon_id = @profile_icon_id::INT,
-    summoner_level = @summoner_level::INT
+    SET flags = array_append(flags, @flag::VARCHAR)
+WHERE puuid = $1 AND NOT @flag::VARCHAR = ANY(flags);
+
+-- name: RemoveSummonerFlag :exec
+UPDATE tft_summoner
+    SET flags = array_remove(flags, @flag::VARCHAR)
 WHERE puuid = $1;
 
--- name: UpdateAccount :exec
+-- name: SetUpdateTimestamp :exec
 UPDATE tft_summoner
-SET name = @name::VARCHAR,
-    tag = @tag::VARCHAR
+    SET update_timestamp = @update_timestamp::TIMESTAMP
+WHERE puuid = $1;
+
+-- name: SetMatchesAfterTimestamp :exec
+UPDATE tft_summoner
+    SET matches_after_timestamp = @matches_after_timestamp::TIMESTAMP
 WHERE puuid = $1;

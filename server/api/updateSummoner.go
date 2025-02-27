@@ -14,7 +14,7 @@ func (env Controller) updateSummoner(w http.ResponseWriter, r *http.Request) {
 
 	puuid := r.PathValue("puuid")
 
-	err := env.Service.UpdateAllSummonerInfo(ctx, puuid)
+	err := env.Service.UpdateSummonerInfo(ctx, puuid)
 	if err == pgx.ErrNoRows {
 		http.Error(w, "summoner not found", 404)
 	} else if err != nil {

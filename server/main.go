@@ -70,13 +70,8 @@ func main() {
 
 	for region := range riot.RegionToCluster {
 		go service.RankEntryCollectionLoop(context.Background(), region)
-		go service.SummonerDataCollectionLoop(context.Background(), region)
+		go service.MatchCollectionLoop(context.Background(), region)
 	}
-	for cluster := range riot.ClusterToRegions {
-		go service.MatchHistoryCollectionLoop(context.Background(), cluster)
-		go service.AccountDataCollectionLoop(context.Background(), cluster)
-	}
-	go service.SummonerRegionCollectionLoop(context.Background())
 
 	service.Riot = riot.New(riotApiKey, riotRateLimiter, 10)
 	apiEnv := api.Controller{

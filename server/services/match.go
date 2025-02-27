@@ -49,23 +49,14 @@ func (service Service) CollectMatchHistory(ctx context.Context, region, puuid st
 	}
 
 	for _, matchId := range res {
-		if exists, _ := service.Queries.MatchExists(ctx, matchId); exists {
-			continue
+		if exists, _ := service.Queries.MatchExists(ctx, matchId); !exists {
+			_ = service.CollectMatchDetails(ctx, region, matchId)
 		}
-
-		res, err := service.Riot.GetMatchDetails(region, matchId)
-		if err != nil {
-			continue
-		}
-
-		service.storeMatchDetails(ctx, res)
-
-		log.Printf("Stored match %v!\n", matchId)
 	}
 
-	service.Queries.SetBackgroundUpdateTimestamp(ctx, db.SetBackgroundUpdateTimestampParams{
+	service.Queries.SetMatchesAfterTimestamp(ctx, db.SetMatchesAfterTimestampParams{
 		Puuid: puuid,
-		BackgroundUpdateTimestamp: pgtype.Timestamp{
+		MatchesAfterTimestamp: pgtype.Timestamp{
 			Time:  updatedAt,
 			Valid: true,
 		},
@@ -74,10 +65,27 @@ func (service Service) CollectMatchHistory(ctx context.Context, region, puuid st
 	return nil
 }
 
-func (service Service) storeMatchDetails(ctx context.Context, matchDetails *riot.Match) error {
-	var err error
+func (service Service) CollectMatchDetails(ctx context.Context, region, matchId string) error {
+	match, err := service.Riot.GetMatchDetails(region, matchId)
+	if err != nil {
+		return err
+	}
 
-	region := service.Riot.GetMatchRegion(matchDetails.MetaData.MatchId)
+	for _, puuid := range match.MetaData.Participants {
+		if exists, _ := service.Queries.SummonerExistsByPuuid(ctx, puuid); !exists {
+			_ = service.CollectSummonerByPuuid(ctx, region, puuid)
+		}
+	}
+
+	service.storeMatchDetails(ctx, region, match)
+
+	log.Printf("Stored match %v!\n", matchId)
+
+	return nil
+}
+
+func (service Service) storeMatchDetails(ctx context.Context, region string, matchDetails *riot.Match) error {
+	var err error
 
 	// comp and matches inserted in one transaction
 	tx, err := service.Pool.Begin(ctx)

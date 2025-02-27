@@ -4,62 +4,26 @@ import (
 	"TFTAnalyticsServer/db"
 	"TFTAnalyticsServer/riot"
 	"context"
+	"log"
 	"time"
 )
 
-func (service Service) SummonerDataCollectionLoop(ctx context.Context, region string) {
-	backoffTicker := time.NewTicker(time.Second * 5)
+func (service Service) MatchCollectionLoop(ctx context.Context, region string) {
+	backoffTime := time.NewTicker(time.Second * 5)
 
-	for range backoffTicker.C {
-		puuids, _ := service.Queries.GetPuuidsWithNullSummonerData(ctx, db.GetPuuidsWithNullSummonerDataParams{
+	for range backoffTime.C {
+		summoners, err := service.Queries.GetOldestMatchesAfter(ctx, db.GetOldestMatchesAfterParams{
 			Limit:  100,
 			Region: region,
 		})
-
-		for _, puuid := range puuids {
-			service.CollectSummonerDetails(ctx, region, puuid)
-		}
-	}
-}
-
-func (service Service) SummonerRegionCollectionLoop(ctx context.Context) {
-	backoffTicker := time.NewTicker(time.Second * 5)
-
-	for range backoffTicker.C {
-		puuids, _ := service.Queries.GetPuuidsWithNullRegion(ctx, 100)
-
-		for _, puuid := range puuids {
-			service.CollectSummonerRegion(ctx, puuid)
-		}
-	}
-}
-
-func (service Service) AccountDataCollectionLoop(ctx context.Context, cluster string) {
-	backoffTicker := time.NewTicker(time.Second * 5)
-
-	for range backoffTicker.C {
-		puuids, _ := service.Queries.GetPuuidsWithNullAccountData(ctx, 100)
-		for _, puuid := range puuids {
-			service.CollectAccountByPuuid(ctx, cluster, puuid)
-		}
-	}
-}
-
-func (service Service) MatchHistoryCollectionLoop(ctx context.Context, cluster string) {
-	backoffTicker := time.NewTicker(time.Second * 5)
-
-	for range backoffTicker.C {
-		for _, region := range riot.ClusterToRegions[cluster] {
-			rows, _ := service.Queries.GetOldestMatchHistories(ctx, db.GetOldestMatchHistoriesParams{
-				Region: region,
-				Limit:  100,
-			})
-
-			for _, row := range rows {
-				service.CollectMatchHistory(ctx, region, row.Puuid, time.Now().Add(-time.Hour*24*3))
-			}
+		if err != nil {
+			log.Println(err.Error())
+			continue
 		}
 
+		for _, summoner := range summoners {
+			_ = service.CollectMatchHistory(ctx, region, summoner.Puuid, summoner.MatchesAfterTimestamp.Time)
+		}
 	}
 }
 
