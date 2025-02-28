@@ -43,12 +43,12 @@ func (service Service) GetMatchHistory(ctx context.Context, puuid string, limit 
 func (service Service) CollectMatchHistory(ctx context.Context, region, puuid string, matchesAfter time.Time) error {
 	updatedAt := time.Now()
 
-	res, err := service.Riot.GetMatchHistory(region, puuid, matchesAfter)
+	matchIds, err := service.Riot.GetMatchHistory(region, puuid, matchesAfter)
 	if err != nil {
 		return err
 	}
 
-	for _, matchId := range res {
+	for _, matchId := range matchIds {
 		if exists, _ := service.Queries.MatchExists(ctx, matchId); !exists {
 			_ = service.CollectMatchDetails(ctx, region, matchId)
 		}
@@ -77,7 +77,7 @@ func (service Service) CollectMatchDetails(ctx context.Context, region, matchId 
 		}
 	}
 
-	err = service.storeMatchDetails(ctx, region, match)
+	err = service.storeMatchDetails(ctx, match)
 	if err != nil {
 		log.Println(err.Error())
 		return err
@@ -88,7 +88,7 @@ func (service Service) CollectMatchDetails(ctx context.Context, region, matchId 
 	return nil
 }
 
-func (service Service) storeMatchDetails(ctx context.Context, region string, matchDetails *riot.Match) error {
+func (service Service) storeMatchDetails(ctx context.Context, matchDetails *riot.Match) error {
 	var err error
 
 	// comp and matches inserted in one transaction

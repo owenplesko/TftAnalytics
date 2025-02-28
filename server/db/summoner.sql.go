@@ -11,22 +11,6 @@ import (
 	"github.com/jackc/pgx/v5/pgtype"
 )
 
-const addSummonerFlag = `-- name: AddSummonerFlag :exec
-UPDATE tft_summoner
-    SET flags = array_append(flags, $2::VARCHAR)
-WHERE puuid = $1 AND NOT $2::VARCHAR = ANY(flags)
-`
-
-type AddSummonerFlagParams struct {
-	Puuid string `json:"puuid"`
-	Flag  string `json:"flag"`
-}
-
-func (q *Queries) AddSummonerFlag(ctx context.Context, arg AddSummonerFlagParams) error {
-	_, err := q.db.Exec(ctx, addSummonerFlag, arg.Puuid, arg.Flag)
-	return err
-}
-
 const getOldestMatchesAfter = `-- name: GetOldestMatchesAfter :many
 SELECT
     puuid,
@@ -140,22 +124,6 @@ func (q *Queries) GetSummonerBySummonerId(ctx context.Context, summonerID string
 		&i.MatchesAfterTimestamp,
 	)
 	return i, err
-}
-
-const removeSummonerFlag = `-- name: RemoveSummonerFlag :exec
-UPDATE tft_summoner
-    SET flags = array_remove(flags, $2::VARCHAR)
-WHERE puuid = $1
-`
-
-type RemoveSummonerFlagParams struct {
-	Puuid string `json:"puuid"`
-	Flag  string `json:"flag"`
-}
-
-func (q *Queries) RemoveSummonerFlag(ctx context.Context, arg RemoveSummonerFlagParams) error {
-	_, err := q.db.Exec(ctx, removeSummonerFlag, arg.Puuid, arg.Flag)
-	return err
 }
 
 const setMatchesAfterTimestamp = `-- name: SetMatchesAfterTimestamp :exec

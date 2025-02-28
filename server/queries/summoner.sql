@@ -51,16 +51,6 @@ WHERE region = @region::VARCHAR
 ORDER BY matches_after_timestamp ASC NULLS FIRST
 LIMIT $1;
 
--- name: AddSummonerFlag :exec
-UPDATE tft_summoner
-    SET flags = array_append(flags, @flag::VARCHAR)
-WHERE puuid = $1 AND NOT @flag::VARCHAR = ANY(flags);
-
--- name: RemoveSummonerFlag :exec
-UPDATE tft_summoner
-    SET flags = array_remove(flags, @flag::VARCHAR)
-WHERE puuid = $1;
-
 -- name: SetUpdateTimestamp :exec
 UPDATE tft_summoner
     SET update_timestamp = @update_timestamp::TIMESTAMP
