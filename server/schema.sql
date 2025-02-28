@@ -31,6 +31,6 @@ CREATE TABLE tft_comp (
 
 CREATE INDEX idx_name_tag_insensitive ON tft_summoner (REPLACE(LOWER(name), ' ', ''), REPLACE(LOWER(tag), ' ', ''));
 
-CREATE INDEX idx_region_update ON tft_summoner (region, update_timestamp ASC NULLS FIRST);
+CREATE INDEX idx_region_update ON tft_summoner (region, matches_after_timestamp ASC NULLS FIRST);
 
 CREATE INDEX idx_match_history ON tft_comp (summoner_puuid, match_date DESC);
