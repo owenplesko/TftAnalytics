@@ -73,7 +73,7 @@ func (service Service) CollectSummonerByPuuid(ctx context.Context, region, puuid
 		return fmt.Errorf("Queries.UpsertSummoner failed with err: %w", err)
 	}
 
-	log.Printf("collected summoner %v#%v on region %v!\n", account.Name, account.Tag, region)
+	log.Printf("collected summoner %v#%v on region %v\n", account.Name, account.Tag, region)
 
 	return nil
 }
@@ -102,7 +102,7 @@ func (service Service) CollectSummonerByNameTag(ctx context.Context, cluster, na
 		return fmt.Errorf("Queries.UpsertSummoner failed with err: %w", err)
 	}
 
-	log.Printf("collected summoner %v#%v on region %v!\n", account.Name, account.Tag, region)
+	log.Printf("collected summoner %v#%v on region %v\n", account.Name, account.Tag, region)
 
 	return nil
 }
