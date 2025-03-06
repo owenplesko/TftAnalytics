@@ -7,10 +7,52 @@ package db
 
 import (
 	"context"
+
+	"github.com/jackc/pgx/v5/pgtype"
 )
 
+const getOldestMatchesAfter = `-- name: GetOldestMatchesAfter :many
+SELECT
+    puuid,
+    matches_after_timestamp
+FROM tft_summoner
+WHERE region = $2::VARCHAR
+ORDER BY matches_after_timestamp ASC NULLS FIRST
+LIMIT $1
+`
+
+type GetOldestMatchesAfterParams struct {
+	Limit  int32  `json:"limit"`
+	Region string `json:"region"`
+}
+
+type GetOldestMatchesAfterRow struct {
+	Puuid                 string           `json:"puuid"`
+	MatchesAfterTimestamp pgtype.Timestamp `json:"matchesAfterTimestamp"`
+}
+
+func (q *Queries) GetOldestMatchesAfter(ctx context.Context, arg GetOldestMatchesAfterParams) ([]GetOldestMatchesAfterRow, error) {
+	rows, err := q.db.Query(ctx, getOldestMatchesAfter, arg.Limit, arg.Region)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []GetOldestMatchesAfterRow
+	for rows.Next() {
+		var i GetOldestMatchesAfterRow
+		if err := rows.Scan(&i.Puuid, &i.MatchesAfterTimestamp); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
 const getSummonerByNameTag = `-- name: GetSummonerByNameTag :one
-SELECT puuid, region, name, tag, summoner_id, profile_icon_id, summoner_level, full_update_timestamp, background_update_timestamp, flags
+SELECT puuid, region, name, tag, summoner_id, profile_icon_id, summoner_level, update_timestamp, matches_after_timestamp
 FROM tft_summoner 
 WHERE REPLACE(LOWER(name), ' ', '') = REPLACE(LOWER($1::VARCHAR), ' ', '')
 AND REPLACE(LOWER(tag), ' ', '') = REPLACE(LOWER($2::VARCHAR), ' ', '')
@@ -32,15 +74,14 @@ func (q *Queries) GetSummonerByNameTag(ctx context.Context, arg GetSummonerByNam
 		&i.SummonerID,
 		&i.ProfileIconID,
 		&i.SummonerLevel,
-		&i.FullUpdateTimestamp,
-		&i.BackgroundUpdateTimestamp,
-		&i.Flags,
+		&i.UpdateTimestamp,
+		&i.MatchesAfterTimestamp,
 	)
 	return i, err
 }
 
 const getSummonerByPuuid = `-- name: GetSummonerByPuuid :one
-SELECT puuid, region, name, tag, summoner_id, profile_icon_id, summoner_level, full_update_timestamp, background_update_timestamp, flags
+SELECT puuid, region, name, tag, summoner_id, profile_icon_id, summoner_level, update_timestamp, matches_after_timestamp
 FROM tft_summoner 
 WHERE puuid = $1
 `
@@ -56,68 +97,78 @@ func (q *Queries) GetSummonerByPuuid(ctx context.Context, puuid string) (TftSumm
 		&i.SummonerID,
 		&i.ProfileIconID,
 		&i.SummonerLevel,
-		&i.FullUpdateTimestamp,
-		&i.BackgroundUpdateTimestamp,
-		&i.Flags,
+		&i.UpdateTimestamp,
+		&i.MatchesAfterTimestamp,
 	)
 	return i, err
 }
 
-const insertPuuid = `-- name: InsertPuuid :exec
-INSERT INTO tft_summoner (
-    puuid,
-    region
-) VALUES (
-    $1, $2::VARCHAR
-) ON CONFLICT (puuid) DO NOTHING
+const getSummonerBySummonerId = `-- name: GetSummonerBySummonerId :one
+SELECT puuid, region, name, tag, summoner_id, profile_icon_id, summoner_level, update_timestamp, matches_after_timestamp
+FROM tft_summoner
+WHERE summoner_id = $1
 `
 
-type InsertPuuidParams struct {
-	Puuid  string `json:"puuid"`
-	Region string `json:"region"`
+func (q *Queries) GetSummonerBySummonerId(ctx context.Context, summonerID string) (TftSummoner, error) {
+	row := q.db.QueryRow(ctx, getSummonerBySummonerId, summonerID)
+	var i TftSummoner
+	err := row.Scan(
+		&i.Puuid,
+		&i.Region,
+		&i.Name,
+		&i.Tag,
+		&i.SummonerID,
+		&i.ProfileIconID,
+		&i.SummonerLevel,
+		&i.UpdateTimestamp,
+		&i.MatchesAfterTimestamp,
+	)
+	return i, err
 }
 
-func (q *Queries) InsertPuuid(ctx context.Context, arg InsertPuuidParams) error {
-	_, err := q.db.Exec(ctx, insertPuuid, arg.Puuid, arg.Region)
-	return err
-}
-
-const summonerExistsByNameTag = `-- name: SummonerExistsByNameTag :one
-SELECT EXISTS (
-    SELECT puuid, region, name, tag, summoner_id, profile_icon_id, summoner_level, full_update_timestamp, background_update_timestamp, flags FROM tft_summoner 
-    WHERE REPLACE(LOWER(name), ' ', '') = REPLACE(LOWER($1::VARCHAR), ' ', '')
-    AND REPLACE(LOWER(tag), ' ', '') = REPLACE(LOWER($2::VARCHAR), ' ', '')
-)
-`
-
-type SummonerExistsByNameTagParams struct {
-	Name string `json:"name"`
-	Tag  string `json:"tag"`
-}
-
-func (q *Queries) SummonerExistsByNameTag(ctx context.Context, arg SummonerExistsByNameTagParams) (bool, error) {
-	row := q.db.QueryRow(ctx, summonerExistsByNameTag, arg.Name, arg.Tag)
-	var exists bool
-	err := row.Scan(&exists)
-	return exists, err
-}
-
-const updateAccount = `-- name: UpdateAccount :exec
+const setMatchesAfterTimestamp = `-- name: SetMatchesAfterTimestamp :exec
 UPDATE tft_summoner
-SET name = $2::VARCHAR,
-    tag = $3::VARCHAR
+    SET matches_after_timestamp = $2::TIMESTAMP
 WHERE puuid = $1
 `
 
-type UpdateAccountParams struct {
-	Puuid string `json:"puuid"`
-	Name  string `json:"name"`
-	Tag   string `json:"tag"`
+type SetMatchesAfterTimestampParams struct {
+	Puuid                 string           `json:"puuid"`
+	MatchesAfterTimestamp pgtype.Timestamp `json:"matchesAfterTimestamp"`
 }
 
-func (q *Queries) UpdateAccount(ctx context.Context, arg UpdateAccountParams) error {
-	_, err := q.db.Exec(ctx, updateAccount, arg.Puuid, arg.Name, arg.Tag)
+func (q *Queries) SetMatchesAfterTimestamp(ctx context.Context, arg SetMatchesAfterTimestampParams) error {
+	_, err := q.db.Exec(ctx, setMatchesAfterTimestamp, arg.Puuid, arg.MatchesAfterTimestamp)
 	return err
+}
+
+const setUpdateTimestamp = `-- name: SetUpdateTimestamp :exec
+UPDATE tft_summoner
+    SET update_timestamp = $2::TIMESTAMP
+WHERE puuid = $1
+`
+
+type SetUpdateTimestampParams struct {
+	Puuid           string           `json:"puuid"`
+	UpdateTimestamp pgtype.Timestamp `json:"updateTimestamp"`
+}
+
+func (q *Queries) SetUpdateTimestamp(ctx context.Context, arg SetUpdateTimestampParams) error {
+	_, err := q.db.Exec(ctx, setUpdateTimestamp, arg.Puuid, arg.UpdateTimestamp)
+	return err
+}
+
+const summonerExistsByPuuid = `-- name: SummonerExistsByPuuid :one
+SELECT EXISTS (
+    SELECT puuid, region, name, tag, summoner_id, profile_icon_id, summoner_level, update_timestamp, matches_after_timestamp FROM tft_summoner WHERE puuid = $1
+)
+`
+
+func (q *Queries) SummonerExistsByPuuid(ctx context.Context, puuid string) (bool, error) {
+	row := q.db.QueryRow(ctx, summonerExistsByPuuid, puuid)
+	var exists bool
+	err := row.Scan(&exists)
+	return exists, err
 }
 
 const updateRegion = `-- name: UpdateRegion :exec
@@ -136,48 +187,44 @@ func (q *Queries) UpdateRegion(ctx context.Context, arg UpdateRegionParams) erro
 	return err
 }
 
-const updateSummoner = `-- name: UpdateSummoner :exec
-UPDATE tft_summoner
-SET summoner_id = $2::VARCHAR,
-    profile_icon_id = $3::INT,
-    summoner_level = $4::INT
-WHERE puuid = $1
+const upsertSummoner = `-- name: UpsertSummoner :exec
+INSERT INTO tft_summoner (
+    puuid,
+    region,
+    name,
+    tag,
+    summoner_id,
+    profile_icon_id,
+    summoner_level
+) VALUES (
+    $1, $2, $3, $4, $5, $6, $7
+) ON CONFLICT (puuid) DO UPDATE
+SET name = EXCLUDED.name,
+    tag = EXCLUDED.tag,
+    summoner_id = EXCLUDED.summoner_id,
+    profile_icon_id = EXCLUDED.profile_icon_id,
+    summoner_level = EXCLUDED.summoner_level
 `
 
-type UpdateSummonerParams struct {
+type UpsertSummonerParams struct {
 	Puuid         string `json:"puuid"`
+	Region        string `json:"region"`
+	Name          string `json:"name"`
+	Tag           string `json:"tag"`
 	SummonerID    string `json:"summonerId"`
 	ProfileIconID int32  `json:"profileIconId"`
 	SummonerLevel int32  `json:"summonerLevel"`
 }
 
-func (q *Queries) UpdateSummoner(ctx context.Context, arg UpdateSummonerParams) error {
-	_, err := q.db.Exec(ctx, updateSummoner,
+func (q *Queries) UpsertSummoner(ctx context.Context, arg UpsertSummonerParams) error {
+	_, err := q.db.Exec(ctx, upsertSummoner,
 		arg.Puuid,
+		arg.Region,
+		arg.Name,
+		arg.Tag,
 		arg.SummonerID,
 		arg.ProfileIconID,
 		arg.SummonerLevel,
 	)
-	return err
-}
-
-const upsertAccount = `-- name: UpsertAccount :exec
-INSERT INTO tft_summoner (
-    puuid,
-    name,
-    tag
-) VALUES (
-    $1, $2::VARCHAR, $3::VARCHAR
-) ON CONFLICT(puuid) DO UPDATE SET name = $2::VARCHAR, tag = $3::VARCHAR
-`
-
-type UpsertAccountParams struct {
-	Puuid string `json:"puuid"`
-	Name  string `json:"name"`
-	Tag   string `json:"tag"`
-}
-
-func (q *Queries) UpsertAccount(ctx context.Context, arg UpsertAccountParams) error {
-	_, err := q.db.Exec(ctx, upsertAccount, arg.Puuid, arg.Name, arg.Tag)
 	return err
 }

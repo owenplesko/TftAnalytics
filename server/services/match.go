@@ -6,18 +6,24 @@ import (
 	"TFTAnalyticsServer/types"
 	"context"
 	"log"
-	"strings"
 	"time"
 
 	"github.com/jackc/pgx/v5/pgtype"
 )
 
-func (env ServiceEnv) GetMatchComps(ctx context.Context, matchId string) ([]db.GetMatchCompsRow, error) {
-	return env.Queries.GetMatchComps(ctx, matchId)
+func (service Service) GetMatchComps(ctx context.Context, matchId string) ([]db.GetMatchCompsRow, error) {
+	comps, err := service.Queries.GetMatchComps(ctx, matchId)
+
+	// prevent returning nil when list is empty
+	if comps == nil {
+		comps = []db.GetMatchCompsRow{}
+	}
+
+	return comps, err
 }
 
-func (env ServiceEnv) GetMatchHistory(ctx context.Context, puuid string, limit int32, after time.Time) ([]db.SummonerMatchHistoryRow, error) {
-	return env.Queries.SummonerMatchHistory(context.Background(), db.SummonerMatchHistoryParams{
+func (service Service) GetMatchHistory(ctx context.Context, puuid string, limit int32, after time.Time) ([]db.SummonerMatchHistoryRow, error) {
+	matches, err := service.Queries.SummonerMatchHistory(context.Background(), db.SummonerMatchHistoryParams{
 		SummonerPuuid: puuid,
 		Limit:         limit,
 		After: pgtype.Timestamp{
@@ -25,71 +31,76 @@ func (env ServiceEnv) GetMatchHistory(ctx context.Context, puuid string, limit i
 			Valid: true,
 		},
 	})
+
+	// prevent returning nil when list is empty
+	if matches == nil {
+		matches = []db.SummonerMatchHistoryRow{}
+	}
+
+	return matches, err
 }
 
-func (env ServiceEnv) CollectMatchHistory(ctx context.Context, cluster, puuid string, matchesAfter time.Time) error {
+func (service Service) CollectMatchHistory(ctx context.Context, region, puuid string, matchesAfter time.Time) error {
 	updatedAt := time.Now()
 
-	res, err := riot.GetMatchHistory(cluster, puuid, matchesAfter)
+	matchIds, err := service.Riot.GetMatchHistory(region, puuid, matchesAfter)
 	if err != nil {
 		return err
 	}
 
-	env.Queries.SetBackgroundUpdateTimestamp(ctx, db.SetBackgroundUpdateTimestampParams{
+	for _, matchId := range matchIds {
+		if exists, _ := service.Queries.MatchExists(ctx, matchId); !exists {
+			_ = service.CollectMatchDetails(ctx, region, matchId)
+		}
+	}
+
+	service.Queries.SetMatchesAfterTimestamp(ctx, db.SetMatchesAfterTimestampParams{
 		Puuid: puuid,
-		BackgroundUpdateTimestamp: pgtype.Timestamp{
+		MatchesAfterTimestamp: pgtype.Timestamp{
 			Time:  updatedAt,
 			Valid: true,
 		},
 	})
 
-	log.Printf("Got %v matchIds from summoner %v\n", len(res), puuid)
-
-	for _, matchId := range res {
-		if exists, _ := env.Queries.MatchExists(ctx, matchId); exists {
-			log.Printf("Skipping match %v...\n", matchId)
-			return nil
-		}
-
-		res, err := riot.GetMatchDetails(cluster, matchId)
-		if err != nil {
-			return err
-		}
-
-		err = env.storeMatchDetails(ctx, res)
-
-		log.Printf("Stored match %v!\n", matchId)
-	}
-
-	return err
+	return nil
 }
 
-func (env ServiceEnv) storeMatchDetails(ctx context.Context, matchDetails *riot.Match) error {
-	var err error
+func (service Service) CollectMatchDetails(ctx context.Context, region, matchId string) error {
+	match, err := service.Riot.GetMatchDetails(region, matchId)
+	if err != nil {
+		return err
+	}
 
-	// parse match region
-	region := strings.Split(matchDetails.MetaData.MatchId, "_")[0]
-
-	// insert participants
-	for _, puuid := range matchDetails.MetaData.Participants {
-		err = env.Queries.InsertPuuid(ctx, db.InsertPuuidParams{
-			Puuid:  puuid,
-			Region: region,
-		})
-		if err != nil {
-			return err
+	for _, puuid := range match.MetaData.Participants {
+		if exists, _ := service.Queries.SummonerExistsByPuuid(ctx, puuid); !exists {
+			_ = service.CollectSummonerByPuuid(ctx, region, puuid)
 		}
 	}
 
-	tx, err := env.Pool.Begin(ctx)
+	err = service.storeMatchDetails(ctx, match)
+	if err != nil {
+		log.Println(err.Error())
+		return err
+	}
+
+	log.Printf("Stored match %v!\n", matchId)
+
+	return nil
+}
+
+func (service Service) storeMatchDetails(ctx context.Context, matchDetails *riot.Match) error {
+	var err error
+
+	// comp and matches inserted in one transaction
+	tx, err := service.Pool.Begin(ctx)
 	if err != nil {
 		return err
 	}
 	defer tx.Rollback(ctx)
 
-	qtx := env.Queries.WithTx(tx)
+	qtx := service.Queries.WithTx(tx)
 
-	// create match
+	// insert match
 	matchDate := pgtype.Timestamp{
 		Time:  time.UnixMilli(matchDetails.Info.Date),
 		Valid: true,
@@ -109,7 +120,7 @@ func (env ServiceEnv) storeMatchDetails(ctx context.Context, matchDetails *riot.
 		return err
 	}
 
-	// create comps
+	// insert comps
 	for _, compDetails := range matchDetails.Info.Comps {
 		err = qtx.CreateComp(ctx, db.CreateCompParams{
 			MatchID:       matchDetails.MetaData.MatchId,

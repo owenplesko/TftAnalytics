@@ -4,61 +4,40 @@ import (
 	"TFTAnalyticsServer/db"
 	"TFTAnalyticsServer/riot"
 	"context"
+	"log"
 	"time"
 )
 
-func (env ServiceEnv) SummonerDataCollectionLoop(ctx context.Context, region string) {
-	backoffTicker := time.NewTicker(time.Second * 5)
+func (service Service) MatchCollectionLoop(ctx context.Context, region string) {
+	backoffTime := time.NewTicker(time.Second * 5)
 
-	for range backoffTicker.C {
-		puuids, _ := env.Queries.GetPuuidsWithNullSummonerData(ctx, db.GetPuuidsWithNullSummonerDataParams{
+	for range backoffTime.C {
+		summoners, err := service.Queries.GetOldestMatchesAfter(ctx, db.GetOldestMatchesAfterParams{
 			Limit:  100,
 			Region: region,
 		})
+		if err != nil {
+			log.Println(err.Error())
+			continue
+		}
 
-		for _, puuid := range puuids {
-			env.CollectSummonerDetails(ctx, region, puuid)
+		for _, summoner := range summoners {
+			_ = service.CollectMatchHistory(ctx, region, summoner.Puuid, summoner.MatchesAfterTimestamp.Time)
 		}
 	}
 }
 
-func (env ServiceEnv) SummonerRegionCollectionLoop(ctx context.Context) {
-	backoffTicker := time.NewTicker(time.Second * 5)
+func (service Service) RankEntryCollectionLoop(ctx context.Context, region string) {
+	//backoffTicker := time.NewTicker(time.Minute * 20)
 
-	for range backoffTicker.C {
-		puuids, _ := env.Queries.GetPuuidsWithNullRegion(ctx, 100)
-
-		for _, puuid := range puuids {
-			env.CollectSummonerRegion(ctx, puuid)
+	for /*range backoffTicker.C*/ {
+		for _, tier := range riot.ApexTiers {
+			service.CollectApexRankEntries(ctx, region, tier)
 		}
-	}
-}
-
-func (env ServiceEnv) AccountDataCollectionLoop(ctx context.Context, cluster string) {
-	backoffTicker := time.NewTicker(time.Second * 5)
-
-	for range backoffTicker.C {
-		puuids, _ := env.Queries.GetPuuidsWithNullAccountData(ctx, 100)
-		for _, puuid := range puuids {
-			env.CollectAccountByPuuid(ctx, cluster, puuid)
-		}
-	}
-}
-
-func (env ServiceEnv) MatchHistoryCollectionLoop(ctx context.Context, cluster string) {
-	backoffTicker := time.NewTicker(time.Second * 5)
-
-	for range backoffTicker.C {
-		for _, region := range riot.ClusterToRegions[cluster] {
-			rows, _ := env.Queries.GetOldestMatchHistories(ctx, db.GetOldestMatchHistoriesParams{
-				Region: region,
-				Limit:  100,
-			})
-
-			for _, row := range rows {
-				env.CollectMatchHistory(ctx, cluster, row.Puuid, time.Now().Add(-time.Hour*24*3))
+		for _, tier := range riot.Tiers {
+			for _, division := range riot.Divisions {
+				service.CollectRankEntries(ctx, region, tier, division)
 			}
 		}
-
 	}
 }

@@ -4,62 +4,86 @@ import (
 	"TFTAnalyticsServer/db"
 	"TFTAnalyticsServer/riot"
 	"context"
-	"errors"
+	"fmt"
 	"log"
+	"sync"
+	"time"
+
+	"github.com/jackc/pgx/v5"
+	"github.com/jackc/pgx/v5/pgtype"
 )
 
-func (env ServiceEnv) CollectSummonerDetails(ctx context.Context, region, puuid string) error {
-	res, err := riot.GetSummonerByPuuid(region, puuid)
+func (service Service) GetSummonerByPuuid(ctx context.Context, puuid string) (db.TftSummoner, error) {
+	return service.Queries.GetSummonerByPuuid(ctx, puuid)
+}
+
+func (service Service) GetOrCollectSummonerByNameTag(ctx context.Context, cluster, name, tag string) (db.TftSummoner, error) {
+	summoner, err := service.Queries.GetSummonerByNameTag(ctx, db.GetSummonerByNameTagParams{
+		Name: name,
+		Tag:  tag,
+	})
+	if err != pgx.ErrNoRows {
+		return summoner, err
+	}
+
+	err = service.CollectSummonerByNameTag(ctx, cluster, name, tag)
+	if err != nil {
+		return summoner, err
+	}
+
+	summoner, err = service.Queries.GetSummonerByNameTag(ctx, db.GetSummonerByNameTagParams{Name: name, Tag: tag})
+
+	return summoner, err
+}
+
+func (service Service) CollectSummonerByPuuid(ctx context.Context, region, puuid string) error {
+	accountDetails, err := service.Riot.GetAccountByPuuid(riot.RegionToCluster[region], puuid)
 	if err != nil {
 		return err
 	}
 
-	err = env.Queries.UpdateSummoner(ctx, db.UpdateSummonerParams{
-		Puuid:         puuid,
-		SummonerID:    res.SummonerId,
-		ProfileIconID: res.ProfileIconId,
-		SummonerLevel: res.SummonerLevel,
+	summonerDetails, err := service.Riot.GetSummonerByPuuid(region, puuid)
+	if err != nil {
+		return err
+	}
+
+	err = service.Queries.UpsertSummoner(ctx, db.UpsertSummonerParams{
+		Puuid:         summonerDetails.Puuid,
+		Region:        region,
+		Name:          accountDetails.Name,
+		Tag:           accountDetails.Tag,
+		SummonerID:    summonerDetails.SummonerId,
+		ProfileIconID: summonerDetails.ProfileIconId,
+		SummonerLevel: summonerDetails.SummonerLevel,
 	})
+	if err != nil {
+		return err
+	}
 
 	log.Printf("Summoner details collected for %v\n", puuid)
 
-	return err
+	return nil
 }
 
-func (env ServiceEnv) CollectAccountByPuuid(ctx context.Context, cluster, puuid string) error {
-	res, err := riot.GetAccountByPuuid(cluster, puuid)
-	if errors.Is(err, riot.NotFoundError) {
-		err = env.Queries.AddSummonerFlag(ctx, db.AddSummonerFlagParams{
-			Puuid: puuid,
-			Flag:  "SKIP_ACCOUNT_DATA",
-		})
-		return err
-	}
+func (service Service) CollectSummonerByNameTag(ctx context.Context, cluster, name, tag string) error {
+	account, err := service.Riot.GetAccountByName(cluster, name, tag)
 	if err != nil {
 		return err
 	}
 
-	err = env.Queries.UpdateAccount(ctx, db.UpdateAccountParams{
-		Puuid: puuid,
-		Name:  res.Name,
-		Tag:   res.Tag,
-	})
-
-	log.Printf("Account details collected for %v\n", puuid)
-
-	return err
-}
-
-func (env ServiceEnv) CollectAccountByNameTag(ctx context.Context, cluster, name, tag string) error {
-	res, err := riot.GetAccountByName(cluster, name, tag)
+	summoner, region, err := service.findSummonerRegion(account.Puuid)
 	if err != nil {
 		return err
 	}
 
-	err = env.Queries.UpsertAccount(ctx, db.UpsertAccountParams{
-		Puuid: res.Puuid,
-		Name:  res.Name,
-		Tag:   res.Tag,
+	err = service.Queries.UpsertSummoner(ctx, db.UpsertSummonerParams{
+		Puuid:         account.Puuid,
+		Region:        region,
+		Name:          account.Name,
+		Tag:           account.Tag,
+		SummonerID:    summoner.SummonerId,
+		ProfileIconID: summoner.ProfileIconId,
+		SummonerLevel: summoner.SummonerLevel,
 	})
 
 	log.Printf("Account collected with name %v#%v\n", name, tag)
@@ -67,59 +91,55 @@ func (env ServiceEnv) CollectAccountByNameTag(ctx context.Context, cluster, name
 	return err
 }
 
-func (env ServiceEnv) GetSummonerByPuuid(ctx context.Context, puuid string) (db.TftSummoner, error) {
-	return env.Queries.GetSummonerByPuuid(ctx, puuid)
+type regionSuccessRes struct {
+	summoner *riot.RiotSummonerRes
+	region   string
 }
 
-func (env ServiceEnv) GetOrCollectSummonerByNameTag(ctx context.Context, cluster, name, tag string) (db.TftSummoner, error) {
-	exists, err := env.Queries.SummonerExistsByNameTag(ctx, db.SummonerExistsByNameTagParams{
-		Name: name,
-		Tag:  tag,
-	})
+func (service Service) findSummonerRegion(puuid string) (*riot.RiotSummonerRes, string, error) {
+	wg := sync.WaitGroup{}
+	successChan := make(chan regionSuccessRes)
+	for region := range riot.RegionToCluster {
+		wg.Add(1)
+
+		go func(region string) {
+			defer wg.Done()
+			if summoner, err := service.Riot.GetSummonerByPuuid(region, puuid); err == nil {
+				successChan <- regionSuccessRes{summoner: summoner, region: region}
+			}
+		}(region)
+	}
+	go func() {
+		wg.Wait()
+		close(successChan)
+	}()
+
+	var err error
+	success := <-successChan
+	if success.region == "" {
+		err = fmt.Errorf("no region match found")
+	}
+
+	return success.summoner, success.region, err
+}
+
+func (service Service) UpdateSummonerInfo(ctx context.Context, puuid string) error {
+	summoner, err := service.GetSummonerByPuuid(ctx, puuid)
 	if err != nil {
-		return db.TftSummoner{}, err
+		return err
 	}
 
-	if !exists {
-		err = env.CollectAccountByNameTag(ctx, cluster, name, tag)
-		if err != nil {
-			return db.TftSummoner{}, err
-		}
-	}
+	go service.CollectSummonerRank(ctx, summoner.Region, summoner.SummonerID)
+	go service.CollectSummonerByPuuid(ctx, summoner.Region, puuid)
+	go service.CollectMatchHistory(ctx, riot.RegionToCluster[summoner.Region], puuid, summoner.MatchesAfterTimestamp.Time)
 
-	return env.Queries.GetSummonerByNameTag(ctx, db.GetSummonerByNameTagParams{Name: name, Tag: tag})
-}
-
-func (env ServiceEnv) CollectSummonerRegion(ctx context.Context, puuid string) error {
-	var regionMatch string
-
-	for region, _ := range riot.RegionToCluster {
-		_, err := riot.GetSummonerByPuuid(region, puuid)
-
-		if errors.Is(err, riot.NotFoundError) {
-			continue
-		}
-
-		if err != nil {
-			return err
-		}
-
-		regionMatch = region
-		break
-	}
-
-	if regionMatch == "" {
-		env.Queries.AddSummonerFlag(ctx, db.AddSummonerFlagParams{
-			Puuid: puuid,
-			Flag:  "SKIP_REGION_MATCH",
-		})
-		return errors.New("no region match found")
-	}
-
-	err := env.Queries.UpdateRegion(ctx, db.UpdateRegionParams{
-		Puuid:  puuid,
-		Region: regionMatch,
+	service.Queries.SetUpdateTimestamp(ctx, db.SetUpdateTimestampParams{
+		Puuid: puuid,
+		UpdateTimestamp: pgtype.Timestamp{
+			Time:  time.Now(),
+			Valid: true,
+		},
 	})
 
-	return err
+	return nil
 }

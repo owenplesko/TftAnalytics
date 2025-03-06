@@ -82,7 +82,7 @@ func (q *Queries) CreateMatch(ctx context.Context, arg CreateMatchParams) error 
 
 const getMatchComps = `-- name: GetMatchComps :many
 SELECT 
-	tft_summoner.puuid, tft_summoner.region, tft_summoner.name, tft_summoner.tag, tft_summoner.summoner_id, tft_summoner.profile_icon_id, tft_summoner.summoner_level, tft_summoner.full_update_timestamp, tft_summoner.background_update_timestamp, tft_summoner.flags, comp_data
+	tft_summoner.puuid, tft_summoner.region, tft_summoner.name, tft_summoner.tag, tft_summoner.summoner_id, tft_summoner.profile_icon_id, tft_summoner.summoner_level, tft_summoner.update_timestamp, tft_summoner.matches_after_timestamp, comp_data
 FROM
 	tft_comp
 	JOIN tft_summoner ON summoner_puuid = puuid
@@ -111,9 +111,8 @@ func (q *Queries) GetMatchComps(ctx context.Context, matchID string) ([]GetMatch
 			&i.TftSummoner.SummonerID,
 			&i.TftSummoner.ProfileIconID,
 			&i.TftSummoner.SummonerLevel,
-			&i.TftSummoner.FullUpdateTimestamp,
-			&i.TftSummoner.BackgroundUpdateTimestamp,
-			&i.TftSummoner.Flags,
+			&i.TftSummoner.UpdateTimestamp,
+			&i.TftSummoner.MatchesAfterTimestamp,
 			&i.CompData,
 		); err != nil {
 			return nil, err
@@ -149,7 +148,7 @@ WHERE
 	summoner_puuid = $1 AND
 	tft_comp.match_date < $3::TIMESTAMP
 ORDER BY
-	tft_comp.match_date
+	tft_comp.match_date DESC
 LIMIT $2
 `
 
