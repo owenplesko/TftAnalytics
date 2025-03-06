@@ -17,12 +17,15 @@ func (service Service) MatchCollectionLoop(ctx context.Context, region string) {
 			Region: region,
 		})
 		if err != nil {
-			log.Println(err.Error())
+			log.Printf("in MatchCollectionLoop Queries.GetOldestMatchesAfter failed with err: %v", err)
 			continue
 		}
 
 		for _, summoner := range summoners {
-			_ = service.CollectMatchHistory(ctx, region, summoner.Puuid, summoner.MatchesAfterTimestamp.Time)
+			err = service.CollectMatchHistory(ctx, region, summoner.Puuid, summoner.MatchesAfterTimestamp.Time)
+			if err != nil {
+				log.Printf("in MatchCollectionLoop service.CollectMatchHistory failed with err: %v", err)
+			}
 		}
 	}
 }
@@ -32,11 +35,17 @@ func (service Service) RankEntryCollectionLoop(ctx context.Context, region strin
 
 	for /*range backoffTicker.C*/ {
 		for _, tier := range riot.ApexTiers {
-			service.CollectApexRankEntries(ctx, region, tier)
+			err := service.CollectApexRankEntries(ctx, region, tier)
+			if err != nil {
+				log.Printf("in RankEntryCollectionLoop CollectApexRankEntries failed with err: %v", err)
+			}
 		}
 		for _, tier := range riot.Tiers {
 			for _, division := range riot.Divisions {
-				service.CollectRankEntries(ctx, region, tier, division)
+				err := service.CollectRankEntries(ctx, region, tier, division)
+				if err != nil {
+					log.Printf("in RankEntryCollectionLoop CollectRankEntries failed with err: %v", err)
+				}
 			}
 		}
 	}
