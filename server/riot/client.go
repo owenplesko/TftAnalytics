@@ -1,9 +1,7 @@
 package riot
 
 import (
-	"TFTAnalyticsServer/riot/limiter"
 	"encoding/json"
-	"errors"
 	"fmt"
 	"log"
 	"net/http"
@@ -31,39 +29,36 @@ func (riot *Riot) request(server string, route string, target any) error {
 	req, _ := http.NewRequest("GET", url, nil)
 	req.Header.Set("X-Riot-Token", riot.apiKey)
 
-	limiter, err := riot.getLimiter(server)
+	err := riot.rateLimiter.Wait(server, riot.requestPriority)
 	if err != nil {
 		return err
 	}
-	<-limiter.Wait(riot.requestPriority)
 
 	res, err := client.Do(req)
 	if err != nil {
-		return err
+		return fmt.Errorf("error making request to %v: %w", url, err)
 	}
 
-	defer res.Body.Close()
-	if res.StatusCode == http.StatusNotFound {
-		return NotFoundError
-	}
+	defer func() {
+		err := res.Body.Close()
+		if err != nil {
+			log.Printf("error closing response body of request to %v: %v", url, err)
+		}
+	}()
+
 	if res.StatusCode != http.StatusOK {
-		log.Printf("Status: %v URL: %v\n", res.Status, url)
-		return errors.New(res.Status)
+		switch res.StatusCode {
+		case http.StatusNotFound:
+			return fmt.Errorf("failed to get resource from %v: %w", url, ErrNotFound)
+		default:
+			return fmt.Errorf("failed to get resource from %v: status code %v", url, res.StatusCode)
+		}
 	}
 
-	return json.NewDecoder(res.Body).Decode(target)
-}
-
-func (riot *Riot) getLimiter(server string) (*limiter.Limiter, error) {
-	cluster, ok := RegionToCluster[server]
-	if !ok {
-		cluster = server
+	err = json.NewDecoder(res.Body).Decode(target)
+	if err != nil {
+		return fmt.Errorf("error decoding body of request to %v: %w", url, err)
 	}
 
-	limiter, ok := riot.rateLimiter[cluster]
-	if !ok {
-		return limiter, NoLimiterError
-	}
-
-	return limiter, nil
+	return nil
 }

@@ -17,7 +17,7 @@ func (env Controller) getSummonerByNameTag(w http.ResponseWriter, r *http.Reques
 	tag := r.PathValue("tag")
 
 	summoner, err := env.Service.GetOrCollectSummonerByNameTag(ctx, cluster, name, tag)
-	if err == riot.NotFoundError {
+	if err == riot.ErrNotFound {
 		http.Error(w, "summoner not found", 404)
 		return
 	}

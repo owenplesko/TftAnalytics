@@ -33,7 +33,7 @@ func init() {
 	ClusterToRegions = make(map[string][]string)
 
 	for region, cluster := range RegionToCluster {
-		arr, _ := ClusterToRegions[cluster]
+		arr := ClusterToRegions[cluster]
 		arr = append(arr, region)
 		ClusterToRegions[cluster] = arr
 	}

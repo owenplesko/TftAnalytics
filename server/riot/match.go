@@ -2,7 +2,6 @@ package riot
 
 import (
 	"fmt"
-	"strings"
 	"time"
 )
 
@@ -55,7 +54,6 @@ type Comp struct {
 }
 
 func getTftMatchCluster(region string) string {
-	// return SEA cluster if applicable
 	if cluster, ok := seaCluster[region]; ok {
 		return cluster
 	}
@@ -63,26 +61,21 @@ func getTftMatchCluster(region string) string {
 	return RegionToCluster[region]
 }
 
-func (c *Riot) GetMatchRegion(matchId string) string {
-	return strings.Split(matchId, "_")[0]
-}
-
 func (c *Riot) GetMatchDetails(region, matchId string) (*Match, error) {
 	matchRes := new(Match)
+
 	route := fmt.Sprintf("tft/match/v1/matches/%v", matchId)
 	err := c.request(getTftMatchCluster(region), route, matchRes)
-	if err != nil {
-		return nil, err
-	}
 
 	return matchRes, err
 }
 
 func (c *Riot) GetMatchHistory(region string, puuid string, matchesAfter time.Time) ([]string, error) {
 	var history []string
-	count := 200
 
+	count := 200
 	route := fmt.Sprintf("tft/match/v1/matches/by-puuid/%v/ids?count=%v&startTime=%v", puuid, count, matchesAfter.Unix())
 	err := c.request(getTftMatchCluster(region), route, &history)
+
 	return history, err
 }
