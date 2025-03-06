@@ -148,7 +148,7 @@ WHERE
 	summoner_puuid = $1 AND
 	tft_comp.match_date < $3::TIMESTAMP
 ORDER BY
-	tft_comp.match_date
+	tft_comp.match_date DESC
 LIMIT $2
 `
 

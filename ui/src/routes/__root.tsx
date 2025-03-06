@@ -6,9 +6,9 @@ import { TanStackRouterDevtools } from "@tanstack/router-devtools";
 export const Route = createRootRoute({
   component: () => (
     <ThemeProvider defaultTheme="dark" storageKey="vite-ui-theme">
-      <main className="w-full flex-col min-h-screen flex items-center pt-2">
+      <main className="flex min-h-screen w-full flex-col items-center pt-2">
         <SearchForm />
-        <div className="w-[1000px] pt-8 flex-col flex items-center">
+        <div className="flex w-[1000px] flex-col items-center pt-8">
           <Outlet />
         </div>
       </main>
