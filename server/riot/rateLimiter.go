@@ -14,17 +14,15 @@ func NewRateLimiter(rateDuration time.Duration) map[string]*limiter.Limiter {
 	for cluster := range ClusterToRegions {
 		limiters[cluster] = limiter.New(rateDuration)
 	}
+	for region := range RegionToCluster {
+		limiters[region] = limiter.New(rateDuration)
+	}
 
 	return limiters
 }
 
 func (limters RateLimiter) Wait(server string, priority int) error {
-	cluster, ok := RegionToCluster[server]
-	if !ok {
-		cluster = server
-	}
-
-	limiter, ok := limters[cluster]
+	limiter, ok := limters[server]
 	if !ok {
 		return fmt.Errorf("no limiter found for server: %v", server)
 	}

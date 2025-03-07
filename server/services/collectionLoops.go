@@ -37,9 +37,9 @@ func (service Service) MatchCollectionLoop(ctx context.Context, region string) {
 }
 
 func (service Service) RankEntryCollectionLoop(ctx context.Context, region string) {
-	//backoffTicker := time.NewTicker(time.Minute * 20)
+	backoffTicker := time.NewTicker(time.Minute * 20)
 
-	for /*range backoffTicker.C*/ {
+	for range backoffTicker.C {
 		for _, tier := range riot.ApexTiers {
 			err := service.CollectApexRankEntries(ctx, region, tier)
 			if err != nil {

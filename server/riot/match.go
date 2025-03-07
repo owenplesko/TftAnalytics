@@ -53,19 +53,11 @@ type Comp struct {
 	} `json:"units"`
 }
 
-func getTftMatchCluster(region string) string {
-	if cluster, ok := seaCluster[region]; ok {
-		return cluster
-	}
-
-	return RegionToCluster[region]
-}
-
 func (c *Riot) GetMatchDetails(region, matchId string) (*Match, error) {
 	matchRes := new(Match)
 
 	route := fmt.Sprintf("tft/match/v1/matches/%v", matchId)
-	err := c.request(getTftMatchCluster(region), route, matchRes)
+	err := c.request(RegionToCluster[region], route, matchRes)
 
 	return matchRes, err
 }
@@ -75,7 +67,7 @@ func (c *Riot) GetMatchHistory(region string, puuid string, matchesAfter time.Ti
 
 	count := 200
 	route := fmt.Sprintf("tft/match/v1/matches/by-puuid/%v/ids?count=%v&startTime=%v", puuid, count, matchesAfter.Unix())
-	err := c.request(getTftMatchCluster(region), route, &history)
+	err := c.request(RegionToCluster[region], route, &history)
 
 	return history, err
 }
