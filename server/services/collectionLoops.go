@@ -22,7 +22,13 @@ func (service Service) MatchCollectionLoop(ctx context.Context, region string) {
 		}
 
 		for _, summoner := range summoners {
-			err = service.CollectMatchHistory(ctx, region, summoner.Puuid, summoner.MatchesAfterTimestamp.Time)
+			var after time.Time
+			if summoner.MatchesAfterTimestamp.Valid {
+				after = summoner.MatchesAfterTimestamp.Time
+			} else {
+				after = time.Now().UTC().Add(-time.Hour * 24 * 30)
+			}
+			err = service.CollectMatchHistory(ctx, region, summoner.Puuid, after)
 			if err != nil {
 				log.Printf("in MatchCollectionLoop service.CollectMatchHistory failed with err: %v", err)
 			}

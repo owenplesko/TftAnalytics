@@ -148,9 +148,25 @@ func (service Service) UpdateSummonerInfo(ctx context.Context, puuid string) err
 		return fmt.Errorf("GetSummonerByPuuid failed with err: %w", err)
 	}
 
-	go service.CollectSummonerRank(ctx, summoner.Region, summoner.SummonerID)
-	go service.CollectSummonerByPuuid(ctx, summoner.Region, puuid)
-	go service.CollectMatchHistory(ctx, riot.RegionToCluster[summoner.Region], puuid, summoner.MatchesAfterTimestamp.Time)
+	var after time.Time
+	if summoner.MatchesAfterTimestamp.Valid {
+		after = summoner.MatchesAfterTimestamp.Time
+	} else {
+		after = time.Now().UTC().Add(-time.Hour * 24 * 30)
+	}
+
+	err = service.CollectSummonerRank(ctx, summoner.Region, summoner.SummonerID)
+	if err != nil {
+		return fmt.Errorf("CollectSummonerRank failed with err: %w", err)
+	}
+	err = service.CollectSummonerByPuuid(ctx, summoner.Region, puuid)
+	if err != nil {
+		return fmt.Errorf("CollectSummonerByPuuid failed with err: %w", err)
+	}
+	err = service.CollectMatchHistory(ctx, summoner.Region, puuid, after)
+	if err != nil {
+		return fmt.Errorf("CollectMatchHistory failed with err: %w", err)
+	}
 
 	err = service.Queries.SetUpdateTimestamp(ctx, db.SetUpdateTimestampParams{
 		Puuid: puuid,
