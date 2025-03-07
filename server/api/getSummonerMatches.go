@@ -3,6 +3,7 @@ package api
 import (
 	"context"
 	"encoding/json"
+	"log"
 	"net/http"
 	"strconv"
 	"time"
@@ -45,6 +46,7 @@ func (env Controller) getSummonerMatches(w http.ResponseWriter, r *http.Request)
 
 	matches, err := env.Service.GetMatchHistory(ctx, puuid, int32(limit), after)
 	if err != nil {
+		log.Printf("Service.GetMatchHistory failed with err: %v\n", err)
 		http.Error(w, "something went wrong", 500)
 		return
 	}

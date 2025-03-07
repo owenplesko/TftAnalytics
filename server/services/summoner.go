@@ -4,13 +4,13 @@ import (
 	"TFTAnalyticsServer/db"
 	"TFTAnalyticsServer/riot"
 	"context"
-	"database/sql"
 	"errors"
 	"fmt"
 	"log"
 	"sync"
 	"time"
 
+	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgtype"
 )
 
@@ -32,7 +32,7 @@ func (service Service) GetOrCollectSummonerByNameTag(ctx context.Context, cluste
 		// summoner found! no need to collect
 		return summoner, nil
 	}
-	if !errors.Is(err, sql.ErrNoRows) {
+	if !errors.Is(err, pgx.ErrNoRows) {
 		return summoner, fmt.Errorf("Queries.GetSummonerByNameTag failed with err: %w", err)
 	}
 
@@ -152,13 +152,16 @@ func (service Service) UpdateSummonerInfo(ctx context.Context, puuid string) err
 	go service.CollectSummonerByPuuid(ctx, summoner.Region, puuid)
 	go service.CollectMatchHistory(ctx, riot.RegionToCluster[summoner.Region], puuid, summoner.MatchesAfterTimestamp.Time)
 
-	service.Queries.SetUpdateTimestamp(ctx, db.SetUpdateTimestampParams{
+	err = service.Queries.SetUpdateTimestamp(ctx, db.SetUpdateTimestampParams{
 		Puuid: puuid,
 		UpdateTimestamp: pgtype.Timestamp{
-			Time:  time.Now(),
+			Time:  time.Now().UTC(),
 			Valid: true,
 		},
 	})
+	if err != nil {
+		return fmt.Errorf("Queries.SetUpdateTimestamp failed with err: %w", err)
+	}
 
 	return nil
 }

@@ -2,6 +2,7 @@ package api
 
 import (
 	"context"
+	"log"
 	"net/http"
 
 	"github.com/jackc/pgx/v5"
@@ -18,6 +19,7 @@ func (env Controller) updateSummoner(w http.ResponseWriter, r *http.Request) {
 	if err == pgx.ErrNoRows {
 		http.Error(w, "summoner not found", 404)
 	} else if err != nil {
+		log.Printf("Service.UpdateSummonerInfo failed with err: %v\n", err)
 		http.Error(w, "something went wrong", 500)
 	}
 }

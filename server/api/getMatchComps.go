@@ -3,6 +3,7 @@ package api
 import (
 	"context"
 	"encoding/json"
+	"log"
 	"net/http"
 )
 
@@ -15,6 +16,7 @@ func (env Controller) getMatchComps(w http.ResponseWriter, r *http.Request) {
 
 	comps, err := env.Service.GetMatchComps(ctx, matchId)
 	if err != nil {
+		log.Printf("Service.GetMatchComps failed with err: %v\n", err)
 		http.Error(w, "something went wrong", 500)
 		return
 	}

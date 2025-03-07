@@ -48,7 +48,7 @@ func (service Service) GetMatchHistory(ctx context.Context, puuid string, limit 
 }
 
 func (service Service) CollectMatchHistory(ctx context.Context, region, puuid string, matchesAfter time.Time) error {
-	updatedAt := time.Now()
+	updatedAt := time.Now().UTC()
 
 	matchIds, err := service.Riot.GetMatchHistory(region, puuid, matchesAfter)
 	if err != nil {

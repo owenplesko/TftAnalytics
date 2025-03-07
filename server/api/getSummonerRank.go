@@ -24,6 +24,7 @@ func (env Controller) getSummonerRank(w http.ResponseWriter, r *http.Request) {
 	}
 	if err != nil {
 		log.Println(err.Error())
+		log.Printf("Service.GetSummonerRank failed with err: %v\n", err)
 		http.Error(w, "something went wrong", 500)
 		return
 	}

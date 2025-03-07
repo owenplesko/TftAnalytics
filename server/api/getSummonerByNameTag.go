@@ -4,6 +4,8 @@ import (
 	"TFTAnalyticsServer/riot"
 	"context"
 	"encoding/json"
+	"errors"
+	"log"
 	"net/http"
 )
 
@@ -17,11 +19,12 @@ func (env Controller) getSummonerByNameTag(w http.ResponseWriter, r *http.Reques
 	tag := r.PathValue("tag")
 
 	summoner, err := env.Service.GetOrCollectSummonerByNameTag(ctx, cluster, name, tag)
-	if err == riot.ErrNotFound {
+	if errors.Is(err, riot.ErrNotFound) {
 		http.Error(w, "summoner not found", 404)
 		return
 	}
 	if err != nil {
+		log.Printf("Service.GetOrCollectSummonerByNameTag failed with err: %v\n", err)
 		http.Error(w, "something went wrong", 500)
 		return
 	}
