@@ -9,17 +9,26 @@ import (
 )
 
 type Service struct {
-	Pool        *pgxpool.Pool
-	Queries     *db.Queries
-	Leaderboard *leaderboard.Leaderboard
-	Riot        *riot.Riot
+	pool        *pgxpool.Pool
+	queries     *db.Queries
+	leaderboard *leaderboard.Leaderboard
+	riot        *riot.Riot
 }
 
 func New(pool *pgxpool.Pool, leaderboard *leaderboard.Leaderboard, riot *riot.Riot) *Service {
 	return &Service{
-		Pool:        pool,
-		Queries:     db.New(pool),
-		Leaderboard: leaderboard,
-		Riot:        riot,
+		pool:        pool,
+		queries:     db.New(pool),
+		leaderboard: leaderboard,
+		riot:        riot,
+	}
+}
+
+func (service *Service) WithRiotRequestPriority(priority int) *Service {
+	return &Service{
+		pool:        service.pool,
+		queries:     service.queries,
+		leaderboard: service.leaderboard,
+		riot:        service.riot.WithRequestPriority(priority),
 	}
 }

@@ -15,7 +15,7 @@ import (
 )
 
 func (service *Service) GetSummonerByPuuid(ctx context.Context, puuid string) (db.TftSummoner, error) {
-	summoner, err := service.Queries.GetSummonerByPuuid(ctx, puuid)
+	summoner, err := service.queries.GetSummonerByPuuid(ctx, puuid)
 	if err != nil {
 		return summoner, fmt.Errorf("Queries.GetSummonerByPuuid failed with err: %w", err)
 	}
@@ -24,7 +24,7 @@ func (service *Service) GetSummonerByPuuid(ctx context.Context, puuid string) (d
 }
 
 func (service *Service) GetOrCollectSummonerByNameTag(ctx context.Context, cluster, name, tag string) (db.TftSummoner, error) {
-	summoner, err := service.Queries.GetSummonerByNameTag(ctx, db.GetSummonerByNameTagParams{
+	summoner, err := service.queries.GetSummonerByNameTag(ctx, db.GetSummonerByNameTagParams{
 		Name: name,
 		Tag:  tag,
 	})
@@ -41,7 +41,7 @@ func (service *Service) GetOrCollectSummonerByNameTag(ctx context.Context, clust
 		return summoner, fmt.Errorf("CollectSummonerByNameTag failed with err: %w", err)
 	}
 
-	summoner, err = service.Queries.GetSummonerByNameTag(ctx, db.GetSummonerByNameTagParams{Name: name, Tag: tag})
+	summoner, err = service.queries.GetSummonerByNameTag(ctx, db.GetSummonerByNameTagParams{Name: name, Tag: tag})
 	if err != nil {
 		return summoner, fmt.Errorf("Queries.GetSummonerByNameTag failed with err: %w", err)
 	}
@@ -50,17 +50,17 @@ func (service *Service) GetOrCollectSummonerByNameTag(ctx context.Context, clust
 }
 
 func (service *Service) CollectSummonerByPuuid(ctx context.Context, region, puuid string) error {
-	account, err := service.Riot.GetAccountByPuuid(riot.RegionToCluster[region], puuid)
+	account, err := service.riot.GetAccountByPuuid(riot.RegionToCluster[region], puuid)
 	if err != nil {
 		return fmt.Errorf("Riot.GetAccountByPuuid failed with err: %w", err)
 	}
 
-	summoner, err := service.Riot.GetSummonerByPuuid(region, puuid)
+	summoner, err := service.riot.GetSummonerByPuuid(region, puuid)
 	if err != nil {
 		return fmt.Errorf("Riot.GetSummonerByPuuid failed with err: %w", err)
 	}
 
-	err = service.Queries.UpsertSummoner(ctx, db.UpsertSummonerParams{
+	err = service.queries.UpsertSummoner(ctx, db.UpsertSummonerParams{
 		Puuid:         summoner.Puuid,
 		Region:        region,
 		Name:          account.Name,
@@ -79,7 +79,7 @@ func (service *Service) CollectSummonerByPuuid(ctx context.Context, region, puui
 }
 
 func (service *Service) CollectSummonerByNameTag(ctx context.Context, cluster, name, tag string) error {
-	account, err := service.Riot.GetAccountByName(cluster, name, tag)
+	account, err := service.riot.GetAccountByName(cluster, name, tag)
 	if err != nil {
 		return fmt.Errorf("Riot.GetAccountByName failed with err: %w", err)
 	}
@@ -89,7 +89,7 @@ func (service *Service) CollectSummonerByNameTag(ctx context.Context, cluster, n
 		return fmt.Errorf("findSummonerRegion failed err: %w", err)
 	}
 
-	err = service.Queries.UpsertSummoner(ctx, db.UpsertSummonerParams{
+	err = service.queries.UpsertSummoner(ctx, db.UpsertSummonerParams{
 		Puuid:         account.Puuid,
 		Region:        region,
 		Name:          account.Name,
@@ -122,7 +122,7 @@ func (service *Service) findSummonerAndRegion(puuid string) (*riot.RiotSummonerR
 
 		go func(region string) {
 			defer wg.Done()
-			if summoner, err := service.Riot.GetSummonerByPuuid(region, puuid); err == nil {
+			if summoner, err := service.riot.GetSummonerByPuuid(region, puuid); err == nil {
 				successChan <- regionSuccessRes{summoner: summoner, region: region}
 			}
 		}(region)
@@ -168,7 +168,7 @@ func (service *Service) UpdateSummonerInfo(ctx context.Context, puuid string) er
 		return fmt.Errorf("CollectMatchHistory failed with err: %w", err)
 	}
 
-	err = service.Queries.SetUpdateTimestamp(ctx, db.SetUpdateTimestampParams{
+	err = service.queries.SetUpdateTimestamp(ctx, db.SetUpdateTimestampParams{
 		Puuid: puuid,
 		UpdateTimestamp: pgtype.Timestamp{
 			Time:  time.Now().UTC(),

@@ -9,7 +9,7 @@ import (
 )
 
 func (service *Service) GetSummonerRank(ctx context.Context, region string, summonerId string) (types.Rank, error) {
-	rank, err := service.Leaderboard.GetRank(ctx, region, summonerId)
+	rank, err := service.leaderboard.GetRank(ctx, region, summonerId)
 	if err != nil {
 		return types.Rank{}, fmt.Errorf("Leaderboard.GetRank failed with err: %w", err)
 	}
@@ -18,7 +18,7 @@ func (service *Service) GetSummonerRank(ctx context.Context, region string, summ
 }
 
 func (service *Service) CollectSummonerRank(ctx context.Context, region, summonerId string) error {
-	rankEntry, err := service.Riot.GetRank(region, summonerId)
+	rankEntry, err := service.riot.GetRank(region, summonerId)
 	if err != nil {
 		return fmt.Errorf("Riot.GetRank failed with err: %w", err)
 	}
@@ -31,7 +31,7 @@ func (service *Service) CollectSummonerRank(ctx context.Context, region, summone
 			LeaguePoints: int(rankEntry.LeaguePoints),
 		}}
 
-	err = service.Leaderboard.SetRank(ctx, region, setRankParam)
+	err = service.leaderboard.SetRank(ctx, region, setRankParam)
 	if err != nil {
 		return fmt.Errorf("Leaderboard.SetRank failed with err: %w", err)
 	}
@@ -45,7 +45,7 @@ func (service *Service) CollectRankEntries(ctx context.Context, region, tier, di
 	page := 0
 	for {
 		page++
-		rankEntries, err := service.Riot.GetRankEntries(region, tier, division, page)
+		rankEntries, err := service.riot.GetRankEntries(region, tier, division, page)
 		if err != nil {
 			return fmt.Errorf("Riot.GetRankEntries failed with err: %w", err)
 		}
@@ -64,7 +64,7 @@ func (service *Service) CollectRankEntries(ctx context.Context, region, tier, di
 				}}
 		}
 
-		err = service.Leaderboard.SetRank(ctx, region, setRankParams...)
+		err = service.leaderboard.SetRank(ctx, region, setRankParams...)
 		if err != nil {
 			return fmt.Errorf("Leaderboard.SetRank failed with err: %w", err)
 		}
@@ -76,7 +76,7 @@ func (service *Service) CollectRankEntries(ctx context.Context, region, tier, di
 }
 
 func (service *Service) CollectApexRankEntries(ctx context.Context, region, tier string) error {
-	rankPage, err := service.Riot.GetApexRankPage(region, tier)
+	rankPage, err := service.riot.GetApexRankPage(region, tier)
 	if err != nil {
 		log.Println(err.Error())
 		return err
@@ -94,7 +94,7 @@ func (service *Service) CollectApexRankEntries(ctx context.Context, region, tier
 		}
 	}
 
-	err = service.Leaderboard.SetRank(ctx, region, setRankParams...)
+	err = service.leaderboard.SetRank(ctx, region, setRankParams...)
 	if err != nil {
 		return fmt.Errorf("Leaderboard.SetRank failed with err: %w", err)
 	}

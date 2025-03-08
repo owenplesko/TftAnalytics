@@ -55,16 +55,18 @@ func main() {
 	rateDuration := time.Duration(rate) * time.Millisecond
 	riotClient := riot.New(os.Getenv("RIOT_KEY"), rateDuration)
 
-	// start collection loops
+	// create service
 	service := services.New(pool, leaderboard, riotClient)
+
+	// start collection loops
 	for region := range riot.RegionToCluster {
 		go service.RankEntryCollectionLoop(context.Background(), region)
 		go service.MatchCollectionLoop(context.Background(), region)
 	}
 
 	// start api
-	api := api.Controller{
-		Service: services.New(pool, leaderboard, riotClient.WithRequestPriority(1)),
+	controller := api.Controller{
+		Service: service.WithRiotRequestPriority(1),
 	}
-	http.ListenAndServe(":8080", api.New())
+	http.ListenAndServe(":8080", api.New(controller))
 }

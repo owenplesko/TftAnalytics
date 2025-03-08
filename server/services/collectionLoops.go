@@ -12,7 +12,7 @@ func (service *Service) MatchCollectionLoop(ctx context.Context, region string) 
 	backoffTime := time.NewTicker(time.Second * 5)
 
 	for range backoffTime.C {
-		summoners, err := service.Queries.GetOldestMatchesAfter(ctx, db.GetOldestMatchesAfterParams{
+		summoners, err := service.queries.GetOldestMatchesAfter(ctx, db.GetOldestMatchesAfterParams{
 			Limit:  100,
 			Region: region,
 		})

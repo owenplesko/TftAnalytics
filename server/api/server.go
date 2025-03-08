@@ -9,7 +9,7 @@ type Controller struct {
 	Service *services.Service
 }
 
-func (controller Controller) New() *http.ServeMux {
+func New(controller Controller) *http.ServeMux {
 	router := http.NewServeMux()
 	router.HandleFunc("/v1/summoner/by-puuid/{puuid}", controller.getSummonerByPuuid)
 	router.HandleFunc("/v1/summoner/by-name-tag/{name}/{tag}", controller.getSummonerByNameTag)

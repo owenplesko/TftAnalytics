@@ -13,7 +13,7 @@ import (
 )
 
 func (service *Service) GetMatchComps(ctx context.Context, matchId string) ([]db.GetMatchCompsRow, error) {
-	comps, err := service.Queries.GetMatchComps(ctx, matchId)
+	comps, err := service.queries.GetMatchComps(ctx, matchId)
 	if err != nil {
 		return []db.GetMatchCompsRow{}, fmt.Errorf("Queries.GetMatchComps failed with err: %w", err)
 	}
@@ -27,7 +27,7 @@ func (service *Service) GetMatchComps(ctx context.Context, matchId string) ([]db
 }
 
 func (service *Service) GetMatchHistory(ctx context.Context, puuid string, limit int32, after time.Time) ([]db.SummonerMatchHistoryRow, error) {
-	matches, err := service.Queries.SummonerMatchHistory(context.Background(), db.SummonerMatchHistoryParams{
+	matches, err := service.queries.SummonerMatchHistory(context.Background(), db.SummonerMatchHistoryParams{
 		SummonerPuuid: puuid,
 		Limit:         limit,
 		After: pgtype.Timestamp{
@@ -50,13 +50,13 @@ func (service *Service) GetMatchHistory(ctx context.Context, puuid string, limit
 func (service *Service) CollectMatchHistory(ctx context.Context, region, puuid string, matchesAfter time.Time) error {
 	updatedAt := time.Now().UTC()
 
-	matchIds, err := service.Riot.GetMatchHistory(riot.RegionToCluster[region], puuid, matchesAfter)
+	matchIds, err := service.riot.GetMatchHistory(riot.RegionToCluster[region], puuid, matchesAfter)
 	if err != nil {
 		return fmt.Errorf("Riot.GetMatchHistory failed with err: %w", err)
 	}
 
 	for _, matchId := range matchIds {
-		if exists, _ := service.Queries.MatchExists(ctx, matchId); !exists {
+		if exists, _ := service.queries.MatchExists(ctx, matchId); !exists {
 			err = service.CollectMatchDetails(ctx, region, matchId)
 			if err != nil {
 				// TODO: explore returning CollectMatchDetails err
@@ -65,7 +65,7 @@ func (service *Service) CollectMatchHistory(ctx context.Context, region, puuid s
 		}
 	}
 
-	err = service.Queries.SetMatchesAfterTimestamp(ctx, db.SetMatchesAfterTimestampParams{
+	err = service.queries.SetMatchesAfterTimestamp(ctx, db.SetMatchesAfterTimestampParams{
 		Puuid: puuid,
 		MatchesAfterTimestamp: pgtype.Timestamp{
 			Time:  updatedAt,
@@ -80,13 +80,13 @@ func (service *Service) CollectMatchHistory(ctx context.Context, region, puuid s
 }
 
 func (service *Service) CollectMatchDetails(ctx context.Context, region, matchId string) error {
-	match, err := service.Riot.GetMatchDetails(riot.RegionToCluster[region], matchId)
+	match, err := service.riot.GetMatchDetails(riot.RegionToCluster[region], matchId)
 	if err != nil {
 		return fmt.Errorf("Riot.GetMatchDetails failed with err: %w", err)
 	}
 
 	for _, puuid := range match.MetaData.Participants {
-		if exists, _ := service.Queries.SummonerExistsByPuuid(ctx, puuid); !exists {
+		if exists, _ := service.queries.SummonerExistsByPuuid(ctx, puuid); !exists {
 			err = service.CollectSummonerByPuuid(ctx, region, puuid)
 			if err != nil {
 				log.Printf("error in CollectMatchDetails collecting summoner with puuid %v from match %v: CollectSummonerByPuuid failed with err: %v", puuid, matchId, err)
@@ -108,13 +108,13 @@ func (service *Service) storeMatchDetails(ctx context.Context, matchDetails *rio
 	var err error
 
 	// comp and matches inserted in one transaction
-	tx, err := service.Pool.Begin(ctx)
+	tx, err := service.pool.Begin(ctx)
 	if err != nil {
 		return fmt.Errorf("failed to create db transaction: %w", err)
 	}
 	defer tx.Rollback(ctx)
 
-	qtx := service.Queries.WithTx(tx)
+	qtx := service.queries.WithTx(tx)
 
 	// insert match
 	matchDate := pgtype.Timestamp{
