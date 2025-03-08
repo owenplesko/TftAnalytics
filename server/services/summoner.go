@@ -14,7 +14,7 @@ import (
 	"github.com/jackc/pgx/v5/pgtype"
 )
 
-func (service Service) GetSummonerByPuuid(ctx context.Context, puuid string) (db.TftSummoner, error) {
+func (service *Service) GetSummonerByPuuid(ctx context.Context, puuid string) (db.TftSummoner, error) {
 	summoner, err := service.Queries.GetSummonerByPuuid(ctx, puuid)
 	if err != nil {
 		return summoner, fmt.Errorf("Queries.GetSummonerByPuuid failed with err: %w", err)
@@ -23,7 +23,7 @@ func (service Service) GetSummonerByPuuid(ctx context.Context, puuid string) (db
 	return summoner, nil
 }
 
-func (service Service) GetOrCollectSummonerByNameTag(ctx context.Context, cluster, name, tag string) (db.TftSummoner, error) {
+func (service *Service) GetOrCollectSummonerByNameTag(ctx context.Context, cluster, name, tag string) (db.TftSummoner, error) {
 	summoner, err := service.Queries.GetSummonerByNameTag(ctx, db.GetSummonerByNameTagParams{
 		Name: name,
 		Tag:  tag,
@@ -49,7 +49,7 @@ func (service Service) GetOrCollectSummonerByNameTag(ctx context.Context, cluste
 	return summoner, nil
 }
 
-func (service Service) CollectSummonerByPuuid(ctx context.Context, region, puuid string) error {
+func (service *Service) CollectSummonerByPuuid(ctx context.Context, region, puuid string) error {
 	account, err := service.Riot.GetAccountByPuuid(riot.RegionToCluster[region], puuid)
 	if err != nil {
 		return fmt.Errorf("Riot.GetAccountByPuuid failed with err: %w", err)
@@ -78,7 +78,7 @@ func (service Service) CollectSummonerByPuuid(ctx context.Context, region, puuid
 	return nil
 }
 
-func (service Service) CollectSummonerByNameTag(ctx context.Context, cluster, name, tag string) error {
+func (service *Service) CollectSummonerByNameTag(ctx context.Context, cluster, name, tag string) error {
 	account, err := service.Riot.GetAccountByName(cluster, name, tag)
 	if err != nil {
 		return fmt.Errorf("Riot.GetAccountByName failed with err: %w", err)
@@ -114,7 +114,7 @@ type regionSuccessRes struct {
 
 // TODO: explore passing riot errors on no region found
 // should implement request retrying for riot requests first tho..
-func (service Service) findSummonerAndRegion(puuid string) (*riot.RiotSummonerRes, string, error) {
+func (service *Service) findSummonerAndRegion(puuid string) (*riot.RiotSummonerRes, string, error) {
 	wg := sync.WaitGroup{}
 	successChan := make(chan regionSuccessRes)
 	for region := range riot.RegionToCluster {
@@ -142,7 +142,7 @@ func (service Service) findSummonerAndRegion(puuid string) (*riot.RiotSummonerRe
 }
 
 // TODO revamp this to have states and better error handling and stuff
-func (service Service) UpdateSummonerInfo(ctx context.Context, puuid string) error {
+func (service *Service) UpdateSummonerInfo(ctx context.Context, puuid string) error {
 	summoner, err := service.GetSummonerByPuuid(ctx, puuid)
 	if err != nil {
 		return fmt.Errorf("GetSummonerByPuuid failed with err: %w", err)

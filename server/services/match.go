@@ -12,7 +12,7 @@ import (
 	"github.com/jackc/pgx/v5/pgtype"
 )
 
-func (service Service) GetMatchComps(ctx context.Context, matchId string) ([]db.GetMatchCompsRow, error) {
+func (service *Service) GetMatchComps(ctx context.Context, matchId string) ([]db.GetMatchCompsRow, error) {
 	comps, err := service.Queries.GetMatchComps(ctx, matchId)
 	if err != nil {
 		return []db.GetMatchCompsRow{}, fmt.Errorf("Queries.GetMatchComps failed with err: %w", err)
@@ -26,7 +26,7 @@ func (service Service) GetMatchComps(ctx context.Context, matchId string) ([]db.
 	return comps, nil
 }
 
-func (service Service) GetMatchHistory(ctx context.Context, puuid string, limit int32, after time.Time) ([]db.SummonerMatchHistoryRow, error) {
+func (service *Service) GetMatchHistory(ctx context.Context, puuid string, limit int32, after time.Time) ([]db.SummonerMatchHistoryRow, error) {
 	matches, err := service.Queries.SummonerMatchHistory(context.Background(), db.SummonerMatchHistoryParams{
 		SummonerPuuid: puuid,
 		Limit:         limit,
@@ -47,7 +47,7 @@ func (service Service) GetMatchHistory(ctx context.Context, puuid string, limit 
 	return matches, nil
 }
 
-func (service Service) CollectMatchHistory(ctx context.Context, region, puuid string, matchesAfter time.Time) error {
+func (service *Service) CollectMatchHistory(ctx context.Context, region, puuid string, matchesAfter time.Time) error {
 	updatedAt := time.Now().UTC()
 
 	matchIds, err := service.Riot.GetMatchHistory(riot.RegionToCluster[region], puuid, matchesAfter)
@@ -79,7 +79,7 @@ func (service Service) CollectMatchHistory(ctx context.Context, region, puuid st
 	return nil
 }
 
-func (service Service) CollectMatchDetails(ctx context.Context, region, matchId string) error {
+func (service *Service) CollectMatchDetails(ctx context.Context, region, matchId string) error {
 	match, err := service.Riot.GetMatchDetails(riot.RegionToCluster[region], matchId)
 	if err != nil {
 		return fmt.Errorf("Riot.GetMatchDetails failed with err: %w", err)
@@ -104,7 +104,7 @@ func (service Service) CollectMatchDetails(ctx context.Context, region, matchId 
 	return nil
 }
 
-func (service Service) storeMatchDetails(ctx context.Context, matchDetails *riot.Match) error {
+func (service *Service) storeMatchDetails(ctx context.Context, matchDetails *riot.Match) error {
 	var err error
 
 	// comp and matches inserted in one transaction

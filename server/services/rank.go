@@ -8,7 +8,7 @@ import (
 	"log"
 )
 
-func (service Service) GetSummonerRank(ctx context.Context, region string, summonerId string) (types.Rank, error) {
+func (service *Service) GetSummonerRank(ctx context.Context, region string, summonerId string) (types.Rank, error) {
 	rank, err := service.Leaderboard.GetRank(ctx, region, summonerId)
 	if err != nil {
 		return types.Rank{}, fmt.Errorf("Leaderboard.GetRank failed with err: %w", err)
@@ -17,7 +17,7 @@ func (service Service) GetSummonerRank(ctx context.Context, region string, summo
 	return rank, nil
 }
 
-func (service Service) CollectSummonerRank(ctx context.Context, region, summonerId string) error {
+func (service *Service) CollectSummonerRank(ctx context.Context, region, summonerId string) error {
 	rankEntry, err := service.Riot.GetRank(region, summonerId)
 	if err != nil {
 		return fmt.Errorf("Riot.GetRank failed with err: %w", err)
@@ -41,7 +41,7 @@ func (service Service) CollectSummonerRank(ctx context.Context, region, summoner
 	return nil
 }
 
-func (service Service) CollectRankEntries(ctx context.Context, region, tier, division string) error {
+func (service *Service) CollectRankEntries(ctx context.Context, region, tier, division string) error {
 	page := 0
 	for {
 		page++
@@ -75,7 +75,7 @@ func (service Service) CollectRankEntries(ctx context.Context, region, tier, div
 	return nil
 }
 
-func (service Service) CollectApexRankEntries(ctx context.Context, region, tier string) error {
+func (service *Service) CollectApexRankEntries(ctx context.Context, region, tier string) error {
 	rankPage, err := service.Riot.GetApexRankPage(region, tier)
 	if err != nil {
 		log.Println(err.Error())

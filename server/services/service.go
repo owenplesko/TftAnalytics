@@ -14,3 +14,12 @@ type Service struct {
 	Leaderboard *leaderboard.Leaderboard
 	Riot        *riot.Riot
 }
+
+func New(pool *pgxpool.Pool, leaderboard *leaderboard.Leaderboard, riot *riot.Riot) *Service {
+	return &Service{
+		Pool:        pool,
+		Queries:     db.New(pool),
+		Leaderboard: leaderboard,
+		Riot:        riot,
+	}
+}

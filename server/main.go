@@ -2,7 +2,6 @@ package main
 
 import (
 	"TFTAnalyticsServer/api"
-	"TFTAnalyticsServer/db"
 	"TFTAnalyticsServer/leaderboard"
 	"TFTAnalyticsServer/riot"
 	"TFTAnalyticsServer/services"
@@ -20,8 +19,7 @@ import (
 )
 
 func main() {
-	ctx := context.Background()
-
+	// load .env file
 	err := godotenv.Load()
 	if err != nil {
 		log.Println("no .env file found")
@@ -29,7 +27,8 @@ func main() {
 		log.Println(".env file loaded")
 	}
 
-	pool, err := pgxpool.New(ctx, os.Getenv("DB_URL"))
+	// create database connection
+	pool, err := pgxpool.New(context.Background(), os.Getenv("DB_URL"))
 	if err != nil {
 		panic(err)
 	}
@@ -38,42 +37,34 @@ func main() {
 	}
 	log.Println("Db connection successful")
 
-	queries := db.New(pool)
-
+	// create leaderboard connection
 	rdb := redis.NewClient(&redis.Options{
 		Addr: os.Getenv("LEADERBOARD_URL"),
 	})
 	if err = rdb.Ping(context.Background()).Err(); err != nil {
 		panic(err)
 	}
+	leaderboard := leaderboard.New(rdb)
 	log.Println("Leaderboard connection successful")
 
-	leaderboard := leaderboard.New(rdb)
-
-	riotApiKey := os.Getenv("RIOT_KEY")
-
+	// create riot client
 	rate, err := strconv.ParseFloat(os.Getenv("RIOT_RATE"), 32)
 	if err != nil {
 		panic("RIOT_RATE not set properly")
 	}
 	rateDuration := time.Duration(rate) * time.Millisecond
-	riotClient := riot.New(riotApiKey, rateDuration)
+	riotClient := riot.New(os.Getenv("RIOT_KEY"), rateDuration)
 
-	service := services.Service{
-		Pool:        pool,
-		Queries:     queries,
-		Leaderboard: leaderboard,
-		Riot:        riotClient,
-	}
-
+	// start collection loops
+	service := services.New(pool, leaderboard, riotClient)
 	for region := range riot.RegionToCluster {
 		go service.RankEntryCollectionLoop(context.Background(), region)
 		go service.MatchCollectionLoop(context.Background(), region)
 	}
 
-	service.Riot = riotClient.WithRequestPriority(1)
-	apiEnv := api.Controller{
-		Service: service,
+	// start api
+	api := api.Controller{
+		Service: services.New(pool, leaderboard, riotClient.WithRequestPriority(1)),
 	}
-	http.ListenAndServe(":8080", apiEnv.New())
+	http.ListenAndServe(":8080", api.New())
 }

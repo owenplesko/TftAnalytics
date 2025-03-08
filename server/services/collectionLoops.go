@@ -8,7 +8,7 @@ import (
 	"time"
 )
 
-func (service Service) MatchCollectionLoop(ctx context.Context, region string) {
+func (service *Service) MatchCollectionLoop(ctx context.Context, region string) {
 	backoffTime := time.NewTicker(time.Second * 5)
 
 	for range backoffTime.C {
@@ -36,7 +36,7 @@ func (service Service) MatchCollectionLoop(ctx context.Context, region string) {
 	}
 }
 
-func (service Service) RankEntryCollectionLoop(ctx context.Context, region string) {
+func (service *Service) RankEntryCollectionLoop(ctx context.Context, region string) {
 	backoffTicker := time.NewTicker(time.Minute * 20)
 
 	for range backoffTicker.C {

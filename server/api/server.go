@@ -6,7 +6,7 @@ import (
 )
 
 type Controller struct {
-	Service services.Service
+	Service *services.Service
 }
 
 func (controller Controller) New() *http.ServeMux {
