@@ -6,6 +6,7 @@ import (
 	"log"
 	"net/http"
 	"strings"
+	"time"
 )
 
 type Riot struct {
@@ -14,11 +15,19 @@ type Riot struct {
 	requestPriority int
 }
 
-func New(apiKey string, rateLimiter RateLimiter, requestPriority int) *Riot {
+func New(apiKey string, rateDuration time.Duration) *Riot {
 	return &Riot{
 		apiKey:          apiKey,
-		rateLimiter:     rateLimiter,
-		requestPriority: requestPriority,
+		rateLimiter:     newRateLimiter(rateDuration),
+		requestPriority: 0,
+	}
+}
+
+func (r *Riot) WithRequestPriority(priority int) *Riot {
+	return &Riot{
+		apiKey:          r.apiKey,
+		rateLimiter:     r.rateLimiter,
+		requestPriority: priority,
 	}
 }
 

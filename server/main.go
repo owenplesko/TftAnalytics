@@ -57,9 +57,7 @@ func main() {
 		panic("RIOT_RATE not set properly")
 	}
 	rateDuration := time.Duration(rate) * time.Millisecond
-
-	riotRateLimiter := riot.NewRateLimiter(rateDuration)
-	riotClient := riot.New(riotApiKey, riotRateLimiter, 0)
+	riotClient := riot.New(riotApiKey, rateDuration)
 
 	service := services.Service{
 		Pool:        pool,
@@ -73,7 +71,7 @@ func main() {
 		go service.MatchCollectionLoop(context.Background(), region)
 	}
 
-	service.Riot = riot.New(riotApiKey, riotRateLimiter, 10)
+	service.Riot = riotClient.WithRequestPriority(1)
 	apiEnv := api.Controller{
 		Service: service,
 	}
