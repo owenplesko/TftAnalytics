@@ -8,10 +8,8 @@ import (
 	"time"
 )
 
-func (env Controller) getSummonerMatches(w http.ResponseWriter, r *http.Request) {
+func (controller Controller) getSummonerMatches(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
-
-	w.Header().Set("Access-Control-Allow-Origin", "*")
 
 	puuid := r.PathValue("puuid")
 
@@ -43,7 +41,7 @@ func (env Controller) getSummonerMatches(w http.ResponseWriter, r *http.Request)
 		}
 	}
 
-	matches, err := env.Service.GetMatchHistory(ctx, puuid, int32(limit), after)
+	matches, err := controller.Service.GetMatchHistory(ctx, puuid, int32(limit), after)
 	if err != nil {
 		log.Printf("Service.GetMatchHistory failed with err: %v\n", err)
 		http.Error(w, "something went wrong", 500)

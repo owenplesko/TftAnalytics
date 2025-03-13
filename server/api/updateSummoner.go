@@ -8,14 +8,12 @@ import (
 	"github.com/jackc/pgx/v5"
 )
 
-func (env Controller) updateSummoner(w http.ResponseWriter, r *http.Request) {
+func (controller Controller) updateSummoner(w http.ResponseWriter, r *http.Request) {
 	ctx := context.WithoutCancel(r.Context())
-
-	w.Header().Set("Access-Control-Allow-Origin", "*")
 
 	puuid := r.PathValue("puuid")
 
-	err := env.Service.UpdateSummonerInfo(ctx, puuid)
+	err := controller.Service.UpdateSummonerInfo(ctx, puuid)
 	if err == pgx.ErrNoRows {
 		http.Error(w, "summoner not found", 404)
 	} else if err != nil {

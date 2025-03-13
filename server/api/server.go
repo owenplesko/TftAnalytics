@@ -1,21 +1,12 @@
 package api
 
 import (
-	"TFTAnalyticsServer/riot/scheduler"
 	"TFTAnalyticsServer/services"
 	"net/http"
 )
 
 type Controller struct {
 	Service *services.Service
-}
-
-func setSchedulerPriority(next http.Handler, priority int) http.Handler {
-	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		ctx := r.Context()
-		ctx = scheduler.WithPriority(ctx, priority)
-		next.ServeHTTP(w, r.WithContext(ctx))
-	})
 }
 
 func (controller Controller) New() *http.ServeMux {
@@ -28,7 +19,7 @@ func (controller Controller) New() *http.ServeMux {
 	router.HandleFunc("/v1/match/{matchid}/comps", controller.getMatchComps)
 
 	root := http.NewServeMux()
-	root.Handle("/", setSchedulerPriority(router, 1))
+	root.Handle("/", setCors(setSchedulerPriority(router)))
 
 	return root
 }
