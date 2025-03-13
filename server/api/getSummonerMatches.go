@@ -23,7 +23,7 @@ func (controller Controller) getSummonerMatches(w http.ResponseWriter, r *http.R
 		limit, err = strconv.ParseInt(limitParamArr[0], 10, 32)
 
 		if err != nil || limit < 0 {
-			http.Error(w, "bad limit param", 400)
+			http.Error(w, "bad limit param", http.StatusBadRequest)
 			return
 		}
 	}
@@ -36,7 +36,7 @@ func (controller Controller) getSummonerMatches(w http.ResponseWriter, r *http.R
 		after, err = time.Parse(layout, afterParamArr[0])
 
 		if err != nil {
-			http.Error(w, "bad after param", 400)
+			http.Error(w, "bad after param", http.StatusBadRequest)
 			return
 		}
 	}
@@ -44,7 +44,7 @@ func (controller Controller) getSummonerMatches(w http.ResponseWriter, r *http.R
 	matches, err := controller.Service.GetMatchHistory(ctx, puuid, int32(limit), after)
 	if err != nil {
 		log.Printf("Service.GetMatchHistory failed with err: %v\n", err)
-		http.Error(w, "something went wrong", 500)
+		http.Error(w, "something went wrong", http.StatusInternalServerError)
 		return
 	}
 

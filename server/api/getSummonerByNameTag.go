@@ -18,12 +18,12 @@ func (controller Controller) getSummonerByNameTag(w http.ResponseWriter, r *http
 
 	summoner, err := controller.Service.GetOrCollectSummonerByNameTag(ctx, cluster, name, tag)
 	if errors.Is(err, riot.ErrNotFound) {
-		http.Error(w, "summoner not found", 404)
+		http.Error(w, "summoner not found", http.StatusNotFound)
 		return
 	}
 	if err != nil {
 		log.Printf("Service.GetOrCollectSummonerByNameTag failed with err: %v\n", err)
-		http.Error(w, "something went wrong", 500)
+		http.Error(w, "something went wrong", http.StatusInternalServerError)
 		return
 	}
 

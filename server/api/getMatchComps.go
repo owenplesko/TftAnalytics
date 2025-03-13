@@ -14,7 +14,7 @@ func (controller Controller) getMatchComps(w http.ResponseWriter, r *http.Reques
 	comps, err := controller.Service.GetMatchComps(ctx, matchId)
 	if err != nil {
 		log.Printf("Service.GetMatchComps failed with err: %v\n", err)
-		http.Error(w, "something went wrong", 500)
+		http.Error(w, "something went wrong", http.StatusInternalServerError)
 		return
 	}
 

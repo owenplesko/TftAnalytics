@@ -16,13 +16,13 @@ func (controller Controller) getSummonerRank(w http.ResponseWriter, r *http.Requ
 
 	rankEntry, err := controller.Service.GetSummonerRank(ctx, region, summonerId)
 	if err == pgx.ErrNoRows {
-		http.Error(w, "rank not found", 404)
+		http.Error(w, "rank not found", http.StatusNotFound)
 		return
 	}
 	if err != nil {
 		log.Println(err.Error())
 		log.Printf("Service.GetSummonerRank failed with err: %v\n", err)
-		http.Error(w, "something went wrong", 500)
+		http.Error(w, "something went wrong", http.StatusInternalServerError)
 		return
 	}
 

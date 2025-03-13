@@ -15,9 +15,11 @@ func (controller Controller) updateSummoner(w http.ResponseWriter, r *http.Reque
 
 	err := controller.Service.UpdateSummonerInfo(ctx, puuid)
 	if err == pgx.ErrNoRows {
-		http.Error(w, "summoner not found", 404)
+		http.Error(w, "summoner not found", http.StatusNotFound)
 	} else if err != nil {
 		log.Printf("Service.UpdateSummonerInfo failed with err: %v\n", err)
-		http.Error(w, "something went wrong", 500)
+		http.Error(w, "something went wrong", http.StatusInternalServerError)
 	}
+
+	w.Write([]byte("updated"))
 }

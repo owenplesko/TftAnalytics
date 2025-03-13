@@ -156,7 +156,8 @@ func (service *Service) UpdateSummonerInfo(ctx context.Context, puuid string) er
 	}
 
 	err = service.CollectSummonerRank(ctx, summoner.Region, summoner.SummonerID)
-	if err != nil {
+	// riot.ErrNotFound is an expected error and should not cause UpdateSummonerInfo to fail
+	if err != nil && !errors.Is(err, riot.ErrNotFound) {
 		return fmt.Errorf("CollectSummonerRank failed with err: %w", err)
 	}
 	err = service.CollectSummonerByPuuid(ctx, summoner.Region, puuid)
