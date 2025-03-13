@@ -1,8 +1,6 @@
 import { rankSchema } from "./types";
 
-type Params = { summonerId: string; region: string };
-
-export async function getRank({ summonerId, region }: Params) {
+export async function getRank(region: string, summonerId: string) {
   const url = `${import.meta.env.VITE_BACKEND_URL}/v1/leaderboard/${region}/${summonerId}`;
   const res = await fetch(url);
   if (res.status == 404) return null;

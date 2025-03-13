@@ -50,6 +50,8 @@ export const compDataSchema = z.object({
   units: unitSchema.array(),
 });
 
+export type CompData = z.infer<typeof compDataSchema>
+
 export const matchSchema = z.object({
   id: z.string(),
   gameVersion: z.string(),
@@ -65,6 +67,13 @@ export const summonerMatchSchema = z.object({
 });
 
 export type SummonerMatch = z.infer<typeof summonerMatchSchema>;
+
+export const matchCompSchema = z.object({
+  compData: compDataSchema,
+  tftSummoner: summonerSchema
+})
+
+export type MatchComp = z.infer<typeof matchCompSchema>
 
 export const rankDataSchema = z.object({
   tier: z.enum([
