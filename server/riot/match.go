@@ -1,6 +1,7 @@
 package riot
 
 import (
+	"context"
 	"fmt"
 	"time"
 )
@@ -53,21 +54,21 @@ type Comp struct {
 	} `json:"units"`
 }
 
-func (c *Riot) GetMatchDetails(cluster, matchId string) (*Match, error) {
+func (c *Riot) GetMatchDetails(ctx context.Context, cluster, matchId string) (*Match, error) {
 	matchRes := new(Match)
 
 	route := fmt.Sprintf("tft/match/v1/matches/%v", matchId)
-	err := c.request(cluster, route, matchRes)
+	err := c.request(ctx, cluster, route, matchRes)
 
 	return matchRes, err
 }
 
-func (c *Riot) GetMatchHistory(cluster string, puuid string, matchesAfter time.Time) ([]string, error) {
+func (c *Riot) GetMatchHistory(ctx context.Context, cluster string, puuid string, matchesAfter time.Time) ([]string, error) {
 	var history []string
 
 	count := 200
 	route := fmt.Sprintf("tft/match/v1/matches/by-puuid/%v/ids?count=%v&startTime=%v", puuid, count, matchesAfter.Unix())
-	err := c.request(cluster, route, &history)
+	err := c.request(ctx, cluster, route, &history)
 
 	return history, err
 }

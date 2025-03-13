@@ -1,14 +1,13 @@
 package api
 
 import (
-	"context"
 	"encoding/json"
 	"log"
 	"net/http"
 )
 
 func (env Controller) getMatchComps(w http.ResponseWriter, r *http.Request) {
-	ctx := context.Background()
+	ctx := r.Context()
 
 	w.Header().Set("Access-Control-Allow-Origin", "*")
 

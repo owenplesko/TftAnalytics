@@ -1,33 +1,34 @@
 package riot
 
 import (
-	"TFTAnalyticsServer/riot/limiter"
+	"TFTAnalyticsServer/riot/scheduler"
+	"context"
 	"fmt"
 	"time"
 )
 
-type RateLimiter map[string]*limiter.Limiter
+type RateLimiter map[string]*scheduler.Scheduler
 
-func newRateLimiter(rateDuration time.Duration) map[string]*limiter.Limiter {
-	limiters := make(map[string]*limiter.Limiter)
+func newRateLimiter(rateDuration time.Duration) map[string]*scheduler.Scheduler {
+	limiters := make(map[string]*scheduler.Scheduler)
 
 	for cluster := range ClusterToRegions {
-		limiters[cluster] = limiter.New(rateDuration)
+		limiters[cluster] = scheduler.New(rateDuration)
 	}
 	for region := range RegionToCluster {
-		limiters[region] = limiter.New(rateDuration)
+		limiters[region] = scheduler.New(rateDuration)
 	}
 
 	return limiters
 }
 
-func (limters RateLimiter) Wait(server string, priority int) error {
+func (limters RateLimiter) Wait(ctx context.Context, server string) error {
 	limiter, ok := limters[server]
 	if !ok {
 		return fmt.Errorf("no limiter found for server: %v", server)
 	}
 
-	<-limiter.Wait(priority)
+	<-limiter.Wait(ctx)
 
 	return nil
 }

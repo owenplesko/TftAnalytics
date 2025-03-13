@@ -1,6 +1,7 @@
 package riot
 
 import (
+	"context"
 	"fmt"
 )
 
@@ -10,7 +11,7 @@ type Account struct {
 	Tag   string `json:"tagLine"`
 }
 
-func (c *Riot) GetAccountByName(cluster string, name string, tag string) (*Account, error) {
+func (c *Riot) GetAccountByName(ctx context.Context, cluster string, name string, tag string) (*Account, error) {
 	// QUICK FIX: sea and asia are merged for account route
 	if cluster == "sea" {
 		cluster = "asia"
@@ -18,7 +19,7 @@ func (c *Riot) GetAccountByName(cluster string, name string, tag string) (*Accou
 
 	accountRes := new(Account)
 	route := fmt.Sprintf("riot/account/v1/accounts/by-riot-id/%v/%v", name, tag)
-	err := c.request(cluster, route, accountRes)
+	err := c.request(ctx, cluster, route, accountRes)
 	if err != nil {
 		return nil, err
 	}
@@ -26,7 +27,7 @@ func (c *Riot) GetAccountByName(cluster string, name string, tag string) (*Accou
 	return accountRes, err
 }
 
-func (c *Riot) GetAccountByPuuid(cluster string, puuid string) (*Account, error) {
+func (c *Riot) GetAccountByPuuid(ctx context.Context, cluster string, puuid string) (*Account, error) {
 	// QUICK FIX: sea and asia are merged for account route
 	if cluster == "sea" {
 		cluster = "asia"
@@ -34,7 +35,7 @@ func (c *Riot) GetAccountByPuuid(cluster string, puuid string) (*Account, error)
 
 	accountRes := new(Account)
 	route := fmt.Sprintf("riot/account/v1/accounts/by-puuid/%v", puuid)
-	err := c.request(cluster, route, accountRes)
+	err := c.request(ctx, cluster, route, accountRes)
 	if err != nil {
 		return nil, err
 	}

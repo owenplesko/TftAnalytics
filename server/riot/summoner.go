@@ -1,6 +1,7 @@
 package riot
 
 import (
+	"context"
 	"fmt"
 )
 
@@ -13,11 +14,11 @@ type RiotSummonerRes struct {
 	SummonerLevel int32  `json:"summonerLevel"`
 }
 
-func (c *Riot) GetSummonerByPuuid(region string, puuid string) (*RiotSummonerRes, error) {
+func (c *Riot) GetSummonerByPuuid(ctx context.Context, region string, puuid string) (*RiotSummonerRes, error) {
 	summonerRes := new(RiotSummonerRes)
 
 	route := fmt.Sprintf("tft/summoner/v1/summoners/by-puuid/%v", puuid)
-	err := c.request(region, route, summonerRes)
+	err := c.request(ctx, region, route, summonerRes)
 
 	return summonerRes, err
 }

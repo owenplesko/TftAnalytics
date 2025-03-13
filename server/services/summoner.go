@@ -50,12 +50,12 @@ func (service *Service) GetOrCollectSummonerByNameTag(ctx context.Context, clust
 }
 
 func (service *Service) CollectSummonerByPuuid(ctx context.Context, region, puuid string) error {
-	account, err := service.riot.GetAccountByPuuid(riot.RegionToCluster[region], puuid)
+	account, err := service.riot.GetAccountByPuuid(ctx, riot.RegionToCluster[region], puuid)
 	if err != nil {
 		return fmt.Errorf("Riot.GetAccountByPuuid failed with err: %w", err)
 	}
 
-	summoner, err := service.riot.GetSummonerByPuuid(region, puuid)
+	summoner, err := service.riot.GetSummonerByPuuid(ctx, region, puuid)
 	if err != nil {
 		return fmt.Errorf("Riot.GetSummonerByPuuid failed with err: %w", err)
 	}
@@ -79,12 +79,12 @@ func (service *Service) CollectSummonerByPuuid(ctx context.Context, region, puui
 }
 
 func (service *Service) CollectSummonerByNameTag(ctx context.Context, cluster, name, tag string) error {
-	account, err := service.riot.GetAccountByName(cluster, name, tag)
+	account, err := service.riot.GetAccountByName(ctx, cluster, name, tag)
 	if err != nil {
 		return fmt.Errorf("Riot.GetAccountByName failed with err: %w", err)
 	}
 
-	summoner, region, err := service.findSummonerAndRegion(account.Puuid)
+	summoner, region, err := service.findSummonerAndRegion(ctx, account.Puuid)
 	if err != nil {
 		return fmt.Errorf("findSummonerRegion failed err: %w", err)
 	}
@@ -114,7 +114,7 @@ type regionSuccessRes struct {
 
 // TODO: explore passing riot errors on no region found
 // should implement request retrying for riot requests first tho..
-func (service *Service) findSummonerAndRegion(puuid string) (*riot.RiotSummonerRes, string, error) {
+func (service *Service) findSummonerAndRegion(ctx context.Context, puuid string) (*riot.RiotSummonerRes, string, error) {
 	wg := sync.WaitGroup{}
 	successChan := make(chan regionSuccessRes)
 	for region := range riot.RegionToCluster {
@@ -122,7 +122,7 @@ func (service *Service) findSummonerAndRegion(puuid string) (*riot.RiotSummonerR
 
 		go func(region string) {
 			defer wg.Done()
-			if summoner, err := service.riot.GetSummonerByPuuid(region, puuid); err == nil {
+			if summoner, err := service.riot.GetSummonerByPuuid(ctx, region, puuid); err == nil {
 				successChan <- regionSuccessRes{summoner: summoner, region: region}
 			}
 		}(region)

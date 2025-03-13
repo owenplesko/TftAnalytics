@@ -50,7 +50,7 @@ func (service *Service) GetMatchHistory(ctx context.Context, puuid string, limit
 func (service *Service) CollectMatchHistory(ctx context.Context, region, puuid string, matchesAfter time.Time) error {
 	updatedAt := time.Now().UTC()
 
-	matchIds, err := service.riot.GetMatchHistory(riot.RegionToCluster[region], puuid, matchesAfter)
+	matchIds, err := service.riot.GetMatchHistory(ctx, riot.RegionToCluster[region], puuid, matchesAfter)
 	if err != nil {
 		return fmt.Errorf("Riot.GetMatchHistory failed with err: %w", err)
 	}
@@ -80,7 +80,7 @@ func (service *Service) CollectMatchHistory(ctx context.Context, region, puuid s
 }
 
 func (service *Service) CollectMatchDetails(ctx context.Context, region, matchId string) error {
-	match, err := service.riot.GetMatchDetails(riot.RegionToCluster[region], matchId)
+	match, err := service.riot.GetMatchDetails(ctx, riot.RegionToCluster[region], matchId)
 	if err != nil {
 		return fmt.Errorf("Riot.GetMatchDetails failed with err: %w", err)
 	}

@@ -1,7 +1,6 @@
 package api
 
 import (
-	"context"
 	"encoding/json"
 	"log"
 	"net/http"
@@ -10,7 +9,7 @@ import (
 )
 
 func (env Controller) getSummonerMatches(w http.ResponseWriter, r *http.Request) {
-	ctx := context.Background()
+	ctx := r.Context()
 
 	w.Header().Set("Access-Control-Allow-Origin", "*")
 

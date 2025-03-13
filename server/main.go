@@ -66,7 +66,7 @@ func main() {
 
 	// start api
 	controller := api.Controller{
-		Service: service.WithRiotRequestPriority(1),
+		Service: service,
 	}
-	http.ListenAndServe(":8080", api.New(controller))
+	http.ListenAndServe(":8080", controller.New())
 }

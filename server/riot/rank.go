@@ -1,6 +1,7 @@
 package riot
 
 import (
+	"context"
 	"fmt"
 	"strings"
 )
@@ -64,10 +65,10 @@ var Divisions = []string{
 	"IV",
 }
 
-func (c *Riot) GetRank(region string, summonerId string) (RankEntry, error) {
+func (c *Riot) GetRank(ctx context.Context, region string, summonerId string) (RankEntry, error) {
 	var rankRes []RankEntry
 	route := fmt.Sprintf("tft/league/v1/entries/by-summoner/%v", summonerId)
-	err := c.request(region, route, &rankRes)
+	err := c.request(ctx, region, route, &rankRes)
 	if err != nil {
 		return RankEntry{}, err
 	}
@@ -81,20 +82,20 @@ func (c *Riot) GetRank(region string, summonerId string) (RankEntry, error) {
 	return RankEntry{}, ErrNotFound
 }
 
-func (c *Riot) GetRankEntries(region string, tier string, division string, page int) ([]RankEntry, error) {
+func (c *Riot) GetRankEntries(ctx context.Context, region string, tier string, division string, page int) ([]RankEntry, error) {
 	var rankPageRes []RankEntry
 
 	route := fmt.Sprintf("tft/league/v1/entries/%v/%v?queue=RANKED_TFT&page=%v", tier, division, page)
-	err := c.request(region, route, &rankPageRes)
+	err := c.request(ctx, region, route, &rankPageRes)
 
 	return rankPageRes, err
 }
 
-func (c *Riot) GetApexRankPage(region string, tier string) (RankPage, error) {
+func (c *Riot) GetApexRankPage(ctx context.Context, region string, tier string) (RankPage, error) {
 	var rankPageRes RankPage
 
 	route := fmt.Sprintf("tft/league/v1/%v?queue=RANKED_TFT", strings.ToLower(tier))
-	err := c.request(region, route, &rankPageRes)
+	err := c.request(ctx, region, route, &rankPageRes)
 
 	return rankPageRes, err
 }

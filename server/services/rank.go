@@ -18,7 +18,7 @@ func (service *Service) GetSummonerRank(ctx context.Context, region string, summ
 }
 
 func (service *Service) CollectSummonerRank(ctx context.Context, region, summonerId string) error {
-	rankEntry, err := service.riot.GetRank(region, summonerId)
+	rankEntry, err := service.riot.GetRank(ctx, region, summonerId)
 	if err != nil {
 		return fmt.Errorf("Riot.GetRank failed with err: %w", err)
 	}
@@ -45,7 +45,7 @@ func (service *Service) CollectRankEntries(ctx context.Context, region, tier, di
 	page := 0
 	for {
 		page++
-		rankEntries, err := service.riot.GetRankEntries(region, tier, division, page)
+		rankEntries, err := service.riot.GetRankEntries(ctx, region, tier, division, page)
 		if err != nil {
 			return fmt.Errorf("Riot.GetRankEntries failed with err: %w", err)
 		}
@@ -76,7 +76,7 @@ func (service *Service) CollectRankEntries(ctx context.Context, region, tier, di
 }
 
 func (service *Service) CollectApexRankEntries(ctx context.Context, region, tier string) error {
-	rankPage, err := service.riot.GetApexRankPage(region, tier)
+	rankPage, err := service.riot.GetApexRankPage(ctx, region, tier)
 	if err != nil {
 		log.Println(err.Error())
 		return err

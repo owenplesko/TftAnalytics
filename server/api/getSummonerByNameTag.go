@@ -10,7 +10,7 @@ import (
 )
 
 func (env Controller) getSummonerByNameTag(w http.ResponseWriter, r *http.Request) {
-	ctx := context.Background()
+	ctx := context.WithoutCancel(r.Context())
 
 	w.Header().Set("Access-Control-Allow-Origin", "*")
 

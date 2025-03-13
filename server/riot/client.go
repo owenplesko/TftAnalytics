@@ -1,6 +1,7 @@
 package riot
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
 	"log"
@@ -10,35 +11,25 @@ import (
 )
 
 type Riot struct {
-	apiKey          string
-	rateLimiter     RateLimiter
-	requestPriority int
+	apiKey      string
+	rateLimiter RateLimiter
 }
 
 func New(apiKey string, rateDuration time.Duration) *Riot {
 	return &Riot{
-		apiKey:          apiKey,
-		rateLimiter:     newRateLimiter(rateDuration),
-		requestPriority: 0,
+		apiKey:      apiKey,
+		rateLimiter: newRateLimiter(rateDuration),
 	}
 }
 
-func (r *Riot) WithRequestPriority(priority int) *Riot {
-	return &Riot{
-		apiKey:          r.apiKey,
-		rateLimiter:     r.rateLimiter,
-		requestPriority: priority,
-	}
-}
-
-func (riot *Riot) request(server string, route string, target any) error {
+func (riot *Riot) request(ctx context.Context, server string, route string, target any) error {
 	url := fmt.Sprintf("https://%v.api.riotgames.com/%v", strings.ToLower(server), route)
 
 	client := &http.Client{}
 	req, _ := http.NewRequest("GET", url, nil)
 	req.Header.Set("X-Riot-Token", riot.apiKey)
 
-	err := riot.rateLimiter.Wait(server, riot.requestPriority)
+	err := riot.rateLimiter.Wait(ctx, server)
 	if err != nil {
 		return err
 	}
