@@ -60,7 +60,7 @@ func main() {
 
 	// start collection loops
 	for region := range riot.RegionToCluster {
-		go service.RankEntryCollectionLoop(context.Background(), region)
+		//go service.RankEntryCollectionLoop(context.Background(), region)
 		go service.MatchCollectionLoop(context.Background(), region)
 	}
 

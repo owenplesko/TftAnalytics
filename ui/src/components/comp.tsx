@@ -39,11 +39,7 @@ const SummonerMatchCard: React.FC<{
 export default SummonerMatchCard;
 
 const MatchCard: React.FC<{ matchId: string }> = ({ matchId }) => {
-  const query = useQuery({
-    queryKey: ["match", matchId],
-    staleTime: Infinity,
-    queryFn: () => getMatchComps(matchId),
-  });
+  const query = useQuery(getMatchComps(matchId));
 
   if (!query.isSuccess) return null;
 
@@ -109,7 +105,7 @@ const PlacementSection: React.FC<{ summonerMatch: SummonerMatch }> = ({
         }
       </span>
       <span className="text-xs text-neutral-400">
-        {formatTimeSince(summonerMatch.tftMatch.matchDate)}
+        {formatTimeSince(new Date(summonerMatch.tftMatch.matchDate))}
       </span>
       <span className="text-xs text-neutral-400">
         {`${formatSeconds(summonerMatch.compData.timeEliminated)}
@@ -158,7 +154,7 @@ const UnitSection: React.FC<{ compData: CompData }> = ({ compData }) => {
                   <TraitIcon
                     name={trait.name}
                     style={trait.style}
-                    tier={trait.tierCurrent}
+                    numUnits={trait.numUnits}
                   />
                 </li>
               ),

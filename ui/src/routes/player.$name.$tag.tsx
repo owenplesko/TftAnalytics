@@ -1,25 +1,47 @@
 import SummonerMatch from "@/components/comp";
 import { Button } from "@/components/ui/button";
-import { formatTimeSince, sentenceCase } from "@/lib/utils";
+import { sentenceCase } from "@/lib/utils";
 import { getPlayer } from "@/services/getPlayer";
 import { getPlayerMatchHistory } from "@/services/getPlayerMatches";
 import { getRank } from "@/services/getRank";
 import { Rank } from "@/services/types";
 import { updatePlayer } from "@/services/updatePlayer";
+import { useMutation, useSuspenseQuery } from "@tanstack/react-query";
 import { createFileRoute } from "@tanstack/react-router";
+import { IconLoader2 } from "@tabler/icons-react";
+import TimeSince from "@/components/timeSince";
 
 export const Route = createFileRoute("/player/$name/$tag")({
   component: Player,
-  loader: async ({ params }) => {
-    const player = await getPlayer(params.name, params.tag);
-    const matches = await getPlayerMatchHistory(player.puuid);
-    const rank = await getRank(player.region, player.summonerId);
-    return { player, matches, rank };
+  loader: async ({ params: { name, tag }, context: { queryClient } }) => {
+    const { region, puuid, summonerId } = await queryClient.ensureQueryData(
+      getPlayer(name, tag),
+    );
+    await queryClient.ensureQueryData(getRank(region, summonerId));
+    await queryClient.ensureQueryData(getPlayerMatchHistory(puuid));
   },
 });
 
 function Player() {
-  const { player, rank, matches } = Route.useLoaderData();
+  const params = Route.useParams();
+
+  const playerQuery = useSuspenseQuery(getPlayer(params.name, params.tag));
+  const player = playerQuery.data;
+
+  const rankQuery = useSuspenseQuery(getRank(player.region, player.summonerId));
+  const rank = rankQuery.data;
+
+  const matchesQuery = useSuspenseQuery(getPlayerMatchHistory(player.puuid));
+  const matches = matchesQuery.data;
+
+  const updateMutation = useMutation({
+    mutationFn: updatePlayer,
+    onSuccess: () => {
+      playerQuery.refetch();
+      rankQuery.refetch();
+      matchesQuery.refetch();
+    },
+  });
 
   return (
     <>
@@ -28,11 +50,7 @@ function Player() {
           className="rounded-sm border"
           width={124}
           height={124}
-          src={
-            player.profileIconId
-              ? `/profileicon/profileicon${player.profileIconId}.png`
-              : "/profileicon/profileicon29.png"
-          }
+          src={`/profileicon/profileicon${player.profileIconId}.png`}
         />
         <div className="flex flex-col items-start gap-2">
           <h1 className="text-3xl font-semibold">
@@ -40,11 +58,32 @@ function Player() {
             <span className="text-muted-foreground">#{player.tag}</span>
           </h1>
           <RankLine rank={rank} />
-          <Button variant="outline" onClick={() => updatePlayer(player.puuid)}>
-            Update
+          <Button
+            variant="outline"
+            onClick={() => updateMutation.mutate(player.puuid)}
+            disabled={updateMutation.isPending}
+          >
+            {
+              {
+                idle: "Update",
+                pending: (
+                  <>
+                    <IconLoader2 className="mr-1 animate-spin ease-in-out" />
+                    Updating...
+                  </>
+                ),
+                success: "Updated",
+                error: "Error",
+              }[updateMutation.status]
+            }
           </Button>
           <span className="text-sm text-muted-foreground">
-            {`Updated ${player.updateTimestamp ? formatTimeSince(player.updateTimestamp) : "never"}`}
+            {"Updated "}
+            {player.updateTimestamp ? (
+              <TimeSince date={new Date(player.updateTimestamp)} />
+            ) : (
+              "never"
+            )}
           </span>
         </div>
       </div>

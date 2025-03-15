@@ -54,6 +54,8 @@ type Comp struct {
 	} `json:"units"`
 }
 
+const MATCH_HISTORY_MAX_COUNT = 200
+
 func (c *Riot) GetMatchDetails(ctx context.Context, cluster, matchId string) (*Match, error) {
 	matchRes := new(Match)
 
@@ -63,11 +65,19 @@ func (c *Riot) GetMatchDetails(ctx context.Context, cluster, matchId string) (*M
 	return matchRes, err
 }
 
-func (c *Riot) GetMatchHistory(ctx context.Context, cluster string, puuid string, matchesAfter time.Time) ([]string, error) {
+func (c *Riot) GetMatchHistory(ctx context.Context, cluster string, puuid string, count int) ([]string, error) {
 	var history []string
 
-	count := 200
-	route := fmt.Sprintf("tft/match/v1/matches/by-puuid/%v/ids?count=%v&startTime=%v", puuid, count, matchesAfter.Unix())
+	route := fmt.Sprintf("tft/match/v1/matches/by-puuid/%v/ids?count=%v", puuid, count)
+	err := c.request(ctx, cluster, route, &history)
+
+	return history, err
+}
+
+func (c *Riot) GetMatchHistoryInTimeRange(ctx context.Context, cluster string, puuid string, count int, matchesAfter, matchesBefore time.Time, startIndex int) ([]string, error) {
+	var history []string
+
+	route := fmt.Sprintf("tft/match/v1/matches/by-puuid/%v/ids?count=%v&startTime=%v&endTime=%v&start=%v", puuid, count, matchesAfter.UTC().Unix(), matchesBefore.UTC().Unix(), startIndex)
 	err := c.request(ctx, cluster, route, &history)
 
 	return history, err

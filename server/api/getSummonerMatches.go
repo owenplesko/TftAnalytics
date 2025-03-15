@@ -16,7 +16,7 @@ func (controller Controller) getSummonerMatches(w http.ResponseWriter, r *http.R
 	// validate query params
 	queryParams := r.URL.Query()
 
-	limit := int64(20) // default value
+	limit := int64(400) // default value
 	if limitParamArr, ok := queryParams["limit"]; ok {
 		var err error
 

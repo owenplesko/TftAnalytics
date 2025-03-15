@@ -70,9 +70,9 @@ const styleColors = {
 
 const TraitIcon: React.FC<{
   name: string;
-  tier: number;
+  numUnits: number;
   style: number;
-}> = ({ name, tier, style }) => {
+}> = ({ name, numUnits: tier, style }) => {
   const icon = iconMap.get(name);
   return (
     <div

@@ -48,16 +48,28 @@ func (service *Service) GetMatchHistory(ctx context.Context, puuid string, limit
 }
 
 func (service *Service) CollectMatchHistory(ctx context.Context, region, puuid string, matchesAfter time.Time) error {
-	updatedAt := time.Now().UTC()
+	matchesBefore := time.Now()
+	count := riot.MATCH_HISTORY_MAX_COUNT
 
-	matchIds, err := service.riot.GetMatchHistory(ctx, riot.RegionToCluster[region], puuid, matchesAfter)
-	if err != nil {
-		return fmt.Errorf("Riot.GetMatchHistory failed with err: %w", err)
+	matchIds := make([]string, 0, count)
+
+	for {
+		startIndex := len(matchIds)
+		res, err := service.riot.GetMatchHistoryInTimeRange(ctx, riot.RegionToCluster[region], puuid, count, matchesAfter, matchesBefore, startIndex)
+		if err != nil {
+			return fmt.Errorf("Riot.GetMatchHistory failed with err: %w", err)
+		}
+
+		if len(res) == 0 {
+			break
+		}
+
+		matchIds = append(matchIds, res...)
 	}
 
 	for _, matchId := range matchIds {
 		if exists, _ := service.queries.MatchExists(ctx, matchId); !exists {
-			err = service.CollectMatchDetails(ctx, region, matchId)
+			err := service.CollectMatchDetails(ctx, region, matchId)
 			if err != nil {
 				// TODO: explore returning CollectMatchDetails err
 				log.Printf("error in CollectMatchHistory collecting match %v for summoner with puuid %v: CollectMatchDetails failed with err: %v", matchId, puuid, err)
@@ -65,10 +77,10 @@ func (service *Service) CollectMatchHistory(ctx context.Context, region, puuid s
 		}
 	}
 
-	err = service.queries.SetMatchesAfterTimestamp(ctx, db.SetMatchesAfterTimestampParams{
+	err := service.queries.SetMatchesAfterTimestamp(ctx, db.SetMatchesAfterTimestampParams{
 		Puuid: puuid,
 		MatchesAfterTimestamp: pgtype.Timestamp{
-			Time:  updatedAt,
+			Time:  matchesBefore,
 			Valid: true,
 		},
 	})

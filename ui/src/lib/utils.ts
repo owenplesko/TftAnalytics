@@ -17,8 +17,7 @@ export function formatStageNumber(rounds: number) {
 }
 
 // formats timestamp str to most significant unit of time ago
-export function formatTimeSince(dateStr: string) {
-  const date = new Date(dateStr);
+export function formatTimeSince(date: Date) {
   const now = new Date();
 
   const seconds = Math.floor((now.getTime() - date.getTime()) / 1000);

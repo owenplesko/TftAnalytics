@@ -1,4 +1,7 @@
-export async function updatePlayer(puuid: string) {
+export const updatePlayer = async (puuid: string) => {
   const url = `${import.meta.env.VITE_BACKEND_URL}/v1/summoner/by-puuid/${puuid}/update`;
-  await fetch(url);
+  const res = await fetch(url);
+  if (!res.ok) {
+    throw new Error(`status code: ${res.status}`)
+  }
 }
