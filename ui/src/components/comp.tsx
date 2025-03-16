@@ -162,9 +162,10 @@ const UnitSection: React.FC<{ compData: CompData }> = ({ compData }) => {
         {compData.traits
           .sort((a, b) => b.style - a.style)
           .map(
-            (trait) =>
+            (trait, i) =>
               trait.style > 0 && (
-                <li>
+                // key = index is acceptable because data is static
+                <li key={i}>
                   <TraitIcon
                     name={trait.name}
                     style={trait.style}
@@ -175,8 +176,9 @@ const UnitSection: React.FC<{ compData: CompData }> = ({ compData }) => {
           )}
       </ul>
       <ul className="flex flex-row gap-2 py-2">
-        {compData.units.map((unit) => (
-          <li>
+        {compData.units.map((unit, i) => (
+          // key = index is acceptable because data is static
+          <li key={i}>
             <UnitIcon unit={unit} />
           </li>
         ))}
