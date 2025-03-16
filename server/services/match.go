@@ -77,9 +77,9 @@ func (service *Service) CollectMatchHistory(ctx context.Context, region, puuid s
 		}
 	}
 
-	err := service.queries.SetMatchesAfterTimestamp(ctx, db.SetMatchesAfterTimestampParams{
+	err := service.queries.SetMatchesBeforeTimestamp(ctx, db.SetMatchesBeforeTimestampParams{
 		Puuid: puuid,
-		MatchesAfterTimestamp: pgtype.Timestamp{
+		MatchesBeforeTimestamp: pgtype.Timestamp{
 			Time:  matchesBefore,
 			Valid: true,
 		},

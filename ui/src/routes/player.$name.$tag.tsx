@@ -20,12 +20,13 @@ import React, { useEffect } from "react";
 export const Route = createFileRoute("/player/$name/$tag")({
   component: Player,
   loader: async ({ params: { name, tag }, context: { queryClient } }) => {
-    const { region, puuid, summonerId } = await queryClient.ensureQueryData(
-      getPlayer(name, tag),
-    );
+    const { region, puuid, summonerId, matchesBeforeTimestamp } =
+      await queryClient.ensureQueryData(getPlayer(name, tag));
     await Promise.all([
       queryClient.ensureQueryData(getRank(region, summonerId)),
-      queryClient.ensureInfiniteQueryData(getPlayerMatchHistory(puuid)),
+      queryClient.ensureInfiniteQueryData(
+        getPlayerMatchHistory(puuid, matchesBeforeTimestamp),
+      ),
     ]);
   },
 });
@@ -40,7 +41,7 @@ function Player() {
   const rank = rankQuery.data;
 
   const matchesQuery = useSuspenseInfiniteQuery(
-    getPlayerMatchHistory(player.puuid),
+    getPlayerMatchHistory(player.puuid, player.matchesBeforeTimestamp),
   );
   const matches = matchesQuery.data.pages.flat();
 

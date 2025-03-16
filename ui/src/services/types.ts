@@ -9,7 +9,7 @@ export const summonerSchema = z.object({
   profileIconId: z.number(),
   summonerLevel: z.number(),
   updateTimestamp: z.string().datetime().nullable(),
-  matchesAfterTimestamp: z.string().datetime().nullable(),
+  matchesBeforeTimestamp: z.string().datetime().nullable(),
 });
 
 export const companionSchema = z.object({

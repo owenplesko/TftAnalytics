@@ -28,13 +28,13 @@ type TftMatch struct {
 }
 
 type TftSummoner struct {
-	Puuid                 string           `json:"puuid"`
-	Region                string           `json:"region"`
-	Name                  string           `json:"name"`
-	Tag                   string           `json:"tag"`
-	SummonerID            string           `json:"summonerId"`
-	ProfileIconID         int32            `json:"profileIconId"`
-	SummonerLevel         int32            `json:"summonerLevel"`
-	UpdateTimestamp       pgtype.Timestamp `json:"updateTimestamp"`
-	MatchesAfterTimestamp pgtype.Timestamp `json:"matchesAfterTimestamp"`
+	Puuid                  string           `json:"puuid"`
+	Region                 string           `json:"region"`
+	Name                   string           `json:"name"`
+	Tag                    string           `json:"tag"`
+	SummonerID             string           `json:"summonerId"`
+	ProfileIconID          int32            `json:"profileIconId"`
+	SummonerLevel          int32            `json:"summonerLevel"`
+	UpdateTimestamp        pgtype.Timestamp `json:"updateTimestamp"`
+	MatchesBeforeTimestamp pgtype.Timestamp `json:"matchesBeforeTimestamp"`
 }

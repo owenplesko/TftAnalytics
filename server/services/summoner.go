@@ -149,8 +149,8 @@ func (service *Service) UpdateSummonerInfo(ctx context.Context, puuid string) er
 	}
 
 	var after time.Time
-	if summoner.MatchesAfterTimestamp.Valid {
-		after = summoner.MatchesAfterTimestamp.Time
+	if summoner.MatchesBeforeTimestamp.Valid {
+		after = summoner.MatchesBeforeTimestamp.Time
 	} else {
 		after = time.Now().UTC().Add(-time.Hour * 24 * 30)
 	}

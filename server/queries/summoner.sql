@@ -45,10 +45,10 @@ WHERE puuid = $1;
 -- name: GetOldestMatchesAfter :many
 SELECT
     puuid,
-    matches_after_timestamp
+    matches_before_timestamp
 FROM tft_summoner
 WHERE region = @region::VARCHAR
-ORDER BY matches_after_timestamp ASC NULLS FIRST
+ORDER BY matches_before_timestamp ASC NULLS FIRST
 LIMIT $1;
 
 -- name: SetUpdateTimestamp :exec
@@ -56,7 +56,7 @@ UPDATE tft_summoner
     SET update_timestamp = @update_timestamp::TIMESTAMP
 WHERE puuid = $1;
 
--- name: SetMatchesAfterTimestamp :exec
+-- name: SetMatchesBeforeTimestamp :exec
 UPDATE tft_summoner
-    SET matches_after_timestamp = @matches_after_timestamp::TIMESTAMP
+    SET matches_before_timestamp = @matches_before_timestamp::TIMESTAMP
 WHERE puuid = $1;

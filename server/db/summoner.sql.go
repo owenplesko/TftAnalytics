@@ -14,10 +14,10 @@ import (
 const getOldestMatchesAfter = `-- name: GetOldestMatchesAfter :many
 SELECT
     puuid,
-    matches_after_timestamp
+    matches_before_timestamp
 FROM tft_summoner
 WHERE region = $2::VARCHAR
-ORDER BY matches_after_timestamp ASC NULLS FIRST
+ORDER BY matches_before_timestamp ASC NULLS FIRST
 LIMIT $1
 `
 
@@ -27,8 +27,8 @@ type GetOldestMatchesAfterParams struct {
 }
 
 type GetOldestMatchesAfterRow struct {
-	Puuid                 string           `json:"puuid"`
-	MatchesAfterTimestamp pgtype.Timestamp `json:"matchesAfterTimestamp"`
+	Puuid                  string           `json:"puuid"`
+	MatchesBeforeTimestamp pgtype.Timestamp `json:"matchesBeforeTimestamp"`
 }
 
 func (q *Queries) GetOldestMatchesAfter(ctx context.Context, arg GetOldestMatchesAfterParams) ([]GetOldestMatchesAfterRow, error) {
@@ -40,7 +40,7 @@ func (q *Queries) GetOldestMatchesAfter(ctx context.Context, arg GetOldestMatche
 	var items []GetOldestMatchesAfterRow
 	for rows.Next() {
 		var i GetOldestMatchesAfterRow
-		if err := rows.Scan(&i.Puuid, &i.MatchesAfterTimestamp); err != nil {
+		if err := rows.Scan(&i.Puuid, &i.MatchesBeforeTimestamp); err != nil {
 			return nil, err
 		}
 		items = append(items, i)
@@ -52,7 +52,7 @@ func (q *Queries) GetOldestMatchesAfter(ctx context.Context, arg GetOldestMatche
 }
 
 const getSummonerByNameTag = `-- name: GetSummonerByNameTag :one
-SELECT puuid, region, name, tag, summoner_id, profile_icon_id, summoner_level, update_timestamp, matches_after_timestamp
+SELECT puuid, region, name, tag, summoner_id, profile_icon_id, summoner_level, update_timestamp, matches_before_timestamp
 FROM tft_summoner 
 WHERE REPLACE(LOWER(name), ' ', '') = REPLACE(LOWER($1::VARCHAR), ' ', '')
 AND REPLACE(LOWER(tag), ' ', '') = REPLACE(LOWER($2::VARCHAR), ' ', '')
@@ -75,13 +75,13 @@ func (q *Queries) GetSummonerByNameTag(ctx context.Context, arg GetSummonerByNam
 		&i.ProfileIconID,
 		&i.SummonerLevel,
 		&i.UpdateTimestamp,
-		&i.MatchesAfterTimestamp,
+		&i.MatchesBeforeTimestamp,
 	)
 	return i, err
 }
 
 const getSummonerByPuuid = `-- name: GetSummonerByPuuid :one
-SELECT puuid, region, name, tag, summoner_id, profile_icon_id, summoner_level, update_timestamp, matches_after_timestamp
+SELECT puuid, region, name, tag, summoner_id, profile_icon_id, summoner_level, update_timestamp, matches_before_timestamp
 FROM tft_summoner 
 WHERE puuid = $1
 `
@@ -98,13 +98,13 @@ func (q *Queries) GetSummonerByPuuid(ctx context.Context, puuid string) (TftSumm
 		&i.ProfileIconID,
 		&i.SummonerLevel,
 		&i.UpdateTimestamp,
-		&i.MatchesAfterTimestamp,
+		&i.MatchesBeforeTimestamp,
 	)
 	return i, err
 }
 
 const getSummonerBySummonerId = `-- name: GetSummonerBySummonerId :one
-SELECT puuid, region, name, tag, summoner_id, profile_icon_id, summoner_level, update_timestamp, matches_after_timestamp
+SELECT puuid, region, name, tag, summoner_id, profile_icon_id, summoner_level, update_timestamp, matches_before_timestamp
 FROM tft_summoner
 WHERE summoner_id = $1
 `
@@ -121,24 +121,24 @@ func (q *Queries) GetSummonerBySummonerId(ctx context.Context, summonerID string
 		&i.ProfileIconID,
 		&i.SummonerLevel,
 		&i.UpdateTimestamp,
-		&i.MatchesAfterTimestamp,
+		&i.MatchesBeforeTimestamp,
 	)
 	return i, err
 }
 
-const setMatchesAfterTimestamp = `-- name: SetMatchesAfterTimestamp :exec
+const setMatchesBeforeTimestamp = `-- name: SetMatchesBeforeTimestamp :exec
 UPDATE tft_summoner
-    SET matches_after_timestamp = $2::TIMESTAMP
+    SET matches_before_timestamp = $2::TIMESTAMP
 WHERE puuid = $1
 `
 
-type SetMatchesAfterTimestampParams struct {
-	Puuid                 string           `json:"puuid"`
-	MatchesAfterTimestamp pgtype.Timestamp `json:"matchesAfterTimestamp"`
+type SetMatchesBeforeTimestampParams struct {
+	Puuid                  string           `json:"puuid"`
+	MatchesBeforeTimestamp pgtype.Timestamp `json:"matchesBeforeTimestamp"`
 }
 
-func (q *Queries) SetMatchesAfterTimestamp(ctx context.Context, arg SetMatchesAfterTimestampParams) error {
-	_, err := q.db.Exec(ctx, setMatchesAfterTimestamp, arg.Puuid, arg.MatchesAfterTimestamp)
+func (q *Queries) SetMatchesBeforeTimestamp(ctx context.Context, arg SetMatchesBeforeTimestampParams) error {
+	_, err := q.db.Exec(ctx, setMatchesBeforeTimestamp, arg.Puuid, arg.MatchesBeforeTimestamp)
 	return err
 }
 
@@ -160,7 +160,7 @@ func (q *Queries) SetUpdateTimestamp(ctx context.Context, arg SetUpdateTimestamp
 
 const summonerExistsByPuuid = `-- name: SummonerExistsByPuuid :one
 SELECT EXISTS (
-    SELECT puuid, region, name, tag, summoner_id, profile_icon_id, summoner_level, update_timestamp, matches_after_timestamp FROM tft_summoner WHERE puuid = $1
+    SELECT puuid, region, name, tag, summoner_id, profile_icon_id, summoner_level, update_timestamp, matches_before_timestamp FROM tft_summoner WHERE puuid = $1
 )
 `
 
