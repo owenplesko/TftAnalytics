@@ -1,9 +1,9 @@
-import { type CompData, type SummonerMatch } from "@/services/types";
+import { MatchComp, type CompData, type SummonerMatch } from "@/services/types";
 import UnitIcon from "./unitIcon";
 import { formatSeconds, formatStageNumber, formatTimeSince } from "@/lib/utils";
 import TraitIcon from "./trait";
 import { useState } from "react";
-import { useQuery } from "@tanstack/react-query";
+import { useQueryClient, useSuspenseQuery } from "@tanstack/react-query";
 import { getMatchComps } from "@/services/getMatchComps";
 import { IconChevronUp } from "@tabler/icons-react";
 
@@ -11,6 +11,7 @@ const SummonerMatchCard: React.FC<{
   summonerMatch: SummonerMatch;
 }> = ({ summonerMatch }) => {
   const [expanded, setExpanded] = useState(false);
+  const queryClient = useQueryClient();
 
   return (
     <>
@@ -24,14 +25,29 @@ const SummonerMatchCard: React.FC<{
           </div>
           <button
             className="flex items-end justify-center bg-secondary hover:bg-secondary/80"
-            onClick={() => {
+            onClick={async () => {
+              if (!expanded)
+                await queryClient.ensureQueryData(
+                  getMatchComps(summonerMatch.tftMatch.id),
+                );
+
               setExpanded(!expanded);
             }}
           >
             <IconChevronUp className={expanded ? "rotate-180" : "rotate-0"} />
           </button>
         </div>
-        {expanded && <MatchCard matchId={summonerMatch.tftMatch.id} />}
+        {expanded && (
+          <MatchCard
+            matchComps={
+              queryClient.getQueryData(
+                getMatchComps(summonerMatch.tftMatch.id).queryKey,
+              )!
+              // justification for using non-null assertion:
+              // IF expanded is true THEN ensureQueryData has ran MEANING getQueryData will not be undefined
+            }
+          />
+        )}
       </div>
     </>
   );
@@ -39,17 +55,11 @@ const SummonerMatchCard: React.FC<{
 export default SummonerMatchCard;
 
 const MatchCard: React.FC<{
-  matchId: string;
-}> = ({ matchId }) => {
-  const query = useQuery(getMatchComps(matchId));
-
-  if (query.isError) return query.error.message;
-
-  if (query.isPending) return null;
-
+  matchComps: MatchComp[];
+}> = ({ matchComps }) => {
   return (
     <ul className="bg-muted/25">
-      {query.data
+      {matchComps
         .sort((a, b) => a.compData.placement - b.compData.placement)
         .map(({ tftSummoner, compData }) => (
           <li className="grid grid-cols-[25px_50px_75px_50px_auto] items-center gap-4 border-t px-3 py-2">
