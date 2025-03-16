@@ -26,12 +26,12 @@ func (service *Service) GetMatchComps(ctx context.Context, matchId string) ([]db
 	return comps, nil
 }
 
-func (service *Service) GetMatchHistory(ctx context.Context, puuid string, limit int32, after time.Time) ([]db.SummonerMatchHistoryRow, error) {
+func (service *Service) GetMatchHistory(ctx context.Context, puuid string, limit int32, before time.Time) ([]db.SummonerMatchHistoryRow, error) {
 	matches, err := service.queries.SummonerMatchHistory(context.Background(), db.SummonerMatchHistoryParams{
 		SummonerPuuid: puuid,
 		Limit:         limit,
-		After: pgtype.Timestamp{
-			Time:  after,
+		Before: pgtype.Timestamp{
+			Time:  before,
 			Valid: true,
 		},
 	})

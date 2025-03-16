@@ -8,5 +8,5 @@ export const getMatchComps = (matchId: string) => queryOptions({
         const res = await fetch(url);
         const data = await res.json();
         return matchCompSchema.array().parse(data);
-    },
+    }
 })

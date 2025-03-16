@@ -6,7 +6,11 @@ import { getPlayerMatchHistory } from "@/services/getPlayerMatches";
 import { getRank } from "@/services/getRank";
 import { Rank } from "@/services/types";
 import { updatePlayer } from "@/services/updatePlayer";
-import { useMutation, useSuspenseQuery } from "@tanstack/react-query";
+import {
+  useMutation,
+  useSuspenseInfiniteQuery,
+  useSuspenseQuery,
+} from "@tanstack/react-query";
 import { createFileRoute } from "@tanstack/react-router";
 import { IconLoader2 } from "@tabler/icons-react";
 import TimeSince from "@/components/timeSince";
@@ -17,8 +21,10 @@ export const Route = createFileRoute("/player/$name/$tag")({
     const { region, puuid, summonerId } = await queryClient.ensureQueryData(
       getPlayer(name, tag),
     );
-    await queryClient.ensureQueryData(getRank(region, summonerId));
-    await queryClient.ensureQueryData(getPlayerMatchHistory(puuid));
+    await Promise.all([
+      queryClient.ensureQueryData(getRank(region, summonerId)),
+      queryClient.ensureInfiniteQueryData(getPlayerMatchHistory(puuid)),
+    ]);
   },
 });
 
@@ -31,8 +37,10 @@ function Player() {
   const rankQuery = useSuspenseQuery(getRank(player.region, player.summonerId));
   const rank = rankQuery.data;
 
-  const matchesQuery = useSuspenseQuery(getPlayerMatchHistory(player.puuid));
-  const matches = matchesQuery.data;
+  const matchesQuery = useSuspenseInfiniteQuery(
+    getPlayerMatchHistory(player.puuid),
+  );
+  const matches = matchesQuery.data.pages.flat();
 
   const updateMutation = useMutation({
     mutationFn: updatePlayer,
@@ -89,9 +97,16 @@ function Player() {
       </div>
       <div className="flex w-full flex-col gap-4 pt-4">
         {matches.map((match) => (
-          <SummonerMatch summonerMatch={match} />
+          <SummonerMatch key={match.tftMatch.id} summonerMatch={match} />
         ))}
       </div>
+      <Button
+        onClick={() => {
+          matchesQuery.fetchNextPage();
+        }}
+      >
+        Load more...
+      </Button>
     </>
   );
 }

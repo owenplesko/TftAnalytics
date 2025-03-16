@@ -155,7 +155,7 @@ LIMIT $2
 type SummonerMatchHistoryParams struct {
 	SummonerPuuid string           `json:"summonerPuuid"`
 	Limit         int32            `json:"limit"`
-	After         pgtype.Timestamp `json:"after"`
+	Before        pgtype.Timestamp `json:"before"`
 }
 
 type SummonerMatchHistoryRow struct {
@@ -164,7 +164,7 @@ type SummonerMatchHistoryRow struct {
 }
 
 func (q *Queries) SummonerMatchHistory(ctx context.Context, arg SummonerMatchHistoryParams) ([]SummonerMatchHistoryRow, error) {
-	rows, err := q.db.Query(ctx, summonerMatchHistory, arg.SummonerPuuid, arg.Limit, arg.After)
+	rows, err := q.db.Query(ctx, summonerMatchHistory, arg.SummonerPuuid, arg.Limit, arg.Before)
 	if err != nil {
 		return nil, err
 	}

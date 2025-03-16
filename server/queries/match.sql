@@ -43,7 +43,7 @@ FROM
 	ON tft_comp.match_id = tft_match.id
 WHERE
 	summoner_puuid = $1 AND
-	tft_comp.match_date < @after::TIMESTAMP
+	tft_comp.match_date < @before::TIMESTAMP
 ORDER BY
 	tft_comp.match_date DESC
 LIMIT $2;

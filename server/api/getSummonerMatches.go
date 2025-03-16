@@ -16,7 +16,7 @@ func (controller Controller) getSummonerMatches(w http.ResponseWriter, r *http.R
 	// validate query params
 	queryParams := r.URL.Query()
 
-	limit := int64(400) // default value
+	limit := int64(20) // default value
 	if limitParamArr, ok := queryParams["limit"]; ok {
 		var err error
 
@@ -28,20 +28,20 @@ func (controller Controller) getSummonerMatches(w http.ResponseWriter, r *http.R
 		}
 	}
 
-	after := time.Now() // default value
-	if afterParamArr, ok := queryParams["after"]; ok {
+	before := time.Now() // default value
+	if beforeParamArr, ok := queryParams["before"]; ok {
 		var err error
-		layout := "2006-01-02 15:04:05.999999"
+		layout := "2006-01-02T15:04:05.999999Z"
 
-		after, err = time.Parse(layout, afterParamArr[0])
+		before, err = time.Parse(layout, beforeParamArr[0])
 
 		if err != nil {
-			http.Error(w, "bad after param", http.StatusBadRequest)
+			http.Error(w, "bad before param", http.StatusBadRequest)
 			return
 		}
 	}
 
-	matches, err := controller.Service.GetMatchHistory(ctx, puuid, int32(limit), after)
+	matches, err := controller.Service.GetMatchHistory(ctx, puuid, int32(limit), before)
 	if err != nil {
 		log.Printf("Service.GetMatchHistory failed with err: %v\n", err)
 		http.Error(w, "something went wrong", http.StatusInternalServerError)

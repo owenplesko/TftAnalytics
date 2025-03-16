@@ -1,4 +1,4 @@
-import { CompData, type SummonerMatch } from "@/services/types";
+import { type CompData, type SummonerMatch } from "@/services/types";
 import UnitIcon from "./unitIcon";
 import { formatSeconds, formatStageNumber, formatTimeSince } from "@/lib/utils";
 import TraitIcon from "./trait";
@@ -38,10 +38,14 @@ const SummonerMatchCard: React.FC<{
 };
 export default SummonerMatchCard;
 
-const MatchCard: React.FC<{ matchId: string }> = ({ matchId }) => {
+const MatchCard: React.FC<{
+  matchId: string;
+}> = ({ matchId }) => {
   const query = useQuery(getMatchComps(matchId));
 
-  if (!query.isSuccess) return null;
+  if (query.isError) return query.error.message;
+
+  if (query.isPending) return null;
 
   return (
     <ul className="bg-muted/25">
