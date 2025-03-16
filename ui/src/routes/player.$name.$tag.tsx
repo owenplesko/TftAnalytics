@@ -14,6 +14,8 @@ import {
 import { createFileRoute } from "@tanstack/react-router";
 import { IconLoader2 } from "@tabler/icons-react";
 import TimeSince from "@/components/timeSince";
+import { useInView } from "react-intersection-observer";
+import React, { useEffect } from "react";
 
 export const Route = createFileRoute("/player/$name/$tag")({
   component: Player,
@@ -50,6 +52,12 @@ function Player() {
       matchesQuery.refetch();
     },
   });
+
+  const [inViewRef, inView] = useInView();
+
+  useEffect(() => {
+    if (inView) matchesQuery.fetchNextPage();
+  }, [inView, matchesQuery.fetchNextPage]);
 
   return (
     <>
@@ -100,13 +108,7 @@ function Player() {
           <SummonerMatch key={match.tftMatch.id} summonerMatch={match} />
         ))}
       </div>
-      <Button
-        onClick={() => {
-          matchesQuery.fetchNextPage();
-        }}
-      >
-        Load more...
-      </Button>
+      <div ref={inViewRef} />
     </>
   );
 }

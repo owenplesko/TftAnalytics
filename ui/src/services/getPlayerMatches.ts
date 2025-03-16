@@ -10,5 +10,5 @@ export const getPlayerMatchHistory = (puuid: string) => infiniteQueryOptions({
     return summonerMatchSchema.array().parse(data);
   },
   initialPageParam: new Date().toISOString(),
-  getNextPageParam: (lastPage) => lastPage[lastPage.length - 1].tftMatch.matchDate
+  getNextPageParam: (lastPage) => lastPage[lastPage.length - 1]?.tftMatch.matchDate
 })
