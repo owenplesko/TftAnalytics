@@ -61,11 +61,11 @@ const iconMap = new Map([
 ]);
 
 const styleColors = {
-  1: "text-yellow-800 bg-yellow-800 border-yellow-800",
-  2: "text-slate-200 bg-slate-200 border-slate-200",
-  3: "text-orange-500 bg-orange-500 border-orange-500",
-  4: "text-yellow-400 bg-yellow-400 border-yellow-400",
-  5: "text-purple-400 bg-purple-400 border-purple-400",
+  1: "text-bronze bg-bronze border-bronze",
+  2: "text-silver bg-silver border-silver",
+  3: "text-unique bg-unique border-unique",
+  4: "text-gold bg-gold border-gold",
+  5: "text-prismatic bg-prismatic border-prismatic",
 };
 
 const TraitIcon: React.FC<{

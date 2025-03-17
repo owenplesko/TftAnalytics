@@ -1,4 +1,7 @@
 /** @type {import('tailwindcss').Config} */
+
+import colors from "tailwindcss/colors";
+
 module.exports = {
   darkMode: ["class"],
   content: [
@@ -18,6 +21,12 @@ module.exports = {
     },
     extend: {
       colors: {
+        unique: colors.orange[500],
+        prismatic: colors.purple[400],
+        gold: colors.yellow[400],
+        silver: colors.slate[200],
+        bronze: colors.yellow[800],
+
         border: "hsl(var(--border))",
         input: "hsl(var(--input))",
         ring: "hsl(var(--ring))",

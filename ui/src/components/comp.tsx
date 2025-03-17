@@ -89,15 +89,13 @@ const MatchCard: React.FC<{
 const placementColor = (placement: number) => {
   switch (placement) {
     case 1:
-      return "text-yellow-400";
+      return "text-gold";
     case 2:
-      return "text-slate-200";
+      return "text-silver";
     case 3:
-      return "text-yellow-800";
-    case 4:
-      return "text-neutral-400";
+      return "text-bronze";
     default:
-      return "text-neutral-500";
+      return "text-muted-foreground";
   }
 };
 
