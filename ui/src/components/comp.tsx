@@ -3,9 +3,10 @@ import UnitIcon from "./unitIcon";
 import { formatSeconds, formatStageNumber, formatTimeSince } from "@/lib/utils";
 import TraitIcon from "./trait";
 import { useState } from "react";
-import { useQueryClient, useSuspenseQuery } from "@tanstack/react-query";
+import { useQueryClient } from "@tanstack/react-query";
 import { getMatchComps } from "@/services/getMatchComps";
 import { IconChevronUp } from "@tabler/icons-react";
+import { Link } from "@tanstack/react-router";
 
 const SummonerMatchCard: React.FC<{
   summonerMatch: SummonerMatch;
@@ -62,16 +63,21 @@ const MatchCard: React.FC<{
       {matchComps
         .sort((a, b) => a.compData.placement - b.compData.placement)
         .map(({ tftSummoner, compData }) => (
-          <li className="grid grid-cols-[25px_50px_75px_50px_auto] items-center gap-4 border-t px-3 py-2">
+          <li
+            key={tftSummoner.puuid}
+            className="grid grid-cols-[25px_50px_75px_50px_auto] items-center gap-4 border-t px-3 py-2"
+          >
             <PlacementText placement={compData.placement} />
             <TacticianSection compData={compData} />
-            <div
-              className="overflow-hidden overflow-ellipsis whitespace-nowrap text-left text-sm"
+            <Link
+              className="overflow-hidden overflow-ellipsis whitespace-nowrap text-left text-sm hover:opacity-75"
               title={`${tftSummoner.name}#${tftSummoner.tag}`}
+              to="/player/$name/$tag"
+              params={{ name: tftSummoner.name, tag: tftSummoner.tag }}
             >
               <span>{tftSummoner.name}</span>
-              <span className="text-neutral-400">#{tftSummoner.tag}</span>
-            </div>
+              <span className="text-muted-foreground">#{tftSummoner.tag}</span>
+            </Link>
             <CombatStatSection compData={compData} />
             <UnitSection compData={compData} />
           </li>

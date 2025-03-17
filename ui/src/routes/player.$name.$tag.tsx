@@ -20,28 +20,33 @@ import React, { useEffect } from "react";
 export const Route = createFileRoute("/player/$name/$tag")({
   component: Player,
   loader: async ({ params: { name, tag }, context: { queryClient } }) => {
-    const { region, puuid, summonerId, matchesBeforeTimestamp } =
-      await queryClient.ensureQueryData(getPlayer(name, tag));
+    const { region, puuid, summonerId } = await queryClient.ensureQueryData(
+      getPlayer(name, tag),
+    );
+
+    const initialPageParam = new Date().toISOString();
     await Promise.all([
       queryClient.ensureQueryData(getRank(region, summonerId)),
       queryClient.ensureInfiniteQueryData(
-        getPlayerMatchHistory(puuid, matchesBeforeTimestamp),
+        getPlayerMatchHistory(puuid, initialPageParam),
       ),
     ]);
+
+    return { name, tag, initialPageParam };
   },
 });
 
 function Player() {
-  const params = Route.useParams();
+  const loader = Route.useLoaderData();
 
-  const playerQuery = useSuspenseQuery(getPlayer(params.name, params.tag));
+  const playerQuery = useSuspenseQuery(getPlayer(loader.name, loader.tag));
   const player = playerQuery.data;
 
   const rankQuery = useSuspenseQuery(getRank(player.region, player.summonerId));
   const rank = rankQuery.data;
 
   const matchesQuery = useSuspenseInfiniteQuery(
-    getPlayerMatchHistory(player.puuid, player.matchesBeforeTimestamp),
+    getPlayerMatchHistory(player.puuid, loader.initialPageParam),
   );
   const matches = matchesQuery.data.pages.flat();
 
@@ -106,7 +111,10 @@ function Player() {
       </div>
       <div className="flex w-full flex-col gap-4 pt-4">
         {matches.map((match) => (
-          <SummonerMatch key={match.tftMatch.id} summonerMatch={match} />
+          <SummonerMatch
+            key={`${match.compData.puuid}_${match.tftMatch.id}`}
+            summonerMatch={match}
+          />
         ))}
       </div>
       <div ref={inViewRef} />

@@ -1,10 +1,12 @@
 import { infiniteQueryOptions } from "@tanstack/react-query";
 import { summonerMatchSchema } from "./types";
 
-export const getPlayerMatchHistory = (puuid: string, initialPageParam: string | null) => infiniteQueryOptions({
+
+export const getPlayerMatchHistory = (puuid: string, initialPageParam?: string | null) => infiniteQueryOptions({
   queryKey: ["GET_PLAYER_MATCH_HISTORY", puuid],
   queryFn: async ({ pageParam }) => {
-    const url = `${import.meta.env.VITE_BACKEND_URL}/v1/summoner/by-puuid/${puuid}/matches?before=${pageParam}`;
+    let url = `${import.meta.env.VITE_BACKEND_URL}/v1/summoner/by-puuid/${puuid}/matches`
+    if (pageParam) url += `?before=${pageParam}`
     const res = await fetch(url);
     const data = await res.json();
     return summonerMatchSchema.array().parse(data);
