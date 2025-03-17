@@ -3,19 +3,19 @@ import { Unit } from "@/services/types";
 const getRarityBackground = (rarity: number) => {
   switch (rarity) {
     case 0:
-      return "border-neutral-400";
+      return "border-common";
     case 1:
-      return "border-green-500";
+      return "border-uncommon";
     case 2:
-      return "border-blue-500";
+      return "border-rare";
     case 4:
-      return "border-purple-500";
+      return "border-mythic";
     case 6:
-      return "border-amber-400";
+      return "border-legendary";
     case 8:
-      return "border-cyan-300";
+      return "border-divine";
   }
-  return "border-neutral-800";
+  return "border-muted";
 };
 
 const UnitIcon: React.FC<{ unit: Unit }> = ({ unit }) => {

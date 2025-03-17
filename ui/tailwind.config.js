@@ -21,12 +21,22 @@ module.exports = {
     },
     extend: {
       colors: {
+        // tft tier colors
         unique: colors.orange[500],
         prismatic: colors.purple[400],
         gold: colors.yellow[400],
         silver: colors.slate[200],
         bronze: colors.yellow[800],
 
+        // tft rarity colors
+        common: colors.neutral[400],
+        uncommon: colors.green[500],
+        rare: colors.blue[500],
+        mythic: colors.purple[500],
+        legendary: colors.amber[400],
+        divine: colors.cyan[300],
+
+        // shadcn colors
         border: "hsl(var(--border))",
         input: "hsl(var(--input))",
         ring: "hsl(var(--ring))",
