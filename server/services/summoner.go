@@ -148,13 +148,6 @@ func (service *Service) UpdateSummonerInfo(ctx context.Context, puuid string) er
 		return fmt.Errorf("GetSummonerByPuuid failed with err: %w", err)
 	}
 
-	var after time.Time
-	if summoner.MatchesBeforeTimestamp.Valid {
-		after = summoner.MatchesBeforeTimestamp.Time
-	} else {
-		after = time.Now().UTC().Add(-time.Hour * 24 * 30)
-	}
-
 	err = service.CollectSummonerRank(ctx, summoner.Region, summoner.SummonerID)
 	// riot.ErrNotFound is an expected error and should not cause UpdateSummonerInfo to fail
 	if err != nil && !errors.Is(err, riot.ErrNotFound) {
@@ -164,7 +157,7 @@ func (service *Service) UpdateSummonerInfo(ctx context.Context, puuid string) er
 	if err != nil {
 		return fmt.Errorf("CollectSummonerByPuuid failed with err: %w", err)
 	}
-	err = service.CollectMatchHistory(ctx, summoner.Region, puuid, after)
+	err = service.CollectMatchHistory(ctx, summoner.Region, puuid, summoner.MatchesBeforeTimestamp.Time)
 	if err != nil {
 		return fmt.Errorf("CollectMatchHistory failed with err: %w", err)
 	}

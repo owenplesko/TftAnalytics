@@ -48,8 +48,12 @@ func (service *Service) GetMatchHistory(ctx context.Context, puuid string, limit
 }
 
 func (service *Service) CollectMatchHistory(ctx context.Context, region, puuid string, matchesAfter time.Time) error {
-	matchesBefore := time.Now()
 	count := riot.MATCH_HISTORY_MAX_COUNT
+
+	matchesBefore := time.Now()
+	if matchesAfter.Before(service.matchesAfterCutoff) {
+		matchesAfter = service.matchesAfterCutoff
+	}
 
 	matchIds := make([]string, 0, count)
 
