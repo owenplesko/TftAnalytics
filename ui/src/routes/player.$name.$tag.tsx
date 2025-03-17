@@ -142,8 +142,8 @@ const RankLine: React.FC<{
       />
       <span>{`${sentenceCase(rank.rankData.tier)}`}</span>
       <span>{`${rank.rankData.leaguePoints} LP`}</span>
-      <span>{`Rank #${rank.leaderboardPosition.position}`}</span>
-      <span>{`Top ${rank.leaderboardPosition.top.toPrecision(2)}%`}</span>
+      <span className="text-muted-foreground">{`Rank #${rank.leaderboardPosition.position}`}</span>
+      <span className="text-muted-foreground">{`Top ${rank.leaderboardPosition.top.toPrecision(2)}%`}</span>
     </div>
   );
 };
