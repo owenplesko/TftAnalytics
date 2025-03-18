@@ -16,16 +16,16 @@ const SummonerMatchCard: React.FC<{
 
   return (
     <>
-      <div className="overflow-hidden rounded-sm border">
-        <div className="flex items-stretch">
-          <div className="grid flex-grow grid-cols-[75px_75px_50px_auto] items-center gap-4 bg-muted/50 p-3">
+      <div className="overflow-hidden rounded border text-card-foreground">
+        <div className="flex">
+          <div className="grid flex-grow grid-cols-[75px_75px_50px_auto] items-center gap-2 bg-card p-4">
             <PlacementSection summonerMatch={summonerMatch} />
             <TacticianSection compData={summonerMatch.compData} />
             <CombatStatSection compData={summonerMatch.compData} />
             <UnitSection compData={summonerMatch.compData} />
           </div>
           <button
-            className="flex items-end justify-center bg-secondary hover:bg-secondary/80"
+            className="flex items-end border-l bg-secondary text-secondary-foreground hover:bg-secondary/80"
             onClick={async () => {
               if (!expanded)
                 await queryClient.ensureQueryData(
@@ -59,13 +59,13 @@ const MatchCard: React.FC<{
   matchComps: MatchComp[];
 }> = ({ matchComps }) => {
   return (
-    <ul className="bg-muted/25">
+    <ul className="bg-card/80">
       {matchComps
         .sort((a, b) => a.compData.placement - b.compData.placement)
         .map(({ tftSummoner, compData }) => (
           <li
             key={tftSummoner.puuid}
-            className="grid grid-cols-[25px_50px_75px_50px_auto] items-center gap-4 border-t px-3 py-2"
+            className="grid grid-cols-[25px_50px_75px_50px_auto] items-center gap-2 border-t px-4 py-2"
           >
             <PlacementText placement={compData.placement} />
             <TacticianSection compData={compData} />
@@ -86,27 +86,26 @@ const MatchCard: React.FC<{
   );
 };
 
-const placementColor = (placement: number) => {
-  switch (placement) {
-    case 1:
-      return "text-gold";
-    case 2:
-      return "text-silver";
-    case 3:
-      return "text-bronze";
-    default:
-      return "text-muted-foreground";
-  }
-};
-
 const PlacementText: React.FC<{
   placement: number;
 }> = ({ placement }) => {
   return (
-    <span className={`text-xl font-bold ${placementColor(placement)}`}>
+    <span
+      className={`text-2xl font-bold ${{ 1: "text-gold", 2: "text-silver", 3: "text-bronze" }[placement] ?? "text-muted-foreground"}`}
+    >
       {placement}
     </span>
   );
+};
+
+const queueLabels = {
+  1090: "Normal",
+  1100: "Ranked",
+  1110: "Tutorial",
+  1130: "Hyper Roll",
+  1160: "Double Up",
+  1220: "Tocker's Trials",
+  6100: "Revival",
 };
 
 const PlacementSection: React.FC<{ summonerMatch: SummonerMatch }> = ({
@@ -115,20 +114,20 @@ const PlacementSection: React.FC<{ summonerMatch: SummonerMatch }> = ({
   return (
     <div className="flex flex-col">
       <PlacementText placement={summonerMatch.compData.placement} />
-      <span className="text-sm text-neutral-300">
+      <span>
         {
           // @ts-ignore
           // ignore because we have nullish coalesce
           queueLabels[summonerMatch.tftMatch.queueId] ?? "Unknown"
         }
       </span>
-      <span className="text-xs text-neutral-400">
+      <span className="text-xs text-muted-foreground">
         {formatTimeSince(new Date(summonerMatch.tftMatch.matchDate))}
       </span>
-      <span className="text-xs text-neutral-400">
+      <span className="text-xs text-muted-foreground">
         {`${formatSeconds(summonerMatch.compData.timeEliminated)}
-   • 
-  ${formatStageNumber(summonerMatch.compData.lastRound)}`}
+          •
+          ${formatStageNumber(summonerMatch.compData.lastRound)}`}
       </span>
     </div>
   );
@@ -136,11 +135,11 @@ const PlacementSection: React.FC<{ summonerMatch: SummonerMatch }> = ({
 
 const CombatStatSection: React.FC<{ compData: CompData }> = ({ compData }) => {
   return (
-    <div className="grid grid-cols-[16px_auto] items-center gap-x-2 text-neutral-300">
+    <div className="grid grid-cols-[1rem_auto] items-center gap-x-1 text-neutral-300">
       <img src="/icon/combat.png" />
-      <span>{compData.totalDamageToPlayers}</span>
+      {compData.totalDamageToPlayers}
       <img src="/icon/gold.png" />
-      <span>{compData.goldLeft}</span>
+      {compData.goldLeft}
     </div>
   );
 };
@@ -149,10 +148,10 @@ const TacticianSection: React.FC<{ compData: CompData }> = ({ compData }) => {
   return (
     <div className="relative">
       <img
-        className="rounded-sm border-2"
+        className="rounded border"
         src={`/companion/${compData.companion.itemId}.png`}
       />
-      <span className="absolute bottom-[-10px] right-1/2 h-5 w-5 translate-x-1/2 rounded-sm bg-neutral-800 text-center text-xs leading-5 text-neutral-300">
+      <span className="absolute bottom-[-0.75rem] right-1/2 h-5 w-5 translate-x-1/2 rounded bg-secondary text-center text-xs leading-5 text-secondary-foreground">
         {compData.level}
       </span>
     </div>
@@ -161,7 +160,7 @@ const TacticianSection: React.FC<{ compData: CompData }> = ({ compData }) => {
 
 const UnitSection: React.FC<{ compData: CompData }> = ({ compData }) => {
   return (
-    <div className="flex flex-col gap-1">
+    <div className="flex flex-col gap-2">
       <ul className="flex flex-row gap-2">
         {compData.traits
           .sort((a, b) => b.style - a.style)
@@ -179,7 +178,7 @@ const UnitSection: React.FC<{ compData: CompData }> = ({ compData }) => {
               ),
           )}
       </ul>
-      <ul className="flex flex-row gap-2 py-2">
+      <ul className="flex flex-row gap-2">
         {compData.units.map((unit, i) => (
           // key = index is acceptable because data is static
           <li key={i}>
@@ -189,14 +188,4 @@ const UnitSection: React.FC<{ compData: CompData }> = ({ compData }) => {
       </ul>
     </div>
   );
-};
-
-const queueLabels = {
-  1090: "Normal",
-  1100: "Ranked",
-  1110: "Tutorial",
-  1130: "Hyper Roll",
-  1160: "Double Up",
-  1220: "Tocker's Trials",
-  6100: "Revival",
 };

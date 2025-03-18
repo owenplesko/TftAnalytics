@@ -20,22 +20,25 @@ const getRarityBackground = (rarity: number) => {
 
 const UnitIcon: React.FC<{ unit: Unit }> = ({ unit }) => {
   return (
-    <div className="relative">
+    <div className="relative my-[0.625rem]">
       {unit.tier === 2 || unit.tier === 3 ? (
-        <img className="absolute top-[-10px]" src={`/stars/${unit.tier}.png`} />
+        <img
+          className="absolute top-[-0.625rem]"
+          src={`/stars/${unit.tier}.png`}
+        />
       ) : null}
       <img
-        className={`rounded-sm border-2 ${getRarityBackground(unit.rarity)}`}
+        className={`rounded border ${getRarityBackground(unit.rarity)}`}
         width={48}
         height={48}
         src={`/unit/${unit.characterId}.png`}
       />
-      <ul className="absolute bottom-[-10px] flex w-full flex-row justify-center">
+      <ul className="absolute bottom-[-0.625rem] flex w-full flex-row justify-center">
         {unit.itemNames.map((item, i) => (
           // key = index is acceptable because data is static
           <li key={i}>
             <img
-              className="rounded-sm border border-neutral-800"
+              className="rounded border"
               width={16}
               height={16}
               src={`/item/${item}.png`}

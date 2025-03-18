@@ -65,49 +65,46 @@ function Player() {
 
   return (
     <>
-      <div className="flex w-full items-center gap-4 border-b pb-4">
+      <div className="grid w-full grid-cols-[auto_1fr] grid-rows-[auto_auto_auto_auto] items-center justify-items-start gap-2 border-b pb-4">
         <img
-          className="rounded-sm border"
+          className="row-span-4 rounded border"
           width={124}
           height={124}
           src={`/profileicon/profileicon${player.profileIconId}.png`}
         />
-        <div className="flex flex-col items-start gap-2">
-          <h1 className="text-3xl font-semibold">
-            <span>{player.name}</span>
-            <span className="text-muted-foreground">#{player.tag}</span>
-          </h1>
-          <RankLine rank={rank} />
-          <Button
-            variant="outline"
-            onClick={() => updateMutation.mutate(player.puuid)}
-            disabled={updateMutation.isPending}
-          >
+        <h1 className="text-3xl font-bold">
+          <span>{player.name}</span>
+          <span className="text-muted-foreground">#{player.tag}</span>
+        </h1>
+        <RankLine rank={rank} />
+        <Button
+          onClick={() => updateMutation.mutate(player.puuid)}
+          disabled={updateMutation.isPending}
+        >
+          {
             {
-              {
-                idle: "Update",
-                pending: (
-                  <>
-                    <IconLoader2 className="mr-1 animate-spin ease-in-out" />
-                    Updating...
-                  </>
-                ),
-                success: "Updated",
-                error: "Error",
-              }[updateMutation.status]
-            }
-          </Button>
-          <span className="text-sm text-muted-foreground">
-            {"Updated "}
-            {player.updateTimestamp ? (
-              <TimeSince date={new Date(player.updateTimestamp)} />
-            ) : (
-              "never"
-            )}
-          </span>
-        </div>
+              idle: "Update",
+              pending: (
+                <>
+                  <IconLoader2 className="mr-1 animate-spin ease-in-out" />
+                  Updating...
+                </>
+              ),
+              success: "Updated",
+              error: "Error",
+            }[updateMutation.status]
+          }
+        </Button>
+        <span className="text-muted-foreground">
+          {"Updated "}
+          {player.updateTimestamp ? (
+            <TimeSince date={new Date(player.updateTimestamp)} />
+          ) : (
+            "never"
+          )}
+        </span>
       </div>
-      <div className="flex w-full flex-col gap-4 pt-4">
+      <div className="flex w-full flex-col gap-4 py-4">
         {matches.map((match) => (
           <SummonerMatch
             key={`${match.compData.puuid}_${match.tftMatch.id}`}

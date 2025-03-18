@@ -76,7 +76,7 @@ const TraitIcon: React.FC<{
   const icon = iconMap.get(name);
   return (
     <div
-      className={`grid grid-cols-[12px_auto] items-center gap-1 rounded-sm border bg-opacity-15 px-1 text-xs ${
+      className={`grid grid-cols-[0.75rem_auto] items-center gap-1 rounded border bg-opacity-10 px-1 text-xs ${
         // @ts-ignore
         // ignore because im a beast
         styleColors[style]
