@@ -16,6 +16,7 @@ import { IconLoader2 } from "@tabler/icons-react";
 import TimeSince from "@/components/timeSince";
 import { useInView } from "react-intersection-observer";
 import React, { useEffect } from "react";
+import { Badge } from "@/components/ui/badge";
 
 export const Route = createFileRoute("/player/$name/$tag")({
   component: Player,
@@ -72,10 +73,13 @@ function Player() {
           height={124}
           src={`/profileicon/profileicon${player.profileIconId}.png`}
         />
-        <h1 className="text-3xl font-bold">
-          <span>{player.name}</span>
-          <span className="text-muted-foreground">#{player.tag}</span>
-        </h1>
+        <div className="flex items-center gap-1">
+          <h1 className="text-3xl font-bold">
+            <span>{player.name}</span>
+            <span className="text-muted-foreground">#{player.tag}</span>
+          </h1>
+          <Badge variant="secondary">{player.region}</Badge>
+        </div>
         <RankLine rank={rank} />
         <Button
           onClick={() => updateMutation.mutate(player.puuid)}
