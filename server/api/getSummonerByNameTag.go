@@ -9,7 +9,7 @@ import (
 	"net/http"
 )
 
-func (controller Controller) getSummonerByNameTag(w http.ResponseWriter, r *http.Request) {
+func (controller Api) getSummonerByNameTag(w http.ResponseWriter, r *http.Request) {
 	ctx := context.WithoutCancel(r.Context())
 
 	cluster := "americas"

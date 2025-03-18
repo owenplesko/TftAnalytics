@@ -2,10 +2,10 @@ package main
 
 import (
 	"TFTAnalyticsServer/api"
+	"TFTAnalyticsServer/fileserver"
 	"TFTAnalyticsServer/leaderboard"
 	"TFTAnalyticsServer/riot"
 	"TFTAnalyticsServer/services"
-	"net/http"
 	"strconv"
 	"time"
 
@@ -65,8 +65,16 @@ func main() {
 	}
 
 	// start api
-	controller := api.Controller{
-		Service: service,
+	apiPort, err := strconv.Atoi(os.Getenv("API_PORT"))
+	if err != nil {
+		apiPort = 9001
 	}
-	http.ListenAndServe(":8080", controller.New())
+	go api.Api{Service: service}.ListenAndServe(apiPort)
+
+	// start frontend
+	fileServerPort, err := strconv.Atoi(os.Getenv("FILESERVER_PORT"))
+	if err != nil {
+		fileServerPort = 9000
+	}
+	fileserver.Fileserver{Directory: "../frontend/dist", IndexFilepath: "../frontend/dist/index.html"}.ListenAndServe(fileServerPort)
 }

@@ -6,7 +6,7 @@ import (
 	"net/http"
 )
 
-func (controller Controller) getMatchComps(w http.ResponseWriter, r *http.Request) {
+func (controller Api) getMatchComps(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 
 	matchId := r.PathValue("matchid")

@@ -8,7 +8,7 @@ import (
 	"github.com/jackc/pgx/v5"
 )
 
-func (controller Controller) updateSummoner(w http.ResponseWriter, r *http.Request) {
+func (controller Api) updateSummoner(w http.ResponseWriter, r *http.Request) {
 	ctx := context.WithoutCancel(r.Context())
 
 	puuid := r.PathValue("puuid")

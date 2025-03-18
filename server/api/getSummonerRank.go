@@ -8,7 +8,7 @@ import (
 	"github.com/jackc/pgx/v5"
 )
 
-func (controller Controller) getSummonerRank(w http.ResponseWriter, r *http.Request) {
+func (controller Api) getSummonerRank(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 
 	region := r.PathValue("region")

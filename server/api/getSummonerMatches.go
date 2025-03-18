@@ -8,7 +8,7 @@ import (
 	"time"
 )
 
-func (controller Controller) getSummonerMatches(w http.ResponseWriter, r *http.Request) {
+func (controller Api) getSummonerMatches(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 
 	puuid := r.PathValue("puuid")
