@@ -10,6 +10,6 @@ COPY . .
 
 RUN go build -o TFTAnalyticsServer .
 
-EXPOSE 8080
+EXPOSE 9000 9001
 
 CMD ["./TFTAnalyticsServer"]
