@@ -76,5 +76,5 @@ func main() {
 	if err != nil {
 		fileServerPort = 9000
 	}
-	fileserver.Fileserver{Directory: "../frontend/dist", IndexFilepath: "../frontend/dist/index.html"}.ListenAndServe(fileServerPort)
+	fileserver.ListenAndServe(fileServerPort)
 }

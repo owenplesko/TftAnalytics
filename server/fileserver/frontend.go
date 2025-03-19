@@ -1,32 +1,35 @@
 package fileserver
 
 import (
+	"embed"
 	"fmt"
+	"io/fs"
 	"log"
 	"net/http"
-	"os"
 	"strings"
 )
 
-type Fileserver struct {
-	Directory     string
-	IndexFilepath string
-}
+//go:embed static/*
+var static embed.FS
 
-func (fs Fileserver) ListenAndServe(port int) {
-	_, err := os.Stat(fs.Directory)
+func ListenAndServe(port int) {
+	files, err := fs.Sub(static, "static")
 	if err != nil {
-		log.Fatalf("Directory '%s' not found.\n", fs.Directory)
+		panic(err)
+	}
+
+	index, err := static.ReadFile("static/index.html")
+	if err != nil {
+		log.Panicf("error reading static/index.html: %v", err)
 	}
 
 	router := http.NewServeMux()
-	fileServer := http.FileServer(http.Dir(fs.Directory))
-
+	fileServer := http.FileServer(http.FS(files))
 	router.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
 		if isFilePath(r.URL.Path) {
 			fileServer.ServeHTTP(w, r)
 		} else {
-			fs.serveIndex(w, r)
+			w.Write(index)
 		}
 	})
 
@@ -37,8 +40,4 @@ func (fs Fileserver) ListenAndServe(port int) {
 
 func isFilePath(path string) bool {
 	return strings.Contains(path, ".")
-}
-
-func (fs Fileserver) serveIndex(w http.ResponseWriter, r *http.Request) {
-	http.ServeFile(w, r, fs.IndexFilepath)
 }
