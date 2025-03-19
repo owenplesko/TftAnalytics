@@ -21,14 +21,13 @@ import { Badge } from "@/components/ui/badge";
 export const Route = createFileRoute("/player/$name/$tag")({
   component: Player,
   loader: async ({ params: { name, tag }, context: { queryClient } }) => {
-    const { region, puuid, summonerId, matchesBeforeTimestamp } =
-      await queryClient.ensureQueryData(getPlayer(name, tag));
+    const { region, puuid, summonerId } = await queryClient.ensureQueryData(
+      getPlayer(name, tag),
+    );
 
     await Promise.all([
       queryClient.ensureQueryData(getRank(region, summonerId)),
-      queryClient.ensureInfiniteQueryData(
-        getPlayerMatchHistory(puuid, matchesBeforeTimestamp),
-      ),
+      queryClient.ensureInfiniteQueryData(getPlayerMatchHistory(puuid)),
     ]);
 
     return { name, tag };
@@ -45,11 +44,12 @@ function Player() {
   const rank = rankQuery.data;
 
   const matchesQuery = useSuspenseInfiniteQuery(
-    getPlayerMatchHistory(player.puuid, player.matchesBeforeTimestamp),
+    getPlayerMatchHistory(player.puuid),
   );
   const matches = matchesQuery.data.pages.flat();
 
   const updateMutation = useMutation({
+    mutationKey: ["UPDATE_PLAYER", player.puuid],
     mutationFn: updatePlayer,
     onSuccess: () => {
       playerQuery.refetch();
