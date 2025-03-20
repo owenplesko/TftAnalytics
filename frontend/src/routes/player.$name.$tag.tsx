@@ -8,6 +8,7 @@ import { Rank } from "@/services/types";
 import { updatePlayer } from "@/services/updatePlayer";
 import {
   useMutation,
+  useQuery,
   useSuspenseInfiniteQuery,
   useSuspenseQuery,
 } from "@tanstack/react-query";
@@ -26,7 +27,7 @@ export const Route = createFileRoute("/player/$name/$tag")({
     );
 
     await Promise.all([
-      queryClient.ensureQueryData(getRank(region, summonerId)),
+      queryClient.prefetchQuery(getRank(region, summonerId)),
       queryClient.ensureInfiniteQueryData(getPlayerMatchHistory(puuid)),
     ]);
 
@@ -40,8 +41,7 @@ function Player() {
   const playerQuery = useSuspenseQuery(getPlayer(loader.name, loader.tag));
   const player = playerQuery.data;
 
-  const rankQuery = useSuspenseQuery(getRank(player.region, player.summonerId));
-  const rank = rankQuery.data;
+  const rankQuery = useQuery(getRank(player.region, player.summonerId));
 
   const matchesQuery = useSuspenseInfiniteQuery(
     getPlayerMatchHistory(player.puuid),
@@ -80,7 +80,11 @@ function Player() {
           </h1>
           <Badge variant="secondary">{player.region}</Badge>
         </div>
-        <RankLine rank={rank} />
+        {rankQuery.isSuccess ? (
+          <RankLine rank={rankQuery.data} />
+        ) : (
+          <span className="text-destructive">error loading rank</span>
+        )}
         <Button
           onClick={() => updateMutation.mutate(player.puuid)}
           disabled={updateMutation.isPending}

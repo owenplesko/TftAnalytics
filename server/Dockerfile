@@ -1,15 +1,16 @@
-FROM golang:1.24
-
-WORKDIR /app
-
-COPY go.mod go.sum ./
-
-RUN go mod download
+# syntax=docker/dockerfile:1
+FROM golang:1.24 AS build
+WORKDIR /src
 
 COPY . .
+RUN go mod download
 
-RUN go build -o TFTAnalyticsServer .
+RUN CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -o /bin/server .
+
+FROM gcr.io/distroless/static-debian11
+
+COPY --from=build /bin/server /bin/server
 
 EXPOSE 9000 9001
 
-CMD ["./TFTAnalyticsServer"]
+CMD ["/bin/server"]
