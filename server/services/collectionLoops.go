@@ -24,7 +24,7 @@ func (service *Service) MatchCollectionLoop(ctx context.Context, region string) 
 		for _, summoner := range summoners {
 			err = service.CollectMatchHistory(ctx, region, summoner.Puuid, summoner.MatchesBeforeTimestamp.Time)
 			if err != nil {
-				log.Printf("in MatchCollectionLoop service.CollectMatchHistory failed with err: %v", err)
+				log.Printf("error in MatchCollectionLoop service.CollectMatchHistory failed with err: %v", err)
 			}
 		}
 	}

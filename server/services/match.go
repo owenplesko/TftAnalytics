@@ -72,12 +72,18 @@ func (service *Service) CollectMatchHistory(ctx context.Context, region, puuid s
 	}
 
 	for _, matchId := range matchIds {
-		if exists, _ := service.queries.MatchExists(ctx, matchId); !exists {
-			err := service.CollectMatchDetails(ctx, region, matchId)
-			if err != nil {
-				// TODO: explore returning CollectMatchDetails err
-				log.Printf("error in CollectMatchHistory collecting match %v for summoner with puuid %v: CollectMatchDetails failed with err: %v", matchId, puuid, err)
-			}
+		exists, err := service.queries.MatchExists(ctx, matchId)
+		if err != nil {
+			log.Printf("error getting match exists: %v", err)
+		}
+		if exists {
+			continue
+		}
+
+		err = service.CollectMatchDetails(ctx, region, matchId)
+		if err != nil {
+			// TODO: explore returning CollectMatchDetails err
+			log.Printf("error in CollectMatchHistory collecting match %v for summoner with puuid %v: CollectMatchDetails failed with err: %v", matchId, puuid, err)
 		}
 	}
 
@@ -154,6 +160,10 @@ func (service *Service) storeMatchDetails(ctx context.Context, matchDetails *rio
 
 	// insert comps
 	for _, compDetails := range matchDetails.Info.Comps {
+		if compDetails.Puuid == "BOT" {
+			continue
+		}
+
 		err = qtx.CreateComp(ctx, db.CreateCompParams{
 			MatchID:       matchDetails.MetaData.MatchId,
 			SummonerPuuid: compDetails.Puuid,
