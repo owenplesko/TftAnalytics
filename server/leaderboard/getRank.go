@@ -4,15 +4,17 @@ import (
 	"TFTAnalyticsServer/types"
 	"context"
 	"encoding/json"
+
+	"github.com/redis/go-redis/v9"
 )
 
 func (leaderboard Leaderboard) GetRank(ctx context.Context, region string, summonerId string) (types.Rank, error) {
-	rankData, err := leaderboard.getRankData(ctx, summonerId)
+	leaderboardPosition, err := leaderboard.getLeaderboardPosition(ctx, region, summonerId)
 	if err != nil {
 		return types.Rank{}, err
 	}
 
-	leaderboardPosition, err := leaderboard.getLeaderboardPosition(ctx, region, summonerId)
+	rankData, err := leaderboard.getRankData(ctx, summonerId)
 	if err != nil {
 		return types.Rank{}, err
 	}
@@ -31,6 +33,10 @@ func (leaderboard Leaderboard) getRankData(ctx context.Context, summonerId strin
 	jsonRaw, err := leaderboard.rdb.JSONGet(ctx, "rank:"+summonerId).Result()
 	if err != nil {
 		return rankData, err
+	}
+	// idk why JSONGet doesn't return redis.Nil on missing key!!!
+	if jsonRaw == "" {
+		return rankData, redis.Nil
 	}
 
 	err = json.Unmarshal([]byte(jsonRaw), &rankData)

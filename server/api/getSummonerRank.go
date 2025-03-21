@@ -2,10 +2,11 @@ package api
 
 import (
 	"encoding/json"
+	"errors"
 	"log"
 	"net/http"
 
-	"github.com/jackc/pgx/v5"
+	"github.com/redis/go-redis/v9"
 )
 
 func (controller Api) getSummonerRank(w http.ResponseWriter, r *http.Request) {
@@ -15,7 +16,7 @@ func (controller Api) getSummonerRank(w http.ResponseWriter, r *http.Request) {
 	summonerId := r.PathValue("summonerId")
 
 	rankEntry, err := controller.Service.GetSummonerRank(ctx, region, summonerId)
-	if err == pgx.ErrNoRows {
+	if errors.Is(err, redis.Nil) {
 		http.Error(w, "rank not found", http.StatusNotFound)
 		return
 	}
