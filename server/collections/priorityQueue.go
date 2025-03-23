@@ -4,15 +4,17 @@ import "sync"
 
 // Thread safe generic implementation of priority queue.
 // Insertion order maintained on equal values.
-type PriorityQueue[T Comparable[T]] struct {
-	mu    sync.Mutex
-	items []T
+type PriorityQueue[T any] struct {
+	mu         sync.Mutex
+	comparator Comparator[T]
+	items      []T
 }
 
 // Initialize a new priority queue with items of type T.
-func NewPriorityQueue[T Comparable[T]]() *PriorityQueue[T] {
+func NewPriorityQueue[T any](comparator Comparator[T]) *PriorityQueue[T] {
 	return &PriorityQueue[T]{
-		items: make([]T, 0),
+		comparator: comparator,
+		items:      make([]T, 0),
 	}
 }
 
@@ -45,7 +47,7 @@ func (pq *PriorityQueue[T]) insertionIndex(item T) int {
 	l, r := 0, len(pq.items)
 	for l < r {
 		pivot := (l + r) / 2
-		if item.Compare(pq.items[pivot]) {
+		if pq.comparator(item, pq.items[pivot]) < 0 {
 			r = pivot
 		} else {
 			l = pivot + 1

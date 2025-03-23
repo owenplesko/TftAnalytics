@@ -12,7 +12,9 @@ type Scheduler struct {
 
 func New(rate time.Duration) *Scheduler {
 	lim := &Scheduler{
-		pq: collections.NewPriorityQueue[priorityLock](),
+		pq: collections.NewPriorityQueue(func(a, b priorityLock) int {
+			return b.priority - a.priority
+		}),
 	}
 
 	go lim.dripper(rate)

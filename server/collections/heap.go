@@ -4,14 +4,16 @@ import "sync"
 
 // Thread safe generic implementation of max heap.
 // Insertion order not maintained on equal values.
-type Heap[T Comparable[T]] struct {
-	mu    sync.RWMutex
-	items []T
+type Heap[T any] struct {
+	mu         sync.RWMutex
+	comparator Comparator[T]
+	items      []T
 }
 
-func NewHeap[T Comparable[T]]() *Heap[T] {
+func NewHeap[T any](comparator Comparator[T]) *Heap[T] {
 	return &Heap[T]{
-		items: make([]T, 0),
+		comparator: comparator,
+		items:      make([]T, 0),
 	}
 }
 
@@ -61,25 +63,25 @@ func (h *Heap[T]) siftDown(i int) {
 			return
 		}
 
-		biggestChild := leftChild
+		priorityChild := leftChild
 		rightChild := leftChild + 1
-		if rightChild < len(h.items) && h.items[rightChild].Compare(h.items[leftChild]) {
-			biggestChild = rightChild
+		if rightChild < len(h.items) && h.comparator(h.items[rightChild], h.items[leftChild]) < 0 {
+			priorityChild = rightChild
 		}
 
-		if h.items[i].Compare(h.items[biggestChild]) {
+		if h.comparator(h.items[i], h.items[priorityChild]) < 0 {
 			return
 		}
 
-		h.swap(i, biggestChild)
-		i = biggestChild
+		h.swap(i, priorityChild)
+		i = priorityChild
 	}
 }
 
 func (h *Heap[T]) siftUp(i int) {
 	for i > 0 {
 		parent := (i - 1) / 2
-		if h.items[parent].Compare(h.items[i]) {
+		if h.comparator(h.items[parent], h.items[i]) < 0 {
 			return
 		}
 
