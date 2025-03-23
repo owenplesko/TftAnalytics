@@ -5,7 +5,7 @@ import "sync"
 // Thread safe generic implementation of priority queue.
 // Insertion order maintained on equal values.
 type PriorityQueue[T any] struct {
-	mu         sync.Mutex
+	mu         sync.RWMutex
 	comparator Comparator[T]
 	items      []T
 }
@@ -44,8 +44,8 @@ func (pq *PriorityQueue[T]) Pop() (item T, ok bool) {
 
 // Return item with highest priority without removing.
 func (pq *PriorityQueue[T]) Peek() (item T, ok bool) {
-	pq.mu.Lock()
-	defer pq.mu.Unlock()
+	pq.mu.RLock()
+	defer pq.mu.RUnlock()
 
 	if len(pq.items) == 0 {
 		return item, false
@@ -54,6 +54,14 @@ func (pq *PriorityQueue[T]) Peek() (item T, ok bool) {
 	item = pq.items[0]
 
 	return item, true
+}
+
+// Return true if heap has no items, false otherwise.
+func (pq *PriorityQueue[T]) Empty() bool {
+	pq.mu.RLock()
+	defer pq.mu.RUnlock()
+
+	return len(pq.items) == 0
 }
 
 // Finds the first index i where item > arr[i+1].
