@@ -10,7 +10,7 @@ type PriorityQueue[T any] struct {
 	items      []T
 }
 
-// Initialize a new priority queue with items of type T.
+// Create an empty generic priority queue using comparator function to determine order.
 func NewPriorityQueue[T any](comparator Comparator[T]) *PriorityQueue[T] {
 	return &PriorityQueue[T]{
 		comparator: comparator,
@@ -18,7 +18,7 @@ func NewPriorityQueue[T any](comparator Comparator[T]) *PriorityQueue[T] {
 	}
 }
 
-// Add item to correct location in the queue given its priority.
+// Add item to priority queue.
 func (pq *PriorityQueue[T]) Push(item T) {
 	pq.mu.Lock()
 	defer pq.mu.Unlock()
@@ -27,17 +27,32 @@ func (pq *PriorityQueue[T]) Push(item T) {
 	pq.insert(item, i)
 }
 
-// Remove and return the last added item with the highest priority.
-func (pq *PriorityQueue[T]) Pop() (T, bool) {
+// Return and remove item with highest priority.
+func (pq *PriorityQueue[T]) Pop() (item T, ok bool) {
 	pq.mu.Lock()
 	defer pq.mu.Unlock()
 
-	var item T
 	if len(pq.items) == 0 {
 		return item, false
 	}
 
-	item, pq.items = pq.items[0], pq.items[1:]
+	item = pq.items[0]
+	pq.items = pq.items[1:]
+
+	return item, true
+}
+
+// Return item with highest priority without removing.
+func (pq *PriorityQueue[T]) Peek() (item T, ok bool) {
+	pq.mu.Lock()
+	defer pq.mu.Unlock()
+
+	if len(pq.items) == 0 {
+		return item, false
+	}
+
+	item = pq.items[0]
+
 	return item, true
 }
 

@@ -2,7 +2,7 @@ package collections
 
 import "sync"
 
-// Thread safe generic implementation of max heap.
+// Thread safe generic implementation of heap.
 // Insertion order not maintained on equal values.
 type Heap[T any] struct {
 	mu         sync.RWMutex
@@ -10,6 +10,7 @@ type Heap[T any] struct {
 	items      []T
 }
 
+// Create an empty generic heap using comparator function to determine order.
 func NewHeap[T any](comparator Comparator[T]) *Heap[T] {
 	return &Heap[T]{
 		comparator: comparator,
@@ -17,6 +18,7 @@ func NewHeap[T any](comparator Comparator[T]) *Heap[T] {
 	}
 }
 
+// Add item to heap.
 func (h *Heap[T]) Push(item T) {
 	h.mu.Lock()
 	defer h.mu.Unlock()
@@ -25,26 +27,39 @@ func (h *Heap[T]) Push(item T) {
 	h.siftUp(len(h.items) - 1)
 }
 
-func (h *Heap[T]) Pop() T {
+// Return and remove highest priority item in heap.
+func (h *Heap[T]) Pop() (item T, ok bool) {
 	h.mu.Lock()
 	defer h.mu.Unlock()
 
-	item := h.items[0]
+	if len(h.items) == 0 {
+		return item, false
+	}
+
+	item = h.items[0]
 
 	h.swap(0, len(h.items)-1)
 	h.items = h.items[:len(h.items)-1]
 	h.siftDown(0)
 
-	return item
+	return item, true
 }
 
-func (h *Heap[T]) Peek() T {
+// Return highest priority item in heap without removing.
+func (h *Heap[T]) Peek() (item T, ok bool) {
 	h.mu.RLock()
 	defer h.mu.RUnlock()
 
-	return h.items[0]
+	if len(h.items) == 0 {
+		return item, false
+	}
+
+	item = h.items[0]
+
+	return item, true
 }
 
+// Return true if heap has no items, false otherwise.
 func (h *Heap[T]) Empty() bool {
 	h.mu.RLock()
 	defer h.mu.RUnlock()
@@ -52,10 +67,12 @@ func (h *Heap[T]) Empty() bool {
 	return len(h.items) == 0
 }
 
+// Swap two items in heap at the given indices.
 func (h *Heap[T]) swap(i, j int) {
 	h.items[i], h.items[j] = h.items[j], h.items[i]
 }
 
+// Move item at index i down the heap to its correct location.
 func (h *Heap[T]) siftDown(i int) {
 	for {
 		leftChild := i*2 + 1
@@ -78,6 +95,7 @@ func (h *Heap[T]) siftDown(i int) {
 	}
 }
 
+// Move item at index i up the heap to its correct location
 func (h *Heap[T]) siftUp(i int) {
 	for i > 0 {
 		parent := (i - 1) / 2
