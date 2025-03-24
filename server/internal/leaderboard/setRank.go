@@ -1,7 +1,6 @@
 package leaderboard
 
 import (
-	"TFTAnalyticsServer/types"
 	"context"
 	"encoding/json"
 
@@ -10,7 +9,7 @@ import (
 
 type SetRankParams struct {
 	SummonerId string
-	RankData   types.RankData
+	RankData   RankData
 }
 
 func (leaderboard Leaderboard) SetRank(ctx context.Context, leaderboardName string, params ...SetRankParams) error {

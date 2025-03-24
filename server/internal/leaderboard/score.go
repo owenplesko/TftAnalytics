@@ -1,7 +1,5 @@
 package leaderboard
 
-import "TFTAnalyticsServer/types"
-
 var tierScoreMap = map[string]int{
 	"CHALLENGER":  2800,
 	"GRANDMASTER": 2800,
@@ -22,7 +20,7 @@ var divisionScoreMap = map[string]int{
 	"IV":  0,
 }
 
-func getRankScore(rank types.RankData) int {
+func getRankScore(rank RankData) int {
 	rankScore := tierScoreMap[rank.Tier]
 
 	if rankScore < tierScoreMap["MASTER"] {

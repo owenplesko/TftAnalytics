@@ -1,7 +1,7 @@
 package api
 
 import (
-	"TFTAnalyticsServer/riot"
+	"TFTAnalyticsServer/pkg/riot"
 	"context"
 	"encoding/json"
 	"errors"

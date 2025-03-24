@@ -1,7 +1,7 @@
 package api
 
 import (
-	"TFTAnalyticsServer/riot/scheduler"
+	"TFTAnalyticsServer/pkg/riot/scheduler"
 	"net/http"
 )
 

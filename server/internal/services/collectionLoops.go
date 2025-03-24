@@ -1,8 +1,8 @@
 package services
 
 import (
-	"TFTAnalyticsServer/db"
-	"TFTAnalyticsServer/riot"
+	"TFTAnalyticsServer/internal/db"
+	"TFTAnalyticsServer/pkg/riot"
 	"context"
 	"log"
 	"time"

@@ -1,7 +1,7 @@
 package api
 
 import (
-	"TFTAnalyticsServer/services"
+	"TFTAnalyticsServer/internal/services"
 	"fmt"
 	"log"
 	"net/http"

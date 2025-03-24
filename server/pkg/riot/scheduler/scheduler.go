@@ -1,7 +1,7 @@
 package scheduler
 
 import (
-	"TFTAnalyticsServer/collections"
+	"TFTAnalyticsServer/pkg/collections"
 	"context"
 	"time"
 )

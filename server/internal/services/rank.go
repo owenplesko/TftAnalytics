@@ -1,17 +1,16 @@
 package services
 
 import (
-	"TFTAnalyticsServer/leaderboard"
-	"TFTAnalyticsServer/types"
+	"TFTAnalyticsServer/internal/leaderboard"
 	"context"
 	"fmt"
 	"log"
 )
 
-func (service *Service) GetSummonerRank(ctx context.Context, region string, summonerId string) (types.Rank, error) {
+func (service *Service) GetSummonerRank(ctx context.Context, region string, summonerId string) (leaderboard.Rank, error) {
 	rank, err := service.leaderboard.GetRank(ctx, region, summonerId)
 	if err != nil {
-		return types.Rank{}, fmt.Errorf("Leaderboard.GetRank failed with err: %w", err)
+		return leaderboard.Rank{}, fmt.Errorf("Leaderboard.GetRank failed with err: %w", err)
 	}
 
 	return rank, nil
@@ -25,7 +24,7 @@ func (service *Service) CollectSummonerRank(ctx context.Context, region, summone
 
 	setRankParam := leaderboard.SetRankParams{
 		SummonerId: rankEntry.SummonerId,
-		RankData: types.RankData{
+		RankData: leaderboard.RankData{
 			Tier:         rankEntry.Tier,
 			Rank:         rankEntry.Rank,
 			LeaguePoints: int(rankEntry.LeaguePoints),
@@ -57,7 +56,7 @@ func (service *Service) CollectRankEntries(ctx context.Context, region, tier, di
 		for i, rankEntry := range rankEntries {
 			setRankParams[i] = leaderboard.SetRankParams{
 				SummonerId: rankEntry.SummonerId,
-				RankData: types.RankData{
+				RankData: leaderboard.RankData{
 					Tier:         rankEntry.Tier,
 					Rank:         rankEntry.Rank,
 					LeaguePoints: int(rankEntry.LeaguePoints),
@@ -86,7 +85,7 @@ func (service *Service) CollectApexRankEntries(ctx context.Context, region, tier
 	for i, rankEntry := range rankPage.Entries {
 		setRankParams[i] = leaderboard.SetRankParams{
 			SummonerId: rankEntry.SummonerId,
-			RankData: types.RankData{
+			RankData: leaderboard.RankData{
 				Tier:         tier,
 				Rank:         rankEntry.Rank,
 				LeaguePoints: int(rankEntry.LeaguePoints),

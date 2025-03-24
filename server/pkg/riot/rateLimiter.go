@@ -1,7 +1,7 @@
 package riot
 
 import (
-	"TFTAnalyticsServer/riot/scheduler"
+	"TFTAnalyticsServer/pkg/riot/scheduler"
 	"context"
 	"fmt"
 	"time"

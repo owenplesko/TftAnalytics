@@ -1,25 +1,24 @@
 package leaderboard
 
 import (
-	"TFTAnalyticsServer/types"
 	"context"
 	"encoding/json"
 
 	"github.com/redis/go-redis/v9"
 )
 
-func (leaderboard Leaderboard) GetRank(ctx context.Context, region string, summonerId string) (types.Rank, error) {
+func (leaderboard Leaderboard) GetRank(ctx context.Context, region string, summonerId string) (Rank, error) {
 	leaderboardPosition, err := leaderboard.getLeaderboardPosition(ctx, region, summonerId)
 	if err != nil {
-		return types.Rank{}, err
+		return Rank{}, err
 	}
 
 	rankData, err := leaderboard.getRankData(ctx, summonerId)
 	if err != nil {
-		return types.Rank{}, err
+		return Rank{}, err
 	}
 
-	rank := types.Rank{
+	rank := Rank{
 		Data:                rankData,
 		LeaderboardPosition: leaderboardPosition,
 	}
@@ -27,8 +26,8 @@ func (leaderboard Leaderboard) GetRank(ctx context.Context, region string, summo
 	return rank, nil
 }
 
-func (leaderboard Leaderboard) getRankData(ctx context.Context, summonerId string) (types.RankData, error) {
-	var rankData types.RankData
+func (leaderboard Leaderboard) getRankData(ctx context.Context, summonerId string) (RankData, error) {
+	var rankData RankData
 
 	jsonRaw, err := leaderboard.rdb.JSONGet(ctx, "rank:"+summonerId).Result()
 	if err != nil {
@@ -44,20 +43,20 @@ func (leaderboard Leaderboard) getRankData(ctx context.Context, summonerId strin
 	return rankData, err
 }
 
-func (leaderboard Leaderboard) getLeaderboardPosition(ctx context.Context, region string, summonerId string) (types.LeaderboardPosition, error) {
+func (leaderboard Leaderboard) getLeaderboardPosition(ctx context.Context, region string, summonerId string) (LeaderboardPosition, error) {
 	leaderboardName := "leaderboard:" + region
 
 	position, err := leaderboard.rdb.ZRevRank(ctx, leaderboardName, summonerId).Result()
 	if err != nil {
-		return types.LeaderboardPosition{}, err
+		return LeaderboardPosition{}, err
 	}
 
 	cardinality, err := leaderboard.rdb.ZCard(ctx, leaderboardName).Result()
 	if err != nil {
-		return types.LeaderboardPosition{}, err
+		return LeaderboardPosition{}, err
 	}
 
-	leaderboardPosition := types.LeaderboardPosition{
+	leaderboardPosition := LeaderboardPosition{
 		Leaderboard: region,
 		Position:    int(position + 1),
 		Top:         float32(position+1) / float32(cardinality) * 100,

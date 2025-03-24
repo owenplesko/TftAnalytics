@@ -1,5 +1,0 @@
-.vscode
-.DS_Store
-.env
-buildPush.sh
-fileserver/static/*

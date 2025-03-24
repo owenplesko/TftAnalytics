@@ -1,4 +1,4 @@
-package types
+package leaderboard
 
 type Rank struct {
 	Data                RankData            `json:"rankData"`

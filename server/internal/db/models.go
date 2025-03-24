@@ -5,14 +5,13 @@
 package db
 
 import (
-	"TFTAnalyticsServer/types"
 	"github.com/jackc/pgx/v5/pgtype"
 )
 
 type TftComp struct {
 	MatchID       string           `json:"matchId"`
 	SummonerPuuid string           `json:"summonerPuuid"`
-	CompData      types.CompData   `json:"compData"`
+	CompData      CompData         `json:"compData"`
 	MatchDate     pgtype.Timestamp `json:"matchDate"`
 }
 

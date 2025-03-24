@@ -1,11 +1,11 @@
 package main
 
 import (
-	"TFTAnalyticsServer/api"
-	"TFTAnalyticsServer/fileserver"
-	"TFTAnalyticsServer/leaderboard"
-	"TFTAnalyticsServer/riot"
-	"TFTAnalyticsServer/services"
+	"TFTAnalyticsServer/internal/api"
+	"TFTAnalyticsServer/internal/fileserver"
+	"TFTAnalyticsServer/internal/leaderboard"
+	"TFTAnalyticsServer/internal/services"
+	"TFTAnalyticsServer/pkg/riot"
 	"strconv"
 	"time"
 

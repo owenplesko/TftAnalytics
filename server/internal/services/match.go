@@ -1,9 +1,8 @@
 package services
 
 import (
-	"TFTAnalyticsServer/db"
-	"TFTAnalyticsServer/riot"
-	"TFTAnalyticsServer/types"
+	"TFTAnalyticsServer/internal/db"
+	"TFTAnalyticsServer/pkg/riot"
 	"context"
 	"fmt"
 	"log"
@@ -167,7 +166,7 @@ func (service *Service) storeMatchDetails(ctx context.Context, matchDetails *rio
 		err = qtx.CreateComp(ctx, db.CreateCompParams{
 			MatchID:       matchDetails.MetaData.MatchId,
 			SummonerPuuid: compDetails.Puuid,
-			CompData:      types.CompData(compDetails),
+			CompData:      db.CompData(compDetails),
 			MatchDate:     matchDate,
 		})
 		if err != nil {

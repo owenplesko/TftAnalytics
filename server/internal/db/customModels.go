@@ -1,4 +1,4 @@
-package types
+package db
 
 type CompData struct {
 	Companion struct {

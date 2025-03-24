@@ -1,9 +1,9 @@
 package services
 
 import (
-	"TFTAnalyticsServer/db"
-	"TFTAnalyticsServer/leaderboard"
-	"TFTAnalyticsServer/riot"
+	"TFTAnalyticsServer/internal/db"
+	"TFTAnalyticsServer/internal/leaderboard"
+	"TFTAnalyticsServer/pkg/riot"
 	"time"
 
 	"github.com/jackc/pgx/v5/pgxpool"

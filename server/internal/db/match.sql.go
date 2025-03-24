@@ -8,7 +8,6 @@ package db
 import (
 	"context"
 
-	"TFTAnalyticsServer/types"
 	"github.com/jackc/pgx/v5/pgtype"
 )
 
@@ -26,7 +25,7 @@ INSERT INTO tft_comp (
 type CreateCompParams struct {
 	MatchID       string           `json:"matchId"`
 	SummonerPuuid string           `json:"summonerPuuid"`
-	CompData      types.CompData   `json:"compData"`
+	CompData      CompData         `json:"compData"`
 	MatchDate     pgtype.Timestamp `json:"matchDate"`
 }
 
@@ -90,8 +89,8 @@ WHERE match_id = $1
 `
 
 type GetMatchCompsRow struct {
-	TftSummoner TftSummoner    `json:"tftSummoner"`
-	CompData    types.CompData `json:"compData"`
+	TftSummoner TftSummoner `json:"tftSummoner"`
+	CompData    CompData    `json:"compData"`
 }
 
 func (q *Queries) GetMatchComps(ctx context.Context, matchID string) ([]GetMatchCompsRow, error) {
@@ -159,8 +158,8 @@ type SummonerMatchHistoryParams struct {
 }
 
 type SummonerMatchHistoryRow struct {
-	CompData types.CompData `json:"compData"`
-	TftMatch TftMatch       `json:"tftMatch"`
+	CompData CompData `json:"compData"`
+	TftMatch TftMatch `json:"tftMatch"`
 }
 
 func (q *Queries) SummonerMatchHistory(ctx context.Context, arg SummonerMatchHistoryParams) ([]SummonerMatchHistoryRow, error) {
