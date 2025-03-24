@@ -2,7 +2,6 @@ package main
 
 import (
 	"TFTAnalyticsServer/internal/api"
-	"TFTAnalyticsServer/internal/fileserver"
 	"TFTAnalyticsServer/internal/leaderboard"
 	"TFTAnalyticsServer/internal/services"
 	"TFTAnalyticsServer/pkg/riot"
@@ -69,12 +68,5 @@ func main() {
 	if err != nil {
 		apiPort = 9001
 	}
-	go api.Api{Service: service}.ListenAndServe(apiPort)
-
-	// start frontend
-	fileServerPort, err := strconv.Atoi(os.Getenv("FILESERVER_PORT"))
-	if err != nil {
-		fileServerPort = 9000
-	}
-	fileserver.ListenAndServe(fileServerPort)
+	api.Api{Service: service}.ListenAndServe(apiPort)
 }

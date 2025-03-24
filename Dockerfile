@@ -11,6 +11,6 @@ FROM gcr.io/distroless/static-debian11
 
 COPY --from=build /bin/server /bin/server
 
-EXPOSE 9000 9001
+EXPOSE 9000
 
 CMD ["/bin/server"]

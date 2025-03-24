@@ -12,4 +12,4 @@ yarn-error.log
 *.local
 
 # Build artifacts
-server/internal/fileserver/static/*
+frontend/dist/
