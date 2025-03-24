@@ -1,0 +1,1 @@
+pnpm --prefix frontend install && pnpm --prefix frontend run build && docker buildx build --platform linux/amd64 -t oplesko/tft-analytics:latest . --push

@@ -1,0 +1,29 @@
+package api
+
+import (
+	"TFTAnalyticsServer/internal/services"
+	"fmt"
+	"log"
+	"net/http"
+)
+
+type Api struct {
+	Service *services.Service
+}
+
+func (controller Api) ListenAndServe(port int) {
+	router := http.NewServeMux()
+	router.HandleFunc("/v1/summoner/by-puuid/{puuid}", controller.getSummonerByPuuid)
+	router.HandleFunc("/v1/summoner/by-name-tag/{name}/{tag}", controller.getSummonerByNameTag)
+	router.HandleFunc("/v1/leaderboard/{region}/{summonerId}", controller.getSummonerRank)
+	router.HandleFunc("/v1/summoner/by-puuid/{puuid}/update", controller.updateSummoner)
+	router.HandleFunc("/v1/summoner/by-puuid/{puuid}/matches", controller.getSummonerMatches)
+	router.HandleFunc("/v1/match/{matchid}/comps", controller.getMatchComps)
+
+	root := http.NewServeMux()
+	root.Handle("/", setCors(setSchedulerPriority(router)))
+
+	log.Printf("api listening on port: %d\n", port)
+	err := http.ListenAndServe(fmt.Sprintf(":%d", port), root)
+	log.Fatalf("api failed with err: %v", err)
+}

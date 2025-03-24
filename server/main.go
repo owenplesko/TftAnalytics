@@ -1,11 +1,13 @@
 package main
 
 import (
-	"TheCollectorDG/api"
-	"TheCollectorDG/db"
-	"TheCollectorDG/workerManager"
-	"TheCollectorDG/workers"
-	"net/http"
+	"TFTAnalyticsServer/internal/api"
+	"TFTAnalyticsServer/internal/fileserver"
+	"TFTAnalyticsServer/internal/leaderboard"
+	"TFTAnalyticsServer/internal/services"
+	"TFTAnalyticsServer/pkg/riot"
+	"strconv"
+	"time"
 
 	"context"
 	"log"
@@ -13,36 +15,66 @@ import (
 
 	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/joho/godotenv"
+	"github.com/redis/go-redis/v9"
 )
 
 func main() {
-	ctx := context.Background()
-
+	// load .env file
 	err := godotenv.Load()
 	if err != nil {
-		log.Fatal("Error loading .env file")
+		log.Println("no .env file found")
+	} else {
+		log.Println(".env file loaded")
 	}
-	log.Println("Env variables loaded")
 
-	pool, err := pgxpool.New(ctx, os.Getenv("DB_URL"))
+	// create database connection
+	pool, err := pgxpool.New(context.Background(), os.Getenv("DB_URL"))
 	if err != nil {
+		panic(err)
+	}
+	if err = pool.Ping(context.Background()); err != nil {
 		panic(err)
 	}
 	log.Println("Db connection successful")
 
-	queries := db.New(pool)
+	// create leaderboard connection
+	rdb := redis.NewClient(&redis.Options{
+		Addr: os.Getenv("LEADERBOARD_URL"),
+	})
+	if err = rdb.Ping(context.Background()).Err(); err != nil {
+		panic(err)
+	}
+	leaderboard := leaderboard.New(rdb)
+	log.Println("Leaderboard connection successful")
 
-	workerEnv := workers.WorkerEnv{
-		Pool:    pool,
-		Queries: queries,
+	// create riot client
+	rate, err := strconv.ParseFloat(os.Getenv("RIOT_RATE"), 32)
+	if err != nil {
+		panic("RIOT_RATE not set properly")
+	}
+	rateDuration := time.Duration(rate) * time.Millisecond
+	riotClient := riot.New(os.Getenv("RIOT_KEY"), rateDuration)
+
+	// create service
+	service := services.New(pool, leaderboard, riotClient)
+
+	// start collection loops
+	for region := range riot.RegionToCluster {
+		go service.RankEntryCollectionLoop(context.Background(), region)
+		go service.MatchCollectionLoop(context.Background(), region)
 	}
 
-	workerManager := workerManager.New()
-	workerManager.AddWorker("na1", workerEnv.RegionWorker)
-	workerManager.AddWorker("americas", workerEnv.ClusterWorker)
-
-	apiEnv := api.ApiEnv{
-		Queries: queries,
+	// start api
+	apiPort, err := strconv.Atoi(os.Getenv("API_PORT"))
+	if err != nil {
+		apiPort = 9001
 	}
-	http.ListenAndServe(":8080", apiEnv.New())
+	go api.Api{Service: service}.ListenAndServe(apiPort)
+
+	// start frontend
+	fileServerPort, err := strconv.Atoi(os.Getenv("FILESERVER_PORT"))
+	if err != nil {
+		fileServerPort = 9000
+	}
+	fileserver.ListenAndServe(fileServerPort)
 }

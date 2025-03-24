@@ -1,0 +1,152 @@
+import SummonerMatch from "@/components/comp";
+import { Button } from "@/components/ui/button";
+import { sentenceCase } from "@/lib/utils";
+import { getPlayer } from "@/services/getPlayer";
+import { getPlayerMatchHistory } from "@/services/getPlayerMatches";
+import { getRank } from "@/services/getRank";
+import { Rank } from "@/services/types";
+import { updatePlayer } from "@/services/updatePlayer";
+import {
+  useMutation,
+  useQuery,
+  useSuspenseInfiniteQuery,
+  useSuspenseQuery,
+} from "@tanstack/react-query";
+import { createFileRoute } from "@tanstack/react-router";
+import { IconLoader2 } from "@tabler/icons-react";
+import TimeSince from "@/components/timeSince";
+import { useInView } from "react-intersection-observer";
+import React, { useEffect } from "react";
+import { Badge } from "@/components/ui/badge";
+
+export const Route = createFileRoute("/player/$name/$tag")({
+  component: Player,
+  loader: async ({ params: { name, tag }, context: { queryClient } }) => {
+    const { region, puuid, summonerId } = await queryClient.ensureQueryData(
+      getPlayer(name, tag),
+    );
+
+    await Promise.all([
+      queryClient.prefetchQuery(getRank(region, summonerId)),
+      queryClient.ensureInfiniteQueryData(getPlayerMatchHistory(puuid)),
+    ]);
+
+    return { name, tag };
+  },
+});
+
+function Player() {
+  const loader = Route.useLoaderData();
+
+  const playerQuery = useSuspenseQuery(getPlayer(loader.name, loader.tag));
+  const player = playerQuery.data;
+
+  const rankQuery = useQuery(getRank(player.region, player.summonerId));
+
+  const matchesQuery = useSuspenseInfiniteQuery(
+    getPlayerMatchHistory(player.puuid),
+  );
+  const matches = matchesQuery.data.pages.flat();
+
+  const updateMutation = useMutation({
+    mutationKey: ["UPDATE_PLAYER", player.puuid],
+    mutationFn: updatePlayer,
+    onSuccess: () => {
+      playerQuery.refetch();
+      rankQuery.refetch();
+      matchesQuery.refetch();
+    },
+  });
+
+  const [inViewRef, inView] = useInView();
+
+  useEffect(() => {
+    if (inView) matchesQuery.fetchNextPage();
+  }, [inView, matchesQuery.fetchNextPage]);
+
+  return (
+    <>
+      <div className="grid w-full grid-cols-[auto_1fr] grid-rows-[auto_auto_auto_auto] items-center justify-items-start gap-2 border-b pb-4">
+        <img
+          className="row-span-4 rounded border"
+          width={124}
+          height={124}
+          src={`/profileicon/profileicon${player.profileIconId}.png`}
+        />
+        <div className="flex items-center gap-1">
+          <h1 className="text-3xl font-bold">
+            <span>{player.name}</span>
+            <span className="text-muted-foreground">#{player.tag}</span>
+          </h1>
+          <Badge variant="secondary">{player.region}</Badge>
+        </div>
+        {rankQuery.isSuccess ? (
+          <RankLine rank={rankQuery.data} />
+        ) : (
+          <span className="text-destructive">error loading rank</span>
+        )}
+        <Button
+          onClick={() => updateMutation.mutate(player.puuid)}
+          disabled={updateMutation.isPending}
+        >
+          {
+            {
+              idle: "Update",
+              pending: (
+                <>
+                  <IconLoader2 className="mr-1 animate-spin ease-in-out" />
+                  Updating...
+                </>
+              ),
+              success: "Updated",
+              error: "Error",
+            }[updateMutation.status]
+          }
+        </Button>
+        <span className="text-muted-foreground">
+          {"Updated "}
+          {player.updateTimestamp ? (
+            <TimeSince date={new Date(player.updateTimestamp)} />
+          ) : (
+            "never"
+          )}
+        </span>
+      </div>
+      <div className="flex w-full flex-col gap-4 py-4">
+        {matches.map((match) => (
+          <SummonerMatch
+            key={`${match.compData.puuid}_${match.tftMatch.id}`}
+            summonerMatch={match}
+          />
+        ))}
+      </div>
+      <div ref={inViewRef} />
+    </>
+  );
+}
+
+const RankLine: React.FC<{
+  rank: Rank | null;
+}> = ({ rank }) => {
+  if (rank === null)
+    return (
+      <div className="flex flex-row gap-2">
+        <img width={24} height={24} src="/rank/unranked.svg" />
+        <span>Unranked</span>
+      </div>
+    );
+
+  return (
+    <div className="flex flex-row gap-2">
+      <img
+        width={24}
+        height={24}
+        src={`/rank/${rank.rankData.tier.toLowerCase()}.svg`}
+      />
+      <span>{`${sentenceCase(rank.rankData.tier)}`}</span>
+      <span>{`${rank.rankData.leaguePoints} LP`}</span>
+      <span className="text-muted-foreground">{`Rank #${rank.leaderboardPosition.position}`}</span>
+      <span className="text-muted-foreground">{`Top ${rank.leaderboardPosition.top.toPrecision(2)}%`}</span>
+    </div>
+  );
+};

@@ -1,0 +1,84 @@
+package riot
+
+import (
+	"context"
+	"fmt"
+	"time"
+)
+
+type Match struct {
+	MetaData struct {
+		DataVersion  string   `json:"data_version"`
+		MatchId      string   `json:"match_id"`
+		Participants []string `json:"participants"`
+	} `json:"metadata"`
+	Info struct {
+		Date        int64   `json:"game_datetime"`
+		Length      float64 `json:"game_length"`
+		GameVersion string  `json:"game_version"`
+		QueueId     int32   `json:"queue_id"`
+		GameType    string  `json:"tft_game_type"`
+		SetName     string  `json:"tft_set_core_name"`
+		SetNumber   int32   `json:"tft_set_number"`
+		Comps       []Comp  `json:"participants"`
+	} `json:"info"`
+}
+
+type Comp struct {
+	Companion struct {
+		ContentId string `json:"content_ID"`
+		ItemId    int32  `json:"item_ID"`
+		SkinId    int32  `json:"skin_ID"`
+		Species   string `json:"species"`
+	} `json:"companion"`
+	RemainingGold     int32   `json:"gold_left"`
+	LastRound         int32   `json:"last_round"`
+	Level             int32   `json:"level"`
+	Placement         int32   `json:"placement"`
+	PlayersEliminated int32   `json:"players_eliminated"`
+	Puuid             string  `json:"puuid"`
+	TimeEliminated    float64 `json:"time_eliminated"`
+	DamageToPlayers   int32   `json:"total_damage_to_players"`
+	Traits            []struct {
+		Name       string `json:"name"`
+		NumUnits   int32  `json:"num_units"`
+		Style      int32  `json:"style"`
+		TierActive int32  `json:"tier_current"`
+		TierMax    int32  `json:"tier_total"`
+	} `json:"traits"`
+	Units []struct {
+		CharacterId string   `json:"character_id"`
+		ItemNames   []string `json:"itemNames"`
+		Rarity      int32    `json:"rarity"`
+		Tier        int32    `json:"tier"`
+	} `json:"units"`
+}
+
+const MATCH_HISTORY_MAX_COUNT = 200
+
+func (c *Riot) GetMatchDetails(ctx context.Context, cluster, matchId string) (*Match, error) {
+	matchRes := new(Match)
+
+	route := fmt.Sprintf("tft/match/v1/matches/%v", matchId)
+	err := c.request(ctx, cluster, route, matchRes)
+
+	return matchRes, err
+}
+
+func (c *Riot) GetMatchHistory(ctx context.Context, cluster string, puuid string, count int) ([]string, error) {
+	var history []string
+
+	route := fmt.Sprintf("tft/match/v1/matches/by-puuid/%v/ids?count=%v", puuid, count)
+	err := c.request(ctx, cluster, route, &history)
+
+	return history, err
+}
+
+func (c *Riot) GetMatchHistoryInTimeRange(ctx context.Context, cluster string, puuid string, count int, matchesAfter, matchesBefore time.Time, startIndex int) ([]string, error) {
+	var history []string
+
+	route := fmt.Sprintf("tft/match/v1/matches/by-puuid/%v/ids?count=%v&startTime=%v&endTime=%v&start=%v", puuid, count, matchesAfter.UTC().Unix(), matchesBefore.UTC().Unix(), startIndex)
+	err := c.request(ctx, cluster, route, &history)
+
+	return history, err
+}
