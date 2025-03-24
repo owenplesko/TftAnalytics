@@ -66,11 +66,9 @@ function Player() {
 
   return (
     <>
-      <div className="grid w-full grid-cols-[auto_1fr] grid-rows-[auto_auto_auto_auto] items-center justify-items-start gap-2 border-b pb-4">
+      <div className="grid w-full grid-cols-[auto_1fr] items-center justify-items-start gap-2 border-b pb-4">
         <img
-          className="row-span-4 rounded border"
-          width={124}
-          height={124}
+          className="row-span-4 h-full rounded border"
           src={`/profileicon/profileicon${player.profileIconId}.png`}
         />
         <div className="flex items-center gap-1">
