@@ -2,7 +2,7 @@
   "name": "tft-ui",
   "private": true,
   "version": "0.0.0",
-  "homepage": "https://owenplesko.github.io/TftAnalytics/",
+  "homepage": "https://tft.oween.win/",
   "type": "module",
   "scripts": {
     "predeploy" : "npm run build",
