@@ -18,15 +18,15 @@ jobs:
         uses: actions/setup-node@v3
 
       - name: Install dependencies
-        working-directory: ./frontend # Specify the directory for this step
+        working-directory: ./frontend
         uses: bahmutov/npm-install@v1
 
       - name: Build project
-        working-directory: ./frontend # Specify the directory for this step
+        working-directory: ./frontend
         run: npm run build
 
       - name: Upload production-ready build files
-        working-directory: ./frontend # Specify the directory for this step
+        working-directory: ./frontend
         uses: actions/upload-artifact@v4
         with:
           name: production-files
