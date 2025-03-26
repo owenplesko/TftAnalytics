@@ -13,7 +13,7 @@ func (controller Api) updateSummoner(w http.ResponseWriter, r *http.Request) {
 
 	puuid := r.PathValue("puuid")
 
-	err := controller.Service.UpdateSummonerInfo(ctx, puuid)
+	err := controller.Service.UpdateSummoner(ctx, puuid)
 	if err == pgx.ErrNoRows {
 		http.Error(w, "summoner not found", http.StatusNotFound)
 	} else if err != nil {

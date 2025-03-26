@@ -51,11 +51,6 @@ WHERE region = @region::VARCHAR
 ORDER BY matches_before_timestamp ASC NULLS FIRST
 LIMIT $1;
 
--- name: SetUpdateTimestamp :exec
-UPDATE tft_summoner
-    SET update_timestamp = @update_timestamp::TIMESTAMP
-WHERE puuid = $1;
-
 -- name: SetMatchesBeforeTimestamp :exec
 UPDATE tft_summoner
     SET matches_before_timestamp = @matches_before_timestamp::TIMESTAMP

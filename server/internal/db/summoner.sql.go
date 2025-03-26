@@ -142,22 +142,6 @@ func (q *Queries) SetMatchesBeforeTimestamp(ctx context.Context, arg SetMatchesB
 	return err
 }
 
-const setUpdateTimestamp = `-- name: SetUpdateTimestamp :exec
-UPDATE tft_summoner
-    SET update_timestamp = $2::TIMESTAMP
-WHERE puuid = $1
-`
-
-type SetUpdateTimestampParams struct {
-	Puuid           string           `json:"puuid"`
-	UpdateTimestamp pgtype.Timestamp `json:"updateTimestamp"`
-}
-
-func (q *Queries) SetUpdateTimestamp(ctx context.Context, arg SetUpdateTimestampParams) error {
-	_, err := q.db.Exec(ctx, setUpdateTimestamp, arg.Puuid, arg.UpdateTimestamp)
-	return err
-}
-
 const summonerExistsByPuuid = `-- name: SummonerExistsByPuuid :one
 SELECT EXISTS (
     SELECT puuid, region, name, tag, summoner_id, profile_icon_id, summoner_level, update_timestamp, matches_before_timestamp FROM tft_summoner WHERE puuid = $1

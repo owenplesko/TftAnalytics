@@ -8,10 +8,8 @@ import (
 	"fmt"
 	"log"
 	"sync"
-	"time"
 
 	"github.com/jackc/pgx/v5"
-	"github.com/jackc/pgx/v5/pgtype"
 )
 
 func (service *Service) GetSummonerByPuuid(ctx context.Context, puuid string) (db.TftSummoner, error) {
@@ -142,7 +140,7 @@ func (service *Service) findSummonerAndRegion(ctx context.Context, puuid string)
 }
 
 // TODO revamp this to have states and better error handling and stuff
-func (service *Service) UpdateSummonerInfo(ctx context.Context, puuid string) error {
+func (service *Service) UpdateSummoner(ctx context.Context, puuid string) error {
 	summoner, err := service.GetSummonerByPuuid(ctx, puuid)
 	if err != nil {
 		return fmt.Errorf("GetSummonerByPuuid failed with err: %w", err)
@@ -162,15 +160,9 @@ func (service *Service) UpdateSummonerInfo(ctx context.Context, puuid string) er
 		return fmt.Errorf("CollectMatchHistory failed with err: %w", err)
 	}
 
-	err = service.queries.SetUpdateTimestamp(ctx, db.SetUpdateTimestampParams{
-		Puuid: puuid,
-		UpdateTimestamp: pgtype.Timestamp{
-			Time:  time.Now().UTC(),
-			Valid: true,
-		},
-	})
+	err = service.queries.UpdateSummonerAggregates(ctx, puuid)
 	if err != nil {
-		return fmt.Errorf("Queries.SetUpdateTimestamp failed with err: %w", err)
+		return fmt.Errorf("Queries.UpdateSummonerAggregates failed with err: %w", err)
 	}
 
 	return nil

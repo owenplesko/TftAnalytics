@@ -9,10 +9,11 @@ import (
 )
 
 type TftComp struct {
-	MatchID       string           `json:"matchId"`
-	SummonerPuuid string           `json:"summonerPuuid"`
-	CompData      CompData         `json:"compData"`
-	MatchDate     pgtype.Timestamp `json:"matchDate"`
+	MatchID         string             `json:"matchId"`
+	SummonerPuuid   string             `json:"summonerPuuid"`
+	CompData        CompData           `json:"compData"`
+	MatchDate       pgtype.Timestamp   `json:"matchDate"`
+	InsertTimestamp pgtype.Timestamptz `json:"insertTimestamp"`
 }
 
 type TftMatch struct {
@@ -36,4 +37,16 @@ type TftSummoner struct {
 	SummonerLevel          int32            `json:"summonerLevel"`
 	UpdateTimestamp        pgtype.Timestamp `json:"updateTimestamp"`
 	MatchesBeforeTimestamp pgtype.Timestamp `json:"matchesBeforeTimestamp"`
+}
+
+type TftSummonerCompAggregate struct {
+	SummonerPuuid string        `json:"summonerPuuid"`
+	QueueID       int32         `json:"queueId"`
+	CompCount     int32         `json:"compCount"`
+	Top4Count     int32         `json:"top4Count"`
+	Top1Count     int32         `json:"top1Count"`
+	PlacementSum  int32         `json:"placementSum"`
+	AvgPlacement  pgtype.Float8 `json:"avgPlacement"`
+	Top4Rate      pgtype.Float8 `json:"top4Rate"`
+	Top1Rate      pgtype.Float8 `json:"top1Rate"`
 }
