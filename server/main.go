@@ -2,6 +2,7 @@ package main
 
 import (
 	"TFTAnalyticsServer/internal/api"
+	"TFTAnalyticsServer/internal/db"
 	"TFTAnalyticsServer/internal/leaderboard"
 	"TFTAnalyticsServer/internal/services"
 	"TFTAnalyticsServer/pkg/riot"
@@ -68,5 +69,5 @@ func main() {
 	if err != nil {
 		apiPort = 9001
 	}
-	api.Api{Service: service}.ListenAndServe(apiPort)
+	api.Api{Service: service, Queries: db.New(pool)}.ListenAndServe(apiPort)
 }

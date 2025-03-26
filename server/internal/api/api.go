@@ -1,6 +1,7 @@
 package api
 
 import (
+	"TFTAnalyticsServer/internal/db"
 	"TFTAnalyticsServer/internal/services"
 	"fmt"
 	"log"
@@ -9,6 +10,7 @@ import (
 
 type Api struct {
 	Service *services.Service
+	Queries *db.Queries
 }
 
 func (controller Api) ListenAndServe(port int) {
@@ -18,6 +20,7 @@ func (controller Api) ListenAndServe(port int) {
 	router.HandleFunc("/v1/leaderboard/{region}/{summonerId}", controller.getSummonerRank)
 	router.HandleFunc("/v1/summoner/by-puuid/{puuid}/update", controller.updateSummoner)
 	router.HandleFunc("/v1/summoner/by-puuid/{puuid}/matches", controller.getSummonerMatches)
+	router.HandleFunc("/v1/summoner/by-puuid/{puuid}/aggregates", controller.getSummonerAggregates)
 	router.HandleFunc("/v1/match/{matchid}/comps", controller.getMatchComps)
 
 	root := http.NewServeMux()

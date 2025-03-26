@@ -7,7 +7,56 @@ package db
 
 import (
 	"context"
+
+	"github.com/jackc/pgx/v5/pgtype"
 )
+
+const getSummonerAggregates = `-- name: GetSummonerAggregates :many
+SELECT
+    queue_id,
+	comp_count,
+	avg_placement,
+	top_4_rate,
+	top_1_rate
+FROM
+	tft_summoner_comp_aggregate
+WHERE
+	summoner_puuid = $1
+`
+
+type GetSummonerAggregatesRow struct {
+	QueueID      int32         `json:"queueId"`
+	CompCount    int32         `json:"compCount"`
+	AvgPlacement pgtype.Float8 `json:"avgPlacement"`
+	Top4Rate     pgtype.Float8 `json:"top4Rate"`
+	Top1Rate     pgtype.Float8 `json:"top1Rate"`
+}
+
+func (q *Queries) GetSummonerAggregates(ctx context.Context, summonerPuuid string) ([]GetSummonerAggregatesRow, error) {
+	rows, err := q.db.Query(ctx, getSummonerAggregates, summonerPuuid)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []GetSummonerAggregatesRow
+	for rows.Next() {
+		var i GetSummonerAggregatesRow
+		if err := rows.Scan(
+			&i.QueueID,
+			&i.CompCount,
+			&i.AvgPlacement,
+			&i.Top4Rate,
+			&i.Top1Rate,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
 
 const updateSummonerAggregates = `-- name: UpdateSummonerAggregates :exec
 CALL update_tft_summoner_comp_aggregate($1)
