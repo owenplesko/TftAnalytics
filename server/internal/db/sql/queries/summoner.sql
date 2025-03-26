@@ -11,8 +11,8 @@ WHERE summoner_id = $1;
 -- name: GetSummonerByNameTag :one
 SELECT *
 FROM tft_summoner 
-WHERE REPLACE(LOWER(name), ' ', '') = REPLACE(LOWER(@name::VARCHAR), ' ', '')
-AND REPLACE(LOWER(tag), ' ', '') = REPLACE(LOWER(@tag::VARCHAR), ' ', '');
+WHERE fn_normalize_str(name) = fn_normalize_str(@name::VARCHAR)
+AND fn_normalize_str(tag) = fn_normalize_str(@tag::VARCHAR);
 
 -- name: SummonerExistsByPuuid :one
 SELECT EXISTS (

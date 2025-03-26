@@ -54,8 +54,8 @@ func (q *Queries) GetOldestMatchesAfter(ctx context.Context, arg GetOldestMatche
 const getSummonerByNameTag = `-- name: GetSummonerByNameTag :one
 SELECT puuid, region, name, tag, summoner_id, profile_icon_id, summoner_level, update_timestamp, matches_before_timestamp
 FROM tft_summoner 
-WHERE REPLACE(LOWER(name), ' ', '') = REPLACE(LOWER($1::VARCHAR), ' ', '')
-AND REPLACE(LOWER(tag), ' ', '') = REPLACE(LOWER($2::VARCHAR), ' ', '')
+WHERE fn_normalize_str(name) = fn_normalize_str($1::VARCHAR)
+AND fn_normalize_str(tag) = fn_normalize_str($2::VARCHAR)
 `
 
 type GetSummonerByNameTagParams struct {

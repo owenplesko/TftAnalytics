@@ -29,7 +29,14 @@ CREATE TABLE tft_comp (
 	PRIMARY KEY(match_id, summoner_puuid)
 );
 
-CREATE INDEX idx_name_tag_insensitive ON tft_summoner (REPLACE(LOWER(name), ' ', ''), REPLACE(LOWER(tag), ' ', ''));
+CREATE
+OR REPLACE FUNCTION fn_normalize_str (VARCHAR) RETURNS VARCHAR AS $$
+BEGIN
+	RETURN REPLACE(LOWER($1), ' ', '');
+END;
+$$ LANGUAGE plpgsql IMMUTABLE;
+
+CREATE INDEX idx_name_tag_normalized ON tft_summoner (fn_normalize_str(name), fn_normalize_str(tag));
 
 CREATE INDEX idx_region_update ON tft_summoner (region, matches_after_timestamp ASC NULLS FIRST);
 
