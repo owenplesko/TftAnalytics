@@ -1,11 +1,11 @@
 import SummonerMatch from "@/components/comp";
 import { Button } from "@/components/ui/button";
 import { sentenceCase } from "@/lib/utils";
-import { getPlayer } from "@/services/getPlayer";
-import { getPlayerMatchHistory } from "@/services/getPlayerMatches";
-import { getRank } from "@/services/getRank";
+import { getSummoner } from "@/services/getSummoner";
+import { getSummonerMatches } from "@/services/getSummonerMatches";
+import { getSummonerRank } from "@/services/getSummonerRank";
 import { Rank, SummonerStats } from "@/services/types";
-import { updatePlayer } from "@/services/updatePlayer";
+import { updateSummoner } from "@/services/updateSummoner";
 import {
   useMutation,
   useSuspenseInfiniteQuery,
@@ -17,19 +17,19 @@ import TimeSince from "@/components/timeSince";
 import { useInView } from "react-intersection-observer";
 import React, { useEffect } from "react";
 import { Badge } from "@/components/ui/badge";
-import { getPlayerAggregates } from "@/services/getPlayerStats";
+import { getSummonerStats } from "@/services/getSummonerStats";
 
 export const Route = createFileRoute("/player/$name/$tag")({
   component: Player,
   loader: async ({ params: { name, tag }, context: { queryClient } }) => {
     const { region, puuid, summonerId } = await queryClient.ensureQueryData(
-      getPlayer(name, tag),
+      getSummoner(name, tag),
     );
 
     await Promise.all([
-      queryClient.ensureQueryData(getRank(region, summonerId)),
-      queryClient.ensureQueryData(getPlayerAggregates(puuid)),
-      queryClient.ensureInfiniteQueryData(getPlayerMatchHistory(puuid)),
+      queryClient.ensureQueryData(getSummonerRank(region, summonerId)),
+      queryClient.ensureQueryData(getSummonerStats(puuid)),
+      queryClient.ensureInfiniteQueryData(getSummonerMatches(puuid)),
     ]);
 
     return { name, tag };
@@ -39,32 +39,30 @@ export const Route = createFileRoute("/player/$name/$tag")({
 function Player() {
   const loader = Route.useLoaderData();
 
-  const playerQuery = useSuspenseQuery(getPlayer(loader.name, loader.tag));
+  const summonerQuery = useSuspenseQuery(getSummoner(loader.name, loader.tag));
 
   const rankQuery = useSuspenseQuery(
-    getRank(playerQuery.data.region, playerQuery.data.summonerId),
+    getSummonerRank(summonerQuery.data.region, summonerQuery.data.summonerId),
   );
 
-  const aggregatesQuery = useSuspenseQuery(
-    getPlayerAggregates(playerQuery.data.puuid),
+  const statsQuery = useSuspenseQuery(
+    getSummonerStats(summonerQuery.data.puuid),
   );
-  const rankAggregates = aggregatesQuery.data.find(
-    ({ queueId }) => queueId == 1100,
-  );
+  const rankAggregates = statsQuery.data.find(({ queueId }) => queueId == 1100);
 
   const matchesQuery = useSuspenseInfiniteQuery(
-    getPlayerMatchHistory(playerQuery.data.puuid),
+    getSummonerMatches(summonerQuery.data.puuid),
   );
   const matches = matchesQuery.data.pages.flat();
 
   const updateMutation = useMutation({
-    mutationKey: ["UPDATE_PLAYER", playerQuery.data.puuid],
-    mutationFn: updatePlayer,
+    mutationKey: ["UPDATE_SUMMONER", summonerQuery.data.puuid],
+    mutationFn: updateSummoner,
     onSuccess: () => {
-      playerQuery.refetch();
+      summonerQuery.refetch();
       rankQuery.refetch();
       matchesQuery.refetch();
-      aggregatesQuery.refetch();
+      statsQuery.refetch();
     },
   });
 
@@ -79,16 +77,16 @@ function Player() {
       <div className="grid w-full grid-cols-[auto_1fr] items-center justify-items-start gap-2 border-b pb-4">
         <img
           className="row-span-4 h-full rounded border"
-          src={`/profileicon/profileicon${playerQuery.data.profileIconId}.png`}
+          src={`/profileicon/profileicon${summonerQuery.data.profileIconId}.png`}
         />
         <div className="flex items-center gap-1">
           <h1 className="text-3xl font-bold">
-            <span>{playerQuery.data.name}</span>
+            <span>{summonerQuery.data.name}</span>
             <span className="text-muted-foreground">
-              #{playerQuery.data.tag}
+              #{summonerQuery.data.tag}
             </span>
           </h1>
-          <Badge variant="secondary">{playerQuery.data.region}</Badge>
+          <Badge variant="secondary">{summonerQuery.data.region}</Badge>
         </div>
         {rankQuery.isSuccess ? (
           <RankLine rank={rankQuery.data} />
@@ -96,7 +94,7 @@ function Player() {
           <span className="text-destructive">error loading rank</span>
         )}
         <Button
-          onClick={() => updateMutation.mutate(playerQuery.data.puuid)}
+          onClick={() => updateMutation.mutate(summonerQuery.data.puuid)}
           disabled={updateMutation.isPending}
         >
           {
@@ -115,8 +113,8 @@ function Player() {
         </Button>
         <span className="text-muted-foreground">
           {"Updated "}
-          {playerQuery.data.updateTimestamp ? (
-            <TimeSince date={new Date(playerQuery.data.updateTimestamp)} />
+          {summonerQuery.data.updateTimestamp ? (
+            <TimeSince date={new Date(summonerQuery.data.updateTimestamp)} />
           ) : (
             "never"
           )}
