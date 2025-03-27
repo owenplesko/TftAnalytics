@@ -19,6 +19,8 @@ import React, { useEffect } from "react";
 import { Badge } from "@/components/ui/badge";
 import { getSummonerStats } from "@/services/getSummonerStats";
 
+const CURRENT_SET_NUMBER = 13;
+
 export const Route = createFileRoute("/player/$name/$tag")({
   component: Player,
   loader: async ({ params: { name, tag }, context: { queryClient } }) => {
@@ -28,7 +30,7 @@ export const Route = createFileRoute("/player/$name/$tag")({
 
     await Promise.all([
       queryClient.ensureQueryData(getSummonerRank(region, summonerId)),
-      queryClient.ensureQueryData(getSummonerStats(puuid)),
+      queryClient.ensureQueryData(getSummonerStats(puuid, CURRENT_SET_NUMBER)),
       queryClient.ensureInfiniteQueryData(getSummonerMatches(puuid)),
     ]);
 
@@ -46,9 +48,8 @@ function Player() {
   );
 
   const statsQuery = useSuspenseQuery(
-    getSummonerStats(summonerQuery.data.puuid),
+    getSummonerStats(summonerQuery.data.puuid, CURRENT_SET_NUMBER),
   );
-  const rankAggregates = statsQuery.data.find(({ queueId }) => queueId == 1100);
 
   const matchesQuery = useSuspenseInfiniteQuery(
     getSummonerMatches(summonerQuery.data.puuid),
@@ -120,7 +121,7 @@ function Player() {
           )}
         </span>
       </div>
-      <PlacementLine aggregates={rankAggregates} />
+      <PlacementLine stats={statsQuery.data} />
       <div className="flex w-full flex-col gap-4 py-4">
         {matches.map((match) => (
           <SummonerMatch
@@ -161,16 +162,19 @@ const RankLine: React.FC<{
 };
 
 const PlacementLine: React.FC<{
-  aggregates: SummonerStats | undefined;
-}> = ({ aggregates }) => {
-  if (!aggregates) return null;
-
+  stats: SummonerStats[];
+}> = ({ stats: allStats }) => {
   return (
-    <div className="flex flex-col">
-      <span>{`${aggregates.compCount} Games Played`}</span>
-      <span>{`${aggregates.avgPlacement.toPrecision(3)} AVP`}</span>
-      <span>{`${aggregates.top4Rate.toPrecision(3)}% Top 4`}</span>
-      <span>{`${aggregates.top1Rate.toPrecision(3)}% Top 1`}</span>
+    <div className="flex gap-2">
+      {allStats.map((stats) => (
+        <div className="flex flex-col">
+          <span>{`${stats.queueId ?? "all games"}`}</span>
+          <span>{`${stats.compCount} Games Played`}</span>
+          <span>{`${stats.avgPlacement.toPrecision(3)} AVP`}</span>
+          <span>{`${stats.top4Rate.toPrecision(3)}% Top 4`}</span>
+          <span>{`${stats.top1Rate.toPrecision(3)}% Top 1`}</span>
+        </div>
+      ))}
     </div>
   );
 };

@@ -4,6 +4,7 @@ CALL update_tft_summoner_stats($1);
 -- name: GetSummonerStats :many
 SELECT
     queue_id,
+	set_number,
 	comp_count,
 	avg_placement,
 	top_4_count,
@@ -13,4 +14,4 @@ SELECT
 FROM
 	tft_summoner_stats
 WHERE
-	summoner_puuid = $1;
+	summoner_puuid = $1 AND set_number = $2;

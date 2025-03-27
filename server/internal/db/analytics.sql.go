@@ -14,6 +14,7 @@ import (
 const getSummonerStats = `-- name: GetSummonerStats :many
 SELECT
     queue_id,
+	set_number,
 	comp_count,
 	avg_placement,
 	top_4_count,
@@ -23,21 +24,27 @@ SELECT
 FROM
 	tft_summoner_stats
 WHERE
-	summoner_puuid = $1
+	summoner_puuid = $1 AND set_number = $2
 `
 
-type GetSummonerStatsRow struct {
-	QueueID      int32         `json:"queueId"`
-	CompCount    int32         `json:"compCount"`
-	AvgPlacement pgtype.Float8 `json:"avgPlacement"`
-	Top4Count    int32         `json:"top4Count"`
-	Top4Rate     pgtype.Float8 `json:"top4Rate"`
-	Top1Count    int32         `json:"top1Count"`
-	Top1Rate     pgtype.Float8 `json:"top1Rate"`
+type GetSummonerStatsParams struct {
+	SummonerPuuid string `json:"summonerPuuid"`
+	SetNumber     int32  `json:"setNumber"`
 }
 
-func (q *Queries) GetSummonerStats(ctx context.Context, summonerPuuid string) ([]GetSummonerStatsRow, error) {
-	rows, err := q.db.Query(ctx, getSummonerStats, summonerPuuid)
+type GetSummonerStatsRow struct {
+	QueueID      pgtype.Int4 `json:"queueId"`
+	SetNumber    int32       `json:"setNumber"`
+	CompCount    int32       `json:"compCount"`
+	AvgPlacement float64     `json:"avgPlacement"`
+	Top4Count    int32       `json:"top4Count"`
+	Top4Rate     float64     `json:"top4Rate"`
+	Top1Count    int32       `json:"top1Count"`
+	Top1Rate     float64     `json:"top1Rate"`
+}
+
+func (q *Queries) GetSummonerStats(ctx context.Context, arg GetSummonerStatsParams) ([]GetSummonerStatsRow, error) {
+	rows, err := q.db.Query(ctx, getSummonerStats, arg.SummonerPuuid, arg.SetNumber)
 	if err != nil {
 		return nil, err
 	}
@@ -47,6 +54,7 @@ func (q *Queries) GetSummonerStats(ctx context.Context, summonerPuuid string) ([
 		var i GetSummonerStatsRow
 		if err := rows.Scan(
 			&i.QueueID,
+			&i.SetNumber,
 			&i.CompCount,
 			&i.AvgPlacement,
 			&i.Top4Count,
