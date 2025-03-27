@@ -160,9 +160,9 @@ func (service *Service) UpdateSummoner(ctx context.Context, puuid string) error 
 		return fmt.Errorf("CollectMatchHistory failed with err: %w", err)
 	}
 
-	err = service.queries.UpdateSummonerAggregates(ctx, puuid)
+	err = service.queries.UpdateSummonerStats(ctx, puuid)
 	if err != nil {
-		return fmt.Errorf("Queries.UpdateSummonerAggregates failed with err: %w", err)
+		return fmt.Errorf("Queries.UpdateSummonerStats failed with err: %w", err)
 	}
 
 	return nil

@@ -12,6 +12,18 @@ export const summonerSchema = z.object({
   matchesBeforeTimestamp: z.string().datetime().nullable(),
 });
 
+export const summonerStatsSchema = z.object({
+  queueId: z.number().int(),
+  compCount: z.number().int(),
+  avgPlacement: z.number(),
+  top4Count: z.number(),
+  top4Rate: z.number(),
+  top1Rate: z.number(),
+  top1Count: z.number()
+})
+
+export type SummonerStats = z.infer<typeof summonerStatsSchema>;
+
 export const companionSchema = z.object({
   contentId: z.string(),
   itemId: z.number().int(),

@@ -7,24 +7,24 @@ import (
 	"net/http"
 )
 
-func (controller Api) getSummonerAggregates(w http.ResponseWriter, r *http.Request) {
+func (controller Api) getSummonerStats(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 
 	puuid := r.PathValue("puuid")
 
-	aggregates, err := controller.Queries.GetSummonerAggregates(ctx, puuid)
+	stats, err := controller.Queries.GetSummonerStats(ctx, puuid)
 	if err != nil {
-		log.Printf("Queries.GetSummonerAggregates failed with err: %v\n", err)
+		log.Printf("Queries.GetSummonerStats failed with err: %v\n", err)
 		http.Error(w, "something went wrong", http.StatusInternalServerError)
 		return
 	}
 
 	// return empty array not null
-	if aggregates == nil {
-		aggregates = []db.GetSummonerAggregatesRow{}
+	if stats == nil {
+		stats = []db.GetSummonerStatsRow{}
 	}
 
 	w.Header().Set("Content-Type", "application/json")
-	bytes, _ := json.Marshal(aggregates)
+	bytes, _ := json.Marshal(stats)
 	w.Write(bytes)
 }

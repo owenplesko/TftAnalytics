@@ -11,41 +11,47 @@ import (
 	"github.com/jackc/pgx/v5/pgtype"
 )
 
-const getSummonerAggregates = `-- name: GetSummonerAggregates :many
+const getSummonerStats = `-- name: GetSummonerStats :many
 SELECT
     queue_id,
 	comp_count,
 	avg_placement,
+	top_4_count,
 	top_4_rate,
+	top_1_count,
 	top_1_rate
 FROM
-	tft_summoner_comp_aggregate
+	tft_summoner_stats
 WHERE
 	summoner_puuid = $1
 `
 
-type GetSummonerAggregatesRow struct {
+type GetSummonerStatsRow struct {
 	QueueID      int32         `json:"queueId"`
 	CompCount    int32         `json:"compCount"`
 	AvgPlacement pgtype.Float8 `json:"avgPlacement"`
+	Top4Count    int32         `json:"top4Count"`
 	Top4Rate     pgtype.Float8 `json:"top4Rate"`
+	Top1Count    int32         `json:"top1Count"`
 	Top1Rate     pgtype.Float8 `json:"top1Rate"`
 }
 
-func (q *Queries) GetSummonerAggregates(ctx context.Context, summonerPuuid string) ([]GetSummonerAggregatesRow, error) {
-	rows, err := q.db.Query(ctx, getSummonerAggregates, summonerPuuid)
+func (q *Queries) GetSummonerStats(ctx context.Context, summonerPuuid string) ([]GetSummonerStatsRow, error) {
+	rows, err := q.db.Query(ctx, getSummonerStats, summonerPuuid)
 	if err != nil {
 		return nil, err
 	}
 	defer rows.Close()
-	var items []GetSummonerAggregatesRow
+	var items []GetSummonerStatsRow
 	for rows.Next() {
-		var i GetSummonerAggregatesRow
+		var i GetSummonerStatsRow
 		if err := rows.Scan(
 			&i.QueueID,
 			&i.CompCount,
 			&i.AvgPlacement,
+			&i.Top4Count,
 			&i.Top4Rate,
+			&i.Top1Count,
 			&i.Top1Rate,
 		); err != nil {
 			return nil, err
@@ -58,11 +64,11 @@ func (q *Queries) GetSummonerAggregates(ctx context.Context, summonerPuuid strin
 	return items, nil
 }
 
-const updateSummonerAggregates = `-- name: UpdateSummonerAggregates :exec
-CALL update_tft_summoner_comp_aggregate($1)
+const updateSummonerStats = `-- name: UpdateSummonerStats :exec
+CALL update_tft_summoner_stats($1)
 `
 
-func (q *Queries) UpdateSummonerAggregates(ctx context.Context, inSummonerPuuid string) error {
-	_, err := q.db.Exec(ctx, updateSummonerAggregates, inSummonerPuuid)
+func (q *Queries) UpdateSummonerStats(ctx context.Context, inSummonerPuuid string) error {
+	_, err := q.db.Exec(ctx, updateSummonerStats, inSummonerPuuid)
 	return err
 }

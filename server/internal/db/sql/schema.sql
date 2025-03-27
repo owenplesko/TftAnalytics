@@ -30,7 +30,7 @@ CREATE TABLE tft_comp (
 	PRIMARY KEY(match_id, summoner_puuid)
 );
 
-CREATE TABLE tft_summoner_comp_aggregate (
+CREATE TABLE tft_summoner_stats (
 	summoner_puuid VARCHAR NOT NULL,
 	queue_id INT NOT NULL,
 	comp_count INT NOT NULL,
@@ -56,7 +56,7 @@ CREATE INDEX idx_region_update ON tft_summoner (region, matches_after_timestamp 
 
 CREATE INDEX idx_match_history ON tft_comp (summoner_puuid, match_date DESC);
 
-CREATE OR REPLACE PROCEDURE update_tft_summoner_comp_aggregate(IN in_summoner_puuid VARCHAR)
+CREATE OR REPLACE PROCEDURE update_tft_summoner_stats(IN in_summoner_puuid VARCHAR)
 LANGUAGE plpgsql
 AS $$
 DECLARE
@@ -68,8 +68,8 @@ BEGIN
     FROM tft_summoner
     WHERE puuid = in_summoner_puuid;
 
-    -- Insert or increment aggregated data into tft_summoner_comp_aggregate
-    INSERT INTO tft_summoner_comp_aggregate (summoner_puuid, queue_id, comp_count, top_4_count, top_1_count, placement_sum)
+    -- Insert or increment aggregated data into tft_summoner_stats
+    INSERT INTO tft_summoner_stats (summoner_puuid, queue_id, comp_count, top_4_count, top_1_count, placement_sum)
     SELECT
         in_summoner_puuid,
         queue_id,
@@ -87,10 +87,10 @@ BEGIN
     GROUP BY queue_id
     ON CONFLICT (summoner_puuid, queue_id) DO UPDATE
     SET
-        comp_count = tft_summoner_comp_aggregate.comp_count + EXCLUDED.comp_count,
-        top_4_count = tft_summoner_comp_aggregate.top_4_count + EXCLUDED.top_4_count,
-        top_1_count = tft_summoner_comp_aggregate.top_1_count + EXCLUDED.top_1_count,
-        placement_sum = tft_summoner_comp_aggregate.placement_sum + EXCLUDED.placement_sum;
+        comp_count = tft_summoner_stats.comp_count + EXCLUDED.comp_count,
+        top_4_count = tft_summoner_stats.top_4_count + EXCLUDED.top_4_count,
+        top_1_count = tft_summoner_stats.top_1_count + EXCLUDED.top_1_count,
+        placement_sum = tft_summoner_stats.placement_sum + EXCLUDED.placement_sum;
 
     -- Update the summoner's update timestamp
     UPDATE tft_summoner

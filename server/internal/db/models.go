@@ -39,7 +39,7 @@ type TftSummoner struct {
 	MatchesBeforeTimestamp pgtype.Timestamp `json:"matchesBeforeTimestamp"`
 }
 
-type TftSummonerCompAggregate struct {
+type TftSummonerStat struct {
 	SummonerPuuid string        `json:"summonerPuuid"`
 	QueueID       int32         `json:"queueId"`
 	CompCount     int32         `json:"compCount"`
