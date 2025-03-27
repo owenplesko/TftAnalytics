@@ -27,8 +27,8 @@ type GetOldestMatchesAfterParams struct {
 }
 
 type GetOldestMatchesAfterRow struct {
-	Puuid                  string           `json:"puuid"`
-	MatchesBeforeTimestamp pgtype.Timestamp `json:"matchesBeforeTimestamp"`
+	Puuid                  string             `json:"puuid"`
+	MatchesBeforeTimestamp pgtype.Timestamptz `json:"matchesBeforeTimestamp"`
 }
 
 func (q *Queries) GetOldestMatchesAfter(ctx context.Context, arg GetOldestMatchesAfterParams) ([]GetOldestMatchesAfterRow, error) {
@@ -52,7 +52,7 @@ func (q *Queries) GetOldestMatchesAfter(ctx context.Context, arg GetOldestMatche
 }
 
 const getSummonerByNameTag = `-- name: GetSummonerByNameTag :one
-SELECT puuid, region, name, tag, summoner_id, profile_icon_id, summoner_level, update_timestamp, matches_before_timestamp
+SELECT puuid, region, name, tag, summoner_id, profile_icon_id, summoner_level, stats_update_timestamp, matches_before_timestamp
 FROM tft_summoner 
 WHERE fn_normalize_str(name) = fn_normalize_str($1::VARCHAR)
 AND fn_normalize_str(tag) = fn_normalize_str($2::VARCHAR)
@@ -74,14 +74,14 @@ func (q *Queries) GetSummonerByNameTag(ctx context.Context, arg GetSummonerByNam
 		&i.SummonerID,
 		&i.ProfileIconID,
 		&i.SummonerLevel,
-		&i.UpdateTimestamp,
+		&i.StatsUpdateTimestamp,
 		&i.MatchesBeforeTimestamp,
 	)
 	return i, err
 }
 
 const getSummonerByPuuid = `-- name: GetSummonerByPuuid :one
-SELECT puuid, region, name, tag, summoner_id, profile_icon_id, summoner_level, update_timestamp, matches_before_timestamp
+SELECT puuid, region, name, tag, summoner_id, profile_icon_id, summoner_level, stats_update_timestamp, matches_before_timestamp
 FROM tft_summoner 
 WHERE puuid = $1
 `
@@ -97,14 +97,14 @@ func (q *Queries) GetSummonerByPuuid(ctx context.Context, puuid string) (TftSumm
 		&i.SummonerID,
 		&i.ProfileIconID,
 		&i.SummonerLevel,
-		&i.UpdateTimestamp,
+		&i.StatsUpdateTimestamp,
 		&i.MatchesBeforeTimestamp,
 	)
 	return i, err
 }
 
 const getSummonerBySummonerId = `-- name: GetSummonerBySummonerId :one
-SELECT puuid, region, name, tag, summoner_id, profile_icon_id, summoner_level, update_timestamp, matches_before_timestamp
+SELECT puuid, region, name, tag, summoner_id, profile_icon_id, summoner_level, stats_update_timestamp, matches_before_timestamp
 FROM tft_summoner
 WHERE summoner_id = $1
 `
@@ -120,7 +120,7 @@ func (q *Queries) GetSummonerBySummonerId(ctx context.Context, summonerID string
 		&i.SummonerID,
 		&i.ProfileIconID,
 		&i.SummonerLevel,
-		&i.UpdateTimestamp,
+		&i.StatsUpdateTimestamp,
 		&i.MatchesBeforeTimestamp,
 	)
 	return i, err
@@ -144,7 +144,7 @@ func (q *Queries) SetMatchesBeforeTimestamp(ctx context.Context, arg SetMatchesB
 
 const summonerExistsByPuuid = `-- name: SummonerExistsByPuuid :one
 SELECT EXISTS (
-    SELECT puuid, region, name, tag, summoner_id, profile_icon_id, summoner_level, update_timestamp, matches_before_timestamp FROM tft_summoner WHERE puuid = $1
+    SELECT puuid, region, name, tag, summoner_id, profile_icon_id, summoner_level, stats_update_timestamp, matches_before_timestamp FROM tft_summoner WHERE puuid = $1
 )
 `
 

@@ -17,8 +17,8 @@ CREATE TABLE tft_summoner (
 	summoner_id VARCHAR NOT NULL,
 	profile_icon_id INT NOT NULL,
 	summoner_level INT NOT NULL,
-	update_timestamp TIMESTAMP,
-	matches_before_timestamp TIMESTAMP
+	stats_update_timestamp TIMESTAMPTZ,
+	matches_before_timestamp TIMESTAMPTZ
 );
 
 CREATE TABLE tft_comp (
@@ -44,6 +44,12 @@ CREATE TABLE tft_summoner_stats (
 	UNIQUE(summoner_puuid, set_number, queue_id)
 );
 
+CREATE INDEX idx_name_tag_insensitive ON tft_summoner (REPLACE(LOWER(name), ' ', ''), REPLACE(LOWER(tag), ' ', ''));
+CREATE INDEX idx_region_update ON tft_summoner (region, matches_after_timestamp ASC NULLS FIRST);
+CREATE INDEX idx_match_history ON tft_comp (summoner_puuid, match_date DESC);
+
+SET TIME ZONE 'UTC';
+
 CREATE OR REPLACE PROCEDURE update_tft_summoner_stats(IN in_summoner_puuid VARCHAR)
 LANGUAGE plpgsql
 AS $$
@@ -52,7 +58,7 @@ DECLARE
     update_new TIMESTAMP := CURRENT_TIMESTAMP;
 BEGIN
     -- Get the last update timestamp for the summoner
-    SELECT update_timestamp INTO update_old
+    SELECT stats_update_timestamp INTO update_old
     FROM tft_summoner
     WHERE puuid = in_summoner_puuid;
 
@@ -104,7 +110,7 @@ BEGIN
 
     -- Update summoner's last update timestamp
     UPDATE tft_summoner
-    SET update_timestamp = update_new
+    SET stats_update_timestamp = update_new
     WHERE puuid = in_summoner_puuid;
 END;
 $$;

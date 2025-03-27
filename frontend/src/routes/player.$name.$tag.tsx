@@ -114,8 +114,10 @@ function Player() {
         </Button>
         <span className="text-muted-foreground">
           {"Updated "}
-          {summonerQuery.data.updateTimestamp ? (
-            <TimeSince date={new Date(summonerQuery.data.updateTimestamp)} />
+          {summonerQuery.data.statsUpdateTimestamp ? (
+            <TimeSince
+              date={new Date(summonerQuery.data.statsUpdateTimestamp)}
+            />
           ) : (
             "never"
           )}

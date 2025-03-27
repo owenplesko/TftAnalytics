@@ -8,8 +8,8 @@ export const summonerSchema = z.object({
   summonerId: z.string(),
   profileIconId: z.number(),
   summonerLevel: z.number(),
-  updateTimestamp: z.string().datetime().nullable(),
-  matchesBeforeTimestamp: z.string().datetime().nullable(),
+  statsUpdateTimestamp: z.string().datetime({ offset: true }).nullable(),
+  matchesBeforeTimestamp: z.string().datetime({ offset: true }).nullable(),
 });
 
 export const summonerStatsSchema = z.object({
