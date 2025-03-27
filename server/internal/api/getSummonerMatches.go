@@ -16,11 +16,11 @@ func (controller Api) getSummonerMatches(w http.ResponseWriter, r *http.Request)
 	// validate query params
 	queryParams := r.URL.Query()
 
-	limit := int64(20) // default value
+	limit := 20 // default value
 	if limitParamArr, ok := queryParams["limit"]; ok {
 		var err error
 
-		limit, err = strconv.ParseInt(limitParamArr[0], 10, 32)
+		limit, err = strconv.Atoi(limitParamArr[0])
 
 		if err != nil || limit < 0 {
 			http.Error(w, "bad limit param", http.StatusBadRequest)

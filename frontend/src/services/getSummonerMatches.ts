@@ -7,6 +7,7 @@ export const getSummonerMatches = (puuid: string, initialPageParam?: string | nu
   queryFn: async ({ pageParam }) => {
     let url = `${import.meta.env.VITE_BACKEND_URL}/v1/summoner/by-puuid/${puuid}/matches`
     if (pageParam) url += `?before=${pageParam}`
+
     const res = await fetch(url);
     const data = await res.json();
     return summonerMatchSchema.array().parse(data);

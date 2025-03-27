@@ -11,65 +11,49 @@ import (
 	"github.com/jackc/pgx/v5/pgtype"
 )
 
-const getSummonerStats = `-- name: GetSummonerStats :many
+const getSummonerStats = `-- name: GetSummonerStats :one
 SELECT
-    queue_id,
-	set_number,
-	comp_count,
-	avg_placement,
-	top_4_count,
-	top_4_rate,
-	top_1_count,
-	top_1_rate
+    comp_count,
+    avg_placement,
+    top_4_count,
+    top_4_rate,
+    top_1_count,
+    top_1_rate
 FROM
-	tft_summoner_stats
+    tft_summoner_stats
 WHERE
-	summoner_puuid = $1 AND set_number = $2
+    summoner_puuid = $1 
+    AND set_number = $2
+    AND (queue_id = $3 OR ($3 IS NULL AND queue_id IS NULL))
 `
 
 type GetSummonerStatsParams struct {
-	SummonerPuuid string `json:"summonerPuuid"`
-	SetNumber     int32  `json:"setNumber"`
+	SummonerPuuid string      `json:"summonerPuuid"`
+	SetNumber     int32       `json:"setNumber"`
+	QueueID       pgtype.Int4 `json:"queueId"`
 }
 
 type GetSummonerStatsRow struct {
-	QueueID      pgtype.Int4 `json:"queueId"`
-	SetNumber    int32       `json:"setNumber"`
-	CompCount    int32       `json:"compCount"`
-	AvgPlacement float64     `json:"avgPlacement"`
-	Top4Count    int32       `json:"top4Count"`
-	Top4Rate     float64     `json:"top4Rate"`
-	Top1Count    int32       `json:"top1Count"`
-	Top1Rate     float64     `json:"top1Rate"`
+	CompCount    int32   `json:"compCount"`
+	AvgPlacement float64 `json:"avgPlacement"`
+	Top4Count    int32   `json:"top4Count"`
+	Top4Rate     float64 `json:"top4Rate"`
+	Top1Count    int32   `json:"top1Count"`
+	Top1Rate     float64 `json:"top1Rate"`
 }
 
-func (q *Queries) GetSummonerStats(ctx context.Context, arg GetSummonerStatsParams) ([]GetSummonerStatsRow, error) {
-	rows, err := q.db.Query(ctx, getSummonerStats, arg.SummonerPuuid, arg.SetNumber)
-	if err != nil {
-		return nil, err
-	}
-	defer rows.Close()
-	var items []GetSummonerStatsRow
-	for rows.Next() {
-		var i GetSummonerStatsRow
-		if err := rows.Scan(
-			&i.QueueID,
-			&i.SetNumber,
-			&i.CompCount,
-			&i.AvgPlacement,
-			&i.Top4Count,
-			&i.Top4Rate,
-			&i.Top1Count,
-			&i.Top1Rate,
-		); err != nil {
-			return nil, err
-		}
-		items = append(items, i)
-	}
-	if err := rows.Err(); err != nil {
-		return nil, err
-	}
-	return items, nil
+func (q *Queries) GetSummonerStats(ctx context.Context, arg GetSummonerStatsParams) (GetSummonerStatsRow, error) {
+	row := q.db.QueryRow(ctx, getSummonerStats, arg.SummonerPuuid, arg.SetNumber, arg.QueueID)
+	var i GetSummonerStatsRow
+	err := row.Scan(
+		&i.CompCount,
+		&i.AvgPlacement,
+		&i.Top4Count,
+		&i.Top4Rate,
+		&i.Top1Count,
+		&i.Top1Rate,
+	)
+	return i, err
 }
 
 const updateSummonerStats = `-- name: UpdateSummonerStats :exec

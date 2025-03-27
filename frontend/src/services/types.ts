@@ -13,8 +13,6 @@ export const summonerSchema = z.object({
 });
 
 export const summonerStatsSchema = z.object({
-  queueId: z.number().int().nullable(),
-  setNumber: z.number(),
   compCount: z.number().int(),
   avgPlacement: z.number(),
   top4Count: z.number(),

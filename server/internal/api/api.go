@@ -20,7 +20,7 @@ func (controller Api) ListenAndServe(port int) {
 	router.HandleFunc("/v1/leaderboard/{region}/{summonerId}", controller.getSummonerRank)
 	router.HandleFunc("/v1/summoner/by-puuid/{puuid}/update", controller.updateSummoner)
 	router.HandleFunc("/v1/summoner/by-puuid/{puuid}/matches", controller.getSummonerMatches)
-	router.HandleFunc("/v1/summoner/by-puuid/{puuid}/stats/{setNumber}", controller.getSummonerStats)
+	router.HandleFunc("/v1/summoner/by-puuid/{puuid}/stats", controller.getSummonerStats)
 	router.HandleFunc("/v1/match/{matchid}/comps", controller.getMatchComps)
 
 	root := http.NewServeMux()

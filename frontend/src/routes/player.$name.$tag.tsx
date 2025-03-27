@@ -123,7 +123,7 @@ function Player() {
           )}
         </span>
       </div>
-      <PlacementLine stats={statsQuery.data} />
+      {statsQuery.data && <PlacementLine stats={statsQuery.data} />}
       <div className="flex w-full flex-col gap-4 py-4">
         {matches.map((match) => (
           <SummonerMatch
@@ -164,19 +164,14 @@ const RankLine: React.FC<{
 };
 
 const PlacementLine: React.FC<{
-  stats: SummonerStats[];
-}> = ({ stats: allStats }) => {
+  stats: SummonerStats;
+}> = ({ stats }) => {
   return (
-    <div className="flex gap-2">
-      {allStats.map((stats) => (
-        <div className="flex flex-col">
-          <span>{`${stats.queueId ?? "all games"}`}</span>
-          <span>{`${stats.compCount} Games Played`}</span>
-          <span>{`${stats.avgPlacement.toPrecision(3)} AVP`}</span>
-          <span>{`${stats.top4Rate.toPrecision(3)}% Top 4`}</span>
-          <span>{`${stats.top1Rate.toPrecision(3)}% Top 1`}</span>
-        </div>
-      ))}
+    <div className="flex flex-col">
+      <span>{`${stats.compCount} Games Played`}</span>
+      <span>{`${stats.avgPlacement.toPrecision(3)} AVP`}</span>
+      <span>{`${stats.top4Rate.toPrecision(3)}% Top 4`}</span>
+      <span>{`${stats.top1Rate.toPrecision(3)}% Top 1`}</span>
     </div>
   );
 };
