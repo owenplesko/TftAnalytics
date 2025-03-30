@@ -1,4 +1,4 @@
-import { GET_SUMMONER_KEY, getSummoner } from "@/services/getSummoner";
+import { getSummoner } from "@/services/getSummoner";
 import {
   useMutation,
   useQueryClient,
@@ -9,9 +9,6 @@ import { updateSummoner } from "@/services/updateSummoner";
 import { Button } from "../ui/button";
 import { IconLoader2 } from "@tabler/icons-react";
 import TimeSince from "../timeSince";
-import { GET_SUMMONER_MATCHES_KEY } from "@/services/getSummonerMatches";
-import { GET_SUMMONER_RANK_KEY } from "@/services/getSummonerRank";
-import { GET_SUMMONER_STATS_KEY } from "@/services/getSummonerStats";
 
 const PlayerHeader: React.FC<{ name: string; tag: string }> = ({
   name,
@@ -26,17 +23,19 @@ const PlayerHeader: React.FC<{ name: string; tag: string }> = ({
     mutationFn: updateSummoner,
     onSuccess: () => {
       query.refetch();
-      queryClient.refetchQueries({
-        queryKey: [query.data.puuid],
-        type: "active",
+      queryClient.invalidateQueries({
+        predicate: ({ queryKey }) =>
+          queryKey.includes(query.data.puuid) ||
+          queryKey.includes(query.data.summonerId),
       });
     },
   });
 
   return (
-    <div className="grid w-full grid-cols-[auto_1fr] items-center justify-items-start gap-2 border-b pb-4">
+    <div className="grid w-full grid-cols-[auto_1fr] items-center justify-items-start gap-2">
       <img
-        className="row-span-4 h-full rounded border"
+        className="row-span-3 h-full rounded border"
+        width={124}
         src={`/profileicon/profileicon${query.data.profileIconId}.png`}
       />
       <div className="flex items-center gap-1">

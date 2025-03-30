@@ -16,14 +16,12 @@ const MatchHistory: React.FC<{ puuid: string }> = ({ puuid }) => {
 
   return (
     <>
-      <div className="flex w-full flex-col gap-4 py-4">
-        {matches.map((match) => (
-          <SummonerMatchCard
-            key={`${match.compData.puuid}_${match.tftMatch.id}`}
-            summonerMatch={match}
-          />
-        ))}
-      </div>
+      {matches.map((match) => (
+        <SummonerMatchCard
+          key={`${match.compData.puuid}_${match.tftMatch.id}`}
+          summonerMatch={match}
+        />
+      ))}
       <div ref={inViewRef} />
     </>
   );

@@ -3,9 +3,9 @@ import { getSummonerMatches } from "@/services/getSummonerMatches";
 import { getSummonerRank } from "@/services/getSummonerRank";
 import { createFileRoute } from "@tanstack/react-router";
 import { getSummonerStats } from "@/services/getSummonerStats";
-import QueueSummary from "@/components/player/queueSummary";
-import PlayerHeader from "@/components/player/header";
-import MatchHistory from "@/components/player/matchHistory";
+import QueueSummary from "@/components/summoner/queueSummary";
+import PlayerHeader from "@/components/summoner/header";
+import MatchHistory from "@/components/summoner/matchHistory";
 
 const CURRENT_SET_NUMBER = 13;
 
@@ -38,7 +38,7 @@ function Player() {
   const loader = Route.useLoaderData();
 
   return (
-    <>
+    <div className="flex w-[1000px] flex-col gap-4 pt-4">
       <PlayerHeader name={loader.name} tag={loader.tag} />
       <QueueSummary
         region={loader.region}
@@ -47,6 +47,6 @@ function Player() {
         setNumber={loader.setNumber}
       />
       <MatchHistory puuid={loader.puuid} />
-    </>
+    </div>
   );
 }
