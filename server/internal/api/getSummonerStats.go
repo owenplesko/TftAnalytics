@@ -43,8 +43,6 @@ func (controller Api) getSummonerStats(w http.ResponseWriter, r *http.Request) {
 		queueIdValid = true
 	}
 
-	log.Printf("queueID: %d valid: %t", queueID, queueIdValid)
-
 	stats, err := controller.Queries.GetSummonerStats(ctx, db.GetSummonerStatsParams{
 		SummonerPuuid: puuid,
 		SetNumber:     int32(setNumber),

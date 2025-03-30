@@ -12,7 +12,7 @@
 
 import { Route as rootRoute } from './routes/__root'
 import { Route as IndexImport } from './routes/index'
-import { Route as PlayerNameTagImport } from './routes/player.$name.$tag'
+import { Route as SummonerNameTagImport } from './routes/summoner.$name.$tag'
 
 // Create/Update Routes
 
@@ -21,8 +21,8 @@ const IndexRoute = IndexImport.update({
   getParentRoute: () => rootRoute,
 } as any)
 
-const PlayerNameTagRoute = PlayerNameTagImport.update({
-  path: '/player/$name/$tag',
+const SummonerNameTagRoute = SummonerNameTagImport.update({
+  path: '/summoner/$name/$tag',
   getParentRoute: () => rootRoute,
 } as any)
 
@@ -37,11 +37,11 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexImport
       parentRoute: typeof rootRoute
     }
-    '/player/$name/$tag': {
-      id: '/player/$name/$tag'
-      path: '/player/$name/$tag'
-      fullPath: '/player/$name/$tag'
-      preLoaderRoute: typeof PlayerNameTagImport
+    '/summoner/$name/$tag': {
+      id: '/summoner/$name/$tag'
+      path: '/summoner/$name/$tag'
+      fullPath: '/summoner/$name/$tag'
+      preLoaderRoute: typeof SummonerNameTagImport
       parentRoute: typeof rootRoute
     }
   }
@@ -51,7 +51,7 @@ declare module '@tanstack/react-router' {
 
 export const routeTree = rootRoute.addChildren({
   IndexRoute,
-  PlayerNameTagRoute,
+  SummonerNameTagRoute,
 })
 
 /* prettier-ignore-end */
@@ -63,14 +63,14 @@ export const routeTree = rootRoute.addChildren({
       "filePath": "__root.tsx",
       "children": [
         "/",
-        "/player/$name/$tag"
+        "/summoner/$name/$tag"
       ]
     },
     "/": {
       "filePath": "index.tsx"
     },
-    "/player/$name/$tag": {
-      "filePath": "player.$name.$tag.tsx"
+    "/summoner/$name/$tag": {
+      "filePath": "summoner.$name.$tag.tsx"
     }
   }
 }

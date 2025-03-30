@@ -7,7 +7,7 @@ import { Input } from "@/components/ui/input";
 import { useNavigate } from "@tanstack/react-router";
 
 const FormSchema = z.object({
-  playerName: z.string(),
+  summonerName: z.string(),
 });
 
 export function SearchForm() {
@@ -16,13 +16,13 @@ export function SearchForm() {
   const form = useForm<z.infer<typeof FormSchema>>({
     resolver: zodResolver(FormSchema),
     defaultValues: {
-      playerName: "",
+      summonerName: "",
     },
   });
 
-  function onSubmit({ playerName }: z.infer<typeof FormSchema>) {
-    const [name, tag] = playerName.split("#");
-    navigate({ to: "/player/$name/$tag", params: { name, tag } });
+  function onSubmit({ summonerName }: z.infer<typeof FormSchema>) {
+    const [name, tag] = summonerName.split("#");
+    navigate({ to: "/summoner/$name/$tag", params: { name, tag } });
   }
 
   return (
@@ -30,7 +30,7 @@ export function SearchForm() {
       <form onSubmit={form.handleSubmit(onSubmit)} className="w-[300px]">
         <FormField
           control={form.control}
-          name="playerName"
+          name="summonerName"
           render={({ field }) => (
             <FormItem>
               <FormControl>

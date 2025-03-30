@@ -1,8 +1,10 @@
 import { queryOptions } from "@tanstack/react-query";
 import { matchCompSchema } from "./types";
 
+export const GET_MATCH_COMPS_KEY = "GET_MATCH_COMPS"
+
 export const getMatchComps = (matchId: string) => queryOptions({
-    queryKey: ["GET_MATCH_COMPS", matchId],
+    queryKey: [GET_MATCH_COMPS_KEY, matchId,],
     queryFn: async () => {
         const url = `${import.meta.env.VITE_BACKEND_URL}/v1/match/${matchId}/comps`;
         const res = await fetch(url);

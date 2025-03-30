@@ -72,7 +72,7 @@ const MatchCard: React.FC<{
             <Link
               className="overflow-hidden overflow-ellipsis whitespace-nowrap text-left text-sm hover:opacity-75"
               title={`${tftSummoner.name}#${tftSummoner.tag}`}
-              to="/player/$name/$tag"
+              to="/summoner/$name/$tag"
               params={{ name: tftSummoner.name, tag: tftSummoner.tag }}
             >
               <span>{tftSummoner.name}</span>

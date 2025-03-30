@@ -1,9 +1,10 @@
 import { infiniteQueryOptions } from "@tanstack/react-query";
 import { summonerMatchSchema } from "./types";
 
+export const GET_SUMMONER_MATCHES_KEY = "GET_SUMMONER_MATCHES";
 
 export const getSummonerMatches = (puuid: string, initialPageParam?: string | null) => infiniteQueryOptions({
-  queryKey: ["GET_SUMMONER_MATCHES", puuid],
+  queryKey: [GET_SUMMONER_MATCHES_KEY, puuid],
   queryFn: async ({ pageParam }) => {
     let url = `${import.meta.env.VITE_BACKEND_URL}/v1/summoner/by-puuid/${puuid}/matches`
     if (pageParam) url += `?before=${pageParam}`
