@@ -11,7 +11,7 @@ const QueueSummary: React.FC<{
   setNumber: number;
 }> = ({ region, summonerId, puuid, queueId, setNumber }) => {
   return (
-    <div className="flex flex-col rounded border bg-card p-4">
+    <div className="mr-auto flex flex-col items-center justify-center gap-2 rounded border bg-card p-4">
       <RankSummary region={region} summonerId={summonerId} />
       <QueueStatsSummary
         puuid={puuid}
@@ -41,17 +41,17 @@ const RankSummary: React.FC<{
     );
 
   return (
-    <div className="flex flex-row gap-2">
-      <img
-        width={24}
-        height={24}
-        src={`/rank/${query.data.rankData.tier.toLowerCase()}.svg`}
-      />
-      <span>{`${sentenceCase(query.data.rankData.tier)}`}</span>
-      <span>{`${query.data.rankData.leaguePoints} LP`}</span>
-      <span className="text-muted-foreground">{`Rank #${query.data.leaderboardPosition.position}`}</span>
-      <span className="text-muted-foreground">{`Top ${query.data.leaderboardPosition.top.toPrecision(2)}%`}</span>
-    </div>
+    <>
+      <div className="flex flex-row gap-2">
+        <img
+          width={24}
+          height={24}
+          src={`/rank/${query.data.rankData.tier.toLowerCase()}.svg`}
+        />
+        <span className="text-2xl">{`${sentenceCase(query.data.rankData.tier)} ${query.data.rankData.leaguePoints} LP`}</span>
+      </div>
+      <span className="text-sm">{`Rank #${query.data.leaderboardPosition.position.toLocaleString()} Top ${query.data.leaderboardPosition.top.toPrecision(3)}%`}</span>
+    </>
   );
 };
 
@@ -66,12 +66,36 @@ const QueueStatsSummary: React.FC<{
   if (query.data === null) return null;
 
   return (
-    <div className="flex flex-col">
-      <span>{`${query.data.compCount} games played`}</span>
-      <span>{`${formatSeconds(query.data.totalSecondsIngame, "hours minutes seconds")} played`}</span>
-      <span>{`${query.data.avgPlacement.toPrecision(3)} AVP`}</span>
-      <span>{`${query.data.top4Rate.toPrecision(3)}% Top 4`}</span>
-      <span>{`${query.data.top1Rate.toPrecision(3)}% Top 1`}</span>
-    </div>
+    <>
+      <span className="text-sm text-muted-foreground">{`${formatSeconds(query.data.totalSecondsIngame, "hours minutes seconds")} played`}</span>
+      <div className="flex flex-row gap-2">
+        {[
+          [
+            query.data.avgPlacement.toPrecision(3),
+            "Avg Place",
+            `${query.data.compCount} games`,
+          ],
+          [
+            `${query.data.top4Rate.toPrecision(3)}%`,
+            "Top 4",
+            `${query.data.top4Count} games`,
+          ],
+          [
+            `${query.data.top1Rate.toPrecision(3)}%`,
+            "Top 1",
+            `${query.data.top1Count} games`,
+          ],
+        ].map(([stat, label, games]) => (
+          <div
+            key={label}
+            className="flex flex-col items-center rounded bg-secondary p-1"
+          >
+            <span className="text-xl">{stat}</span>
+            <span className="text-xs">{label}</span>
+            <span className="text-xs text-muted-foreground">{games}</span>
+          </div>
+        ))}
+      </div>
+    </>
   );
 };
