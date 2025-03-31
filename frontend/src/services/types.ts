@@ -13,7 +13,8 @@ export const summonerSchema = z.object({
 });
 
 export const summonerStatsSchema = z.object({
-  compCount: z.number().int(),
+  compCount: z.number(),
+  totalSecondsIngame: z.number(),
   avgPlacement: z.number(),
   top4Count: z.number(),
   top4Rate: z.number(),
@@ -25,38 +26,38 @@ export type SummonerStats = z.infer<typeof summonerStatsSchema>;
 
 export const companionSchema = z.object({
   contentId: z.string(),
-  itemId: z.number().int(),
-  skinId: z.number().int(),
+  itemId: z.number(),
+  skinId: z.number(),
   species: z.string(),
 });
 
 export const traitSchema = z.object({
   name: z.string(),
-  numUnits: z.number().int(),
-  style: z.number().int(),
-  tierCurrent: z.number().int(),
-  tierMax: z.number().int(),
+  numUnits: z.number(),
+  style: z.number(),
+  tierCurrent: z.number(),
+  tierMax: z.number(),
 });
 
 export const unitSchema = z.object({
   characterId: z.string(),
   itemNames: z.string().array(),
-  rarity: z.number().int(),
-  tier: z.number().int(),
+  rarity: z.number(),
+  tier: z.number(),
 });
 
 export type Unit = z.infer<typeof unitSchema>;
 
 export const compDataSchema = z.object({
   companion: companionSchema,
-  goldLeft: z.number().int(),
-  lastRound: z.number().int(),
-  level: z.number().int(),
-  placement: z.number().int(),
-  playersEliminated: z.number().int(),
+  goldLeft: z.number(),
+  lastRound: z.number(),
+  level: z.number(),
+  placement: z.number(),
+  playersEliminated: z.number(),
   puuid: z.string(),
   timeEliminated: z.number(),
-  totalDamageToPlayers: z.number().int(),
+  totalDamageToPlayers: z.number(),
   traits: traitSchema.array(),
   units: unitSchema.array(),
 });

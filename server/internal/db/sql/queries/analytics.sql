@@ -8,7 +8,8 @@ SELECT
     top_4_count,
     top_4_rate,
     top_1_count,
-    top_1_rate
+    top_1_rate,
+	total_seconds_ingame
 FROM
     tft_summoner_stats
 WHERE

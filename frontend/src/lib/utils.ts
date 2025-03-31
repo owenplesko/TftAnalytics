@@ -40,12 +40,24 @@ export function formatTimeSince(date: Date) {
   return `${seconds} second${seconds > 1 ? "s" : ""} ago`;
 }
 
-// formats float value seconds to string format m:s
-export function formatSeconds(seconds: number) {
-  const s = Math.floor(seconds % 60);
+type FormatSecondStyle = "h:m:s" | "hours minutes seconds"
+
+// Formats float value seconds to string format h:m:s
+export function formatSeconds(seconds: number, format?: FormatSecondStyle) {
+  const h = Math.floor(seconds / 3600);
   const m = Math.floor((seconds % 3600) / 60);
+  const s = Math.floor(seconds % 60);
 
-  const str = `${m}:${s}`;
+  switch (format) {
+    case "hours minutes seconds":
+      return h > 0 ? `${h} hours` : m > 0 ? `${m} minutes` : `${s} seconds`
 
-  return str;
+    case "h:m:s":
+    default:
+      // Ensure two-digit formatting for minutes and seconds
+      const formattedM = String(m).padStart(2, "0");
+      const formattedS = String(s).padStart(2, "0");
+
+      return h > 0 ? `${h}:${formattedM}:${formattedS}` : `${formattedM}:${formattedS}`;
+  }
 }

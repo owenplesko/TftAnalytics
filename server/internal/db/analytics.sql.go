@@ -18,7 +18,8 @@ SELECT
     top_4_count,
     top_4_rate,
     top_1_count,
-    top_1_rate
+    top_1_rate,
+	total_seconds_ingame
 FROM
     tft_summoner_stats
 WHERE
@@ -34,12 +35,13 @@ type GetSummonerStatsParams struct {
 }
 
 type GetSummonerStatsRow struct {
-	CompCount    int32   `json:"compCount"`
-	AvgPlacement float64 `json:"avgPlacement"`
-	Top4Count    int32   `json:"top4Count"`
-	Top4Rate     float64 `json:"top4Rate"`
-	Top1Count    int32   `json:"top1Count"`
-	Top1Rate     float64 `json:"top1Rate"`
+	CompCount          int32   `json:"compCount"`
+	AvgPlacement       float64 `json:"avgPlacement"`
+	Top4Count          int32   `json:"top4Count"`
+	Top4Rate           float64 `json:"top4Rate"`
+	Top1Count          int32   `json:"top1Count"`
+	Top1Rate           float64 `json:"top1Rate"`
+	TotalSecondsIngame float64 `json:"totalSecondsIngame"`
 }
 
 func (q *Queries) GetSummonerStats(ctx context.Context, arg GetSummonerStatsParams) (GetSummonerStatsRow, error) {
@@ -52,6 +54,7 @@ func (q *Queries) GetSummonerStats(ctx context.Context, arg GetSummonerStatsPara
 		&i.Top4Rate,
 		&i.Top1Count,
 		&i.Top1Rate,
+		&i.TotalSecondsIngame,
 	)
 	return i, err
 }

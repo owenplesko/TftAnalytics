@@ -38,6 +38,7 @@ CREATE TABLE tft_summoner_stats (
 	top_4_count INT NOT NULL,
 	top_1_count INT NOT NULL,
 	placement_sum INT NOT NULL,
+	total_seconds_ingame FLOAT NOT NULL,
 	avg_placement FLOAT NOT NULL GENERATED ALWAYS AS (placement_sum::FLOAT / comp_count) STORED,
 	top_4_rate FLOAT NOT NULL GENERATED ALWAYS AS (top_4_count::FLOAT / comp_count * 100) STORED,
 	top_1_rate FLOAT NOT NULL GENERATED ALWAYS AS (top_1_count::FLOAT / comp_count * 100) STORED,
@@ -50,9 +51,8 @@ CREATE INDEX idx_match_history ON tft_comp (summoner_puuid, match_date DESC);
 
 SET TIME ZONE 'UTC';
 
-CREATE OR REPLACE PROCEDURE update_tft_summoner_stats(IN in_summoner_puuid VARCHAR)
-LANGUAGE plpgsql
-AS $$
+CREATE
+OR REPLACE PROCEDURE update_tft_summoner_stats (IN in_summoner_puuid VARCHAR) LANGUAGE plpgsql AS $$
 DECLARE
     update_old TIMESTAMP;
     update_new TIMESTAMP := CURRENT_TIMESTAMP;
@@ -70,7 +70,8 @@ BEGIN
             COUNT(*) AS comp_count,
             COUNT(*) FILTER (WHERE (comp_data ->> 'placement')::INT <= 4) AS top_4_count,
             COUNT(*) FILTER (WHERE (comp_data ->> 'placement')::INT = 1) AS top_1_count,
-            SUM((comp_data ->> 'placement')::INT) AS placement_sum
+            SUM((comp_data ->> 'placement')::INT) AS placement_sum,
+            SUM((comp_data ->> 'timeEliminated')::FLOAT) AS total_seconds_ingame
         FROM tft_comp
         JOIN tft_match ON tft_comp.match_id = tft_match.id
         WHERE tft_comp.summoner_puuid = in_summoner_puuid
@@ -85,28 +86,30 @@ BEGIN
             SUM(comp_count) AS comp_count,
             SUM(top_4_count) AS top_4_count,
             SUM(top_1_count) AS top_1_count,
-            SUM(placement_sum) AS placement_sum
+            SUM(placement_sum) AS placement_sum,
+            SUM(total_seconds_ingame) AS total_seconds_ingame
         FROM queue_id_stats
         GROUP BY set_number
     ),
 	-- Combine both stats
 	combined_stats AS (
-    	SELECT queue_id, set_number, comp_count, top_4_count, top_1_count, placement_sum FROM queue_id_stats
+    	SELECT queue_id, set_number, comp_count, top_4_count, top_1_count, placement_sum, total_seconds_ingame FROM queue_id_stats
     	UNION ALL
-    	SELECT NULL, set_number, comp_count, top_4_count, top_1_count, placement_sum FROM stats
+    	SELECT NULL, set_number, comp_count, top_4_count, top_1_count, placement_sum, total_seconds_ingame FROM stats
 	)
 
     -- Insert new stats or update existing ones
-    INSERT INTO tft_summoner_stats (summoner_puuid, queue_id, set_number, comp_count, top_4_count, top_1_count, placement_sum)
+    INSERT INTO tft_summoner_stats (summoner_puuid, queue_id, set_number, comp_count, top_4_count, top_1_count, placement_sum, total_seconds_ingame)
     SELECT 
-        in_summoner_puuid, queue_id, set_number, comp_count, top_4_count, top_1_count, placement_sum
+        in_summoner_puuid, queue_id, set_number, comp_count, top_4_count, top_1_count, placement_sum, total_seconds_ingame
     FROM combined_stats
     ON CONFLICT (summoner_puuid, queue_id, set_number) DO UPDATE
     SET
         comp_count = tft_summoner_stats.comp_count + EXCLUDED.comp_count,
         top_4_count = tft_summoner_stats.top_4_count + EXCLUDED.top_4_count,
         top_1_count = tft_summoner_stats.top_1_count + EXCLUDED.top_1_count,
-        placement_sum = tft_summoner_stats.placement_sum + EXCLUDED.placement_sum;
+        placement_sum = tft_summoner_stats.placement_sum + EXCLUDED.placement_sum,
+        total_seconds_ingame = tft_summoner_stats.total_seconds_ingame + EXCLUDED.total_seconds_ingame;
 
     -- Update summoner's last update timestamp
     UPDATE tft_summoner

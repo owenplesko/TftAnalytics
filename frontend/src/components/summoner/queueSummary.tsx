@@ -1,4 +1,4 @@
-import { sentenceCase } from "@/lib/utils";
+import { formatSeconds, sentenceCase } from "@/lib/utils";
 import { getSummonerRank } from "@/services/getSummonerRank";
 import { getSummonerStats } from "@/services/getSummonerStats";
 import { useSuspenseQuery } from "@tanstack/react-query";
@@ -67,7 +67,8 @@ const QueueStatsSummary: React.FC<{
 
   return (
     <div className="flex flex-col">
-      <span>{`${query.data.compCount} Games Played`}</span>
+      <span>{`${query.data.compCount} games played`}</span>
+      <span>{`${formatSeconds(query.data.totalSecondsIngame, "hours minutes seconds")} played`}</span>
       <span>{`${query.data.avgPlacement.toPrecision(3)} AVP`}</span>
       <span>{`${query.data.top4Rate.toPrecision(3)}% Top 4`}</span>
       <span>{`${query.data.top1Rate.toPrecision(3)}% Top 1`}</span>

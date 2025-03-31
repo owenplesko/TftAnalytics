@@ -40,14 +40,15 @@ type TftSummoner struct {
 }
 
 type TftSummonerStat struct {
-	SummonerPuuid string      `json:"summonerPuuid"`
-	QueueID       pgtype.Int4 `json:"queueId"`
-	SetNumber     int32       `json:"setNumber"`
-	CompCount     int32       `json:"compCount"`
-	Top4Count     int32       `json:"top4Count"`
-	Top1Count     int32       `json:"top1Count"`
-	PlacementSum  int32       `json:"placementSum"`
-	AvgPlacement  float64     `json:"avgPlacement"`
-	Top4Rate      float64     `json:"top4Rate"`
-	Top1Rate      float64     `json:"top1Rate"`
+	SummonerPuuid      string      `json:"summonerPuuid"`
+	QueueID            pgtype.Int4 `json:"queueId"`
+	SetNumber          int32       `json:"setNumber"`
+	CompCount          int32       `json:"compCount"`
+	Top4Count          int32       `json:"top4Count"`
+	Top1Count          int32       `json:"top1Count"`
+	PlacementSum       int32       `json:"placementSum"`
+	TotalSecondsIngame float64     `json:"totalSecondsIngame"`
+	AvgPlacement       float64     `json:"avgPlacement"`
+	Top4Rate           float64     `json:"top4Rate"`
+	Top1Rate           float64     `json:"top1Rate"`
 }
