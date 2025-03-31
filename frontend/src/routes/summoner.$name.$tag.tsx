@@ -6,6 +6,15 @@ import { getSummonerStats } from "@/services/getSummonerStats";
 import QueueSummary from "@/components/summoner/queueSummary";
 import PlayerHeader from "@/components/summoner/header";
 import MatchHistory from "@/components/summoner/matchHistory";
+import { useState } from "react";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import QueueSelector from "@/components/summoner/queueSelector";
 
 const CURRENT_SET_NUMBER = 13;
 
@@ -18,7 +27,9 @@ export const Route = createFileRoute("/summoner/$name/$tag")({
 
     await Promise.all([
       queryClient.ensureQueryData(getSummonerRank(region, summonerId)),
-      queryClient.ensureQueryData(getSummonerStats(puuid, CURRENT_SET_NUMBER)),
+      queryClient.ensureQueryData(
+        getSummonerStats(puuid, CURRENT_SET_NUMBER, null),
+      ),
       queryClient.ensureInfiniteQueryData(getSummonerMatches(puuid)),
     ]);
 
@@ -37,14 +48,18 @@ export const Route = createFileRoute("/summoner/$name/$tag")({
 function Player() {
   const loader = Route.useLoaderData();
 
+  const [queueId, setQueueId] = useState<number | null>(null);
+
   return (
     <div className="flex w-[1000px] flex-col gap-4 pt-4">
       <PlayerHeader name={loader.name} tag={loader.tag} />
+      <QueueSelector setQueueId={setQueueId} />
       <QueueSummary
         region={loader.region}
         summonerId={loader.summonerId}
         puuid={loader.puuid}
         setNumber={loader.setNumber}
+        queueId={queueId}
       />
       <MatchHistory puuid={loader.puuid} />
     </div>

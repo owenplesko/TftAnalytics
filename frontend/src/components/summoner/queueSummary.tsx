@@ -7,7 +7,7 @@ const QueueSummary: React.FC<{
   region: string;
   summonerId: string;
   puuid: string;
-  queueId?: number | null;
+  queueId: number | null;
   setNumber: number;
 }> = ({ region, summonerId, puuid, queueId, setNumber }) => {
   return (
@@ -57,7 +57,7 @@ const RankSummary: React.FC<{
 
 const QueueStatsSummary: React.FC<{
   puuid: string;
-  queueId?: number | null;
+  queueId: number | null;
   setNumber: number;
 }> = ({ puuid, queueId, setNumber }) => {
   const query = useSuspenseQuery(getSummonerStats(puuid, setNumber, queueId));
