@@ -30,7 +30,7 @@ export const Route = createFileRoute("/summoner/$name/$tag")({
       queryClient.ensureQueryData(
         getSummonerStats(puuid, CURRENT_SET_NUMBER, null),
       ),
-      queryClient.ensureInfiniteQueryData(getSummonerMatches(puuid)),
+      queryClient.ensureInfiniteQueryData(getSummonerMatches({ puuid })),
     ]);
 
     const data = {
@@ -61,7 +61,7 @@ function Player() {
         setNumber={loader.setNumber}
         queueId={queueId}
       />
-      <MatchHistory puuid={loader.puuid} />
+      <MatchHistory puuid={loader.puuid} queueId={queueId} />
     </div>
   );
 }

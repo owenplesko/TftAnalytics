@@ -124,20 +124,7 @@ func (q *Queries) GetMatchComps(ctx context.Context, matchID string) ([]GetMatch
 	return items, nil
 }
 
-const matchExists = `-- name: MatchExists :one
-SELECT EXISTS (
-    SELECT id, data_version, game_version, queue_id, game_type, set_name, set_number, match_date FROM tft_match WHERE id = $1
-)
-`
-
-func (q *Queries) MatchExists(ctx context.Context, id string) (bool, error) {
-	row := q.db.QueryRow(ctx, matchExists, id)
-	var exists bool
-	err := row.Scan(&exists)
-	return exists, err
-}
-
-const summonerMatchHistory = `-- name: SummonerMatchHistory :many
+const getSummonerMatchHistory = `-- name: GetSummonerMatchHistory :many
 SELECT 
 	comp_data, tft_match.id, tft_match.data_version, tft_match.game_version, tft_match.queue_id, tft_match.game_type, tft_match.set_name, tft_match.set_number, tft_match.match_date
 FROM
@@ -145,32 +132,39 @@ FROM
 	ON tft_comp.match_id = tft_match.id
 WHERE
 	summoner_puuid = $1 AND
-	tft_comp.match_date < $3::TIMESTAMP
+	tft_comp.match_date < $3::TIMESTAMP AND
+	($4::INT IS NULL OR tft_match.queue_id = $4::INT)
 ORDER BY
 	tft_comp.match_date DESC
 LIMIT $2
 `
 
-type SummonerMatchHistoryParams struct {
+type GetSummonerMatchHistoryParams struct {
 	SummonerPuuid string           `json:"summonerPuuid"`
 	Limit         int32            `json:"limit"`
 	Before        pgtype.Timestamp `json:"before"`
+	QueueID       pgtype.Int4      `json:"queueId"`
 }
 
-type SummonerMatchHistoryRow struct {
+type GetSummonerMatchHistoryRow struct {
 	CompData CompData `json:"compData"`
 	TftMatch TftMatch `json:"tftMatch"`
 }
 
-func (q *Queries) SummonerMatchHistory(ctx context.Context, arg SummonerMatchHistoryParams) ([]SummonerMatchHistoryRow, error) {
-	rows, err := q.db.Query(ctx, summonerMatchHistory, arg.SummonerPuuid, arg.Limit, arg.Before)
+func (q *Queries) GetSummonerMatchHistory(ctx context.Context, arg GetSummonerMatchHistoryParams) ([]GetSummonerMatchHistoryRow, error) {
+	rows, err := q.db.Query(ctx, getSummonerMatchHistory,
+		arg.SummonerPuuid,
+		arg.Limit,
+		arg.Before,
+		arg.QueueID,
+	)
 	if err != nil {
 		return nil, err
 	}
 	defer rows.Close()
-	var items []SummonerMatchHistoryRow
+	var items []GetSummonerMatchHistoryRow
 	for rows.Next() {
-		var i SummonerMatchHistoryRow
+		var i GetSummonerMatchHistoryRow
 		if err := rows.Scan(
 			&i.CompData,
 			&i.TftMatch.ID,
@@ -190,4 +184,17 @@ func (q *Queries) SummonerMatchHistory(ctx context.Context, arg SummonerMatchHis
 		return nil, err
 	}
 	return items, nil
+}
+
+const matchExists = `-- name: MatchExists :one
+SELECT EXISTS (
+    SELECT id, data_version, game_version, queue_id, game_type, set_name, set_number, match_date FROM tft_match WHERE id = $1
+)
+`
+
+func (q *Queries) MatchExists(ctx context.Context, id string) (bool, error) {
+	row := q.db.QueryRow(ctx, matchExists, id)
+	var exists bool
+	err := row.Scan(&exists)
+	return exists, err
 }

@@ -25,27 +25,6 @@ func (service *Service) GetMatchComps(ctx context.Context, matchId string) ([]db
 	return comps, nil
 }
 
-func (service *Service) GetMatchHistory(ctx context.Context, puuid string, limit int32, before time.Time) ([]db.SummonerMatchHistoryRow, error) {
-	matches, err := service.queries.SummonerMatchHistory(context.Background(), db.SummonerMatchHistoryParams{
-		SummonerPuuid: puuid,
-		Limit:         limit,
-		Before: pgtype.Timestamp{
-			Time:  before,
-			Valid: true,
-		},
-	})
-	if err != nil {
-		return []db.SummonerMatchHistoryRow{}, fmt.Errorf("Queries.SummonerMatchHistory failed with err: %w", err)
-	}
-
-	// prevent returning nil when list is empty
-	if matches == nil {
-		matches = []db.SummonerMatchHistoryRow{}
-	}
-
-	return matches, nil
-}
-
 func (service *Service) CollectMatchHistory(ctx context.Context, region, puuid string, matchesAfter time.Time) error {
 	count := riot.MATCH_HISTORY_MAX_COUNT
 

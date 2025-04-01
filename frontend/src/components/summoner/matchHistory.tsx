@@ -4,8 +4,13 @@ import { useEffect } from "react";
 import { useInView } from "react-intersection-observer";
 import SummonerMatchCard from "../comp";
 
-const MatchHistory: React.FC<{ puuid: string }> = ({ puuid }) => {
-  const matchesQuery = useSuspenseInfiniteQuery(getSummonerMatches(puuid));
+const MatchHistory: React.FC<{ puuid: string; queueId: number | null }> = ({
+  puuid,
+  queueId,
+}) => {
+  const matchesQuery = useSuspenseInfiniteQuery(
+    getSummonerMatches({ puuid, queueId }),
+  );
   const matches = matchesQuery.data.pages.flat();
 
   const [inViewRef, inView] = useInView();
