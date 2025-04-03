@@ -88,7 +88,7 @@ const QueueStatsSummary: React.FC<{
         ].map(([stat, label, games]) => (
           <div
             key={label}
-            className="flex flex-col items-center rounded bg-secondary p-1"
+            className="flex size-20 flex-col items-center justify-center rounded bg-secondary"
           >
             <span className="text-xl">{stat}</span>
             <span className="text-xs">{label}</span>
