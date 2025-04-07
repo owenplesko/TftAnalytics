@@ -18,6 +18,7 @@ const QueueSelector: React.FC<{
   return (
     <Select
       defaultValue="null"
+      // @ts-ignore value should always be a key of queueIdvalues
       onValueChange={(value) => setQueueId(queueIdValues[value])}
     >
       <SelectTrigger className="w-[200px]">
