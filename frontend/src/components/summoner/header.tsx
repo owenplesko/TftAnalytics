@@ -36,7 +36,7 @@ const PlayerHeader: React.FC<{ name: string; tag: string }> = ({
       <img
         className="row-span-3 h-full rounded border"
         width={124}
-        src={`/profileicon/profileicon${query.data.profileIconId}.png`}
+        src={`https://raw.communitydragon.org/latest/plugins/rcp-be-lol-game-data/global/default/v1/profile-icons/${query.data.profileIconId}.jpg`}
       />
       <div className="flex items-center gap-1">
         <h1 className="text-3xl font-bold">

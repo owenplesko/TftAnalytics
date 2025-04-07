@@ -25,6 +25,6 @@ func New(pool *pgxpool.Pool, leaderboard *leaderboard.Leaderboard, riot *riot.Ri
 		leaderboard:        leaderboard,
 		riot:               riot,
 		serviceStatus:      make(map[string]string),
-		matchesAfterCutoff: time.Date(2024, 11, 20, 0, 0, 0, 0, time.UTC),
+		matchesAfterCutoff: time.Date(2025, 4, 1, 0, 0, 0, 0, time.UTC),
 	}
 }

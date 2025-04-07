@@ -31,7 +31,7 @@ const UnitIcon: React.FC<{ unit: Unit }> = ({ unit }) => {
         className={`rounded border ${getRarityBackground(unit.rarity)}`}
         width={48}
         height={48}
-        src={`/unit/${unit.characterId}.png`}
+        src={`/unit/${unit.characterId}.webp`}
       />
       <ul className="absolute bottom-[-0.625rem] flex w-full flex-row justify-center">
         {unit.itemNames.map((item, i) => (
@@ -41,7 +41,7 @@ const UnitIcon: React.FC<{ unit: Unit }> = ({ unit }) => {
               className="rounded border"
               width={16}
               height={16}
-              src={`/item/${item}.png`}
+              src={`/item/${item}.webp`}
             />
           </li>
         ))}

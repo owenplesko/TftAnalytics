@@ -132,15 +132,17 @@ FROM
 	ON tft_comp.match_id = tft_match.id
 WHERE
 	summoner_puuid = $1 AND
-	tft_comp.match_date < $3::TIMESTAMP AND
-	($4::INT IS NULL OR tft_match.queue_id = $4::INT)
+	tft_comp.match_date < $4::TIMESTAMP AND
+	($5::INT IS NULL OR tft_match.queue_id = $5::INT) AND
+	set_number = $2
 ORDER BY
 	tft_comp.match_date DESC
-LIMIT $2
+LIMIT $3
 `
 
 type GetSummonerMatchHistoryParams struct {
 	SummonerPuuid string           `json:"summonerPuuid"`
+	SetNumber     int32            `json:"setNumber"`
 	Limit         int32            `json:"limit"`
 	Before        pgtype.Timestamp `json:"before"`
 	QueueID       pgtype.Int4      `json:"queueId"`
@@ -154,6 +156,7 @@ type GetSummonerMatchHistoryRow struct {
 func (q *Queries) GetSummonerMatchHistory(ctx context.Context, arg GetSummonerMatchHistoryParams) ([]GetSummonerMatchHistoryRow, error) {
 	rows, err := q.db.Query(ctx, getSummonerMatchHistory,
 		arg.SummonerPuuid,
+		arg.SetNumber,
 		arg.Limit,
 		arg.Before,
 		arg.QueueID,

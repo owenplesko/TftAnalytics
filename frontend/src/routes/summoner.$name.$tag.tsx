@@ -7,16 +7,9 @@ import QueueSummary from "@/components/summoner/queueSummary";
 import PlayerHeader from "@/components/summoner/header";
 import MatchHistory from "@/components/summoner/matchHistory";
 import { useState } from "react";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 import QueueSelector from "@/components/summoner/queueSelector";
 
-const CURRENT_SET_NUMBER = 13;
+const CURRENT_SET_NUMBER = 14;
 
 export const Route = createFileRoute("/summoner/$name/$tag")({
   component: Player,

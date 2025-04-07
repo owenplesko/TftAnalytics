@@ -53,6 +53,9 @@ func (controller Api) getSummonerMatches(w http.ResponseWriter, r *http.Request)
 		}
 	}
 
+	// TODO: extract this constant somewhere
+	setNumber := 14
+
 	matches, err := controller.Queries.GetSummonerMatchHistory(ctx, db.GetSummonerMatchHistoryParams{
 		SummonerPuuid: puuid,
 		Limit:         int32(limit),
@@ -64,6 +67,7 @@ func (controller Api) getSummonerMatches(w http.ResponseWriter, r *http.Request)
 			Int32: int32(queue),
 			Valid: queue != 0,
 		},
+		SetNumber: int32(setNumber),
 	})
 	if err != nil {
 		log.Printf("Queries.GetSummonerMatchHistory failed with err: %v\n", err)

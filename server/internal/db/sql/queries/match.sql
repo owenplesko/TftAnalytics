@@ -44,7 +44,8 @@ FROM
 WHERE
 	summoner_puuid = $1 AND
 	tft_comp.match_date < @before::TIMESTAMP AND
-	(sqlc.narg(queue_id)::INT IS NULL OR tft_match.queue_id = sqlc.narg(queue_id)::INT)
+	(sqlc.narg(queue_id)::INT IS NULL OR tft_match.queue_id = sqlc.narg(queue_id)::INT) AND
+	set_number = $2
 ORDER BY
 	tft_comp.match_date DESC
-LIMIT $2;
+LIMIT $3;

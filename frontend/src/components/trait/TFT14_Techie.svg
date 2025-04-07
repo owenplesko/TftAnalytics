@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<svg fill="currentColor" viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg">
+<rect height="3" transform="translate(-10.39 14.44) rotate(-45)" width="20.48" x="2" y="18.26"/>
+<path d="M24,8v4h-4v-4h4M26,6h-8v8h8V6h0Z"/>
+<path d="M26,19v4h-4v-4h4M28,17h-8v8h8v-8h0Z"/>
+<path d="M13,6v4h-4v-4h4M15,4H7v8h8V4h0Z"/>
+<polygon points="17.38 19.5 13 24 13 28 18.62 22.5 21 22.5 21 19.5 17.38 19.5"/>
+<polygon points="12.5 11 9.5 11 9.5 13.38 4 19 8 19 12.5 14.62 12.5 11"/>
+</svg>

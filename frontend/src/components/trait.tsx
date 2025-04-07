@@ -1,63 +1,55 @@
-import TFT13_Academy from "@/components/traits/TFT13_Academy.svg?react";
-import TFT13_Ambassador from "@/components/traits/TFT13_Ambassador.svg?react";
-import TFT13_Ambusher from "@/components/traits/TFT13_Ambusher.svg?react";
-import TFT13_Bruiser from "@/components/traits/TFT13_Bruiser.svg?react";
-import TFT13_Cabal from "@/components/traits/TFT13_Cabal.svg?react";
-import TFT13_Challenger from "@/components/traits/TFT13_Challenger.svg?react";
-import TFT13_Crime from "@/components/traits/TFT13_Crime.svg?react";
-import TFT13_Experiment from "@/components/traits/TFT13_Experiment.svg?react";
-import TFT13_Family from "@/components/traits/TFT13_Family.svg?react";
-import TFT13_FormSwapper from "@/components/traits/TFT13_FormSwapper.svg?react";
-import TFT13_Hextech from "@/components/traits/TFT13_Hextech.svg?react";
-import TFT13_HighRoller from "@/components/traits/TFT13_HighRoller.svg?react";
-import TFT13_Hoverboard from "@/components/traits/TFT13_Hoverboard.svg?react";
-import TFT13_Infused from "@/components/traits/TFT13_Infused.svg?react";
-import TFT13_Invoker from "@/components/traits/TFT13_Invoker.svg?react";
-import TFT13_JunkerKing from "@/components/traits/TFT13_JunkerKing.svg?react";
-import TFT13_Martialist from "@/components/traits/TFT13_Martialist.svg?react";
-import TFT13_Pugilist from "@/components/traits/TFT13_Pugilist.svg?react";
-import TFT13_Rebel from "@/components/traits/TFT13_Rebel.svg?react";
-import TFT13_Scrap from "@/components/traits/TFT13_Scrap.svg?react";
-import TFT13_Sniper from "@/components/traits/TFT13_Sniper.svg?react";
-import TFT13_Sorcerer from "@/components/traits/TFT13_Sorcerer.svg?react";
-import TFT13_Squad from "@/components/traits/TFT13_Squad.svg?react";
-import TFT13_Titan from "@/components/traits/TFT13_Titan.svg?react";
-import TFT13_Warband from "@/components/traits/TFT13_Warband.svg?react";
-import TFT13_Watcher from "@/components/traits/TFT13_Watcher.svg?react";
-import TFT13_MissMageTrait from "@/components/traits/TFT13_MissMageTrait.svg?react";
-import TFT13_MachineHerald from "@/components/traits/TFT13_MachineHerald.svg?react";
-import TFT13_BloodHunter from "@/components/traits/TFT13_BloodHunter.svg?react";
+import TFT14_Divinicorp from "@/components/trait/TFT14_Divinicorp.svg?react";
+import TFT14_StreetDemon from "@/components/trait/TFT14_StreetDemon.svg?react";
+import TFT14_Supercharge from "@/components/trait/TFT14_Supercharge.svg?react";
+import TFT14_AnimaSquad from "@/components/trait/TFT14_AnimaSquad.svg?react";
+import TFT14_Vanguard from "@/components/trait/TFT14_Vanguard.svg?react";
+import TFT14_Strong from "@/components/trait/TFT14_Strong.svg?react";
+import TFT14_ViegoUniqueTrait from "@/components/trait/TFT14_ViegoUniqueTrait.svg?react";
+import TFT14_Cyberboss from "@/components/trait/TFT14_Cyberboss.svg?react";
+import TFT14_Cutter from "@/components/trait/TFT14_Cutter.svg?react";
+import TFT14_Armorclad from "@/components/trait/TFT14_Armorclad.svg?react";
+import TFT14_EdgeRunner from "@/components/trait/TFT14_EdgeRunner.svg?react";
+import TFT14_Overlord from "@/components/trait/TFT14_Overlord.svg?react";
+import TFT14_Netgod from "@/components/trait/TFT14_Netgod.svg?react";
+import TFT14_Swift from "@/components/trait/TFT14_Swift.svg?react";
+import TFT14_Controller from "@/components/trait/TFT14_Controller.svg?react";
+import TFT14_Bruiser from "@/components/trait/TFT14_Bruiser.svg?react";
+import TFT14_Marksman from "@/components/trait/TFT14_Marksman.svg?react";
+import TFT14_Immortal from "@/components/trait/TFT14_Immortal.svg?react";
+import TFT14_BallisTek from "@/components/trait/TFT14_BallisTek.svg?react";
+import TFT14_Techie from "@/components/trait/TFT14_Techie.svg?react";
+import TFT14_Thirsty from "@/components/trait/TFT14_Thirsty.svg?react";
+import TFT14_Virus from "@/components/trait/TFT14_Virus.svg?react";
+import TFT14_Mob from "@/components/trait/TFT14_Mob.svg?react";
+import TFT14_HotRod from "@/components/trait/TFT14_HotRod.svg?react";
+import TFT14_Suits from "@/components/trait/TFT14_Suits.svg?react";
 
 const iconMap = new Map([
-  ["TFT13_Academy", TFT13_Academy({})],
-  ["TFT13_Ambassador", TFT13_Ambassador({})],
-  ["TFT13_Ambusher", TFT13_Ambusher({})],
-  ["TFT13_Bruiser", TFT13_Bruiser({})],
-  ["TFT13_Cabal", TFT13_Cabal({})],
-  ["TFT13_Challenger", TFT13_Challenger({})],
-  ["TFT13_Crime", TFT13_Crime({})],
-  ["TFT13_Experiment", TFT13_Experiment({})],
-  ["TFT13_Family", TFT13_Family({})],
-  ["TFT13_FormSwapper", TFT13_FormSwapper({})],
-  ["TFT13_Hextech", TFT13_Hextech({})],
-  ["TFT13_HighRoller", TFT13_HighRoller({})],
-  ["TFT13_Hoverboard", TFT13_Hoverboard({})],
-  ["TFT13_Infused", TFT13_Infused({})],
-  ["TFT13_Invoker", TFT13_Invoker({})],
-  ["TFT13_JunkerKing", TFT13_JunkerKing({})],
-  ["TFT13_Martialist", TFT13_Martialist({})],
-  ["TFT13_Pugilist", TFT13_Pugilist({})],
-  ["TFT13_Rebel", TFT13_Rebel({})],
-  ["TFT13_Scrap", TFT13_Scrap({})],
-  ["TFT13_Sniper", TFT13_Sniper({})],
-  ["TFT13_Sorcerer", TFT13_Sorcerer({})],
-  ["TFT13_Squad", TFT13_Squad({})],
-  ["TFT13_Titan", TFT13_Titan({})],
-  ["TFT13_Warband", TFT13_Warband({})],
-  ["TFT13_Watcher", TFT13_Watcher({})],
-  ["TFT13_MissMageTrait", TFT13_MissMageTrait({})],
-  ["TFT13_MachineHerald", TFT13_MachineHerald({})],
-  ["TFT13_BloodHunter", TFT13_BloodHunter({})],
+  ["TFT14_Divinicorp", TFT14_Divinicorp({})],
+  ["TFT14_StreetDemon", TFT14_StreetDemon({})],
+  ["TFT14_Supercharge", TFT14_Supercharge({})],
+  ["TFT14_AnimaSquad", TFT14_AnimaSquad({})],
+  ["TFT14_Vanguard", TFT14_Vanguard({})],
+  ["TFT14_Strong", TFT14_Strong({})],
+  ["TFT14_ViegoUniqueTrait", TFT14_ViegoUniqueTrait({})],
+  ["TFT14_Cyberboss", TFT14_Cyberboss({})],
+  ["TFT14_Cutter", TFT14_Cutter({})],
+  ["TFT14_Armorclad", TFT14_Armorclad({})],
+  ["TFT14_EdgeRunner", TFT14_EdgeRunner({})],
+  ["TFT14_Overlord", TFT14_Overlord({})],
+  ["TFT14_Netgod", TFT14_Netgod({})],
+  ["TFT14_Swift", TFT14_Swift({})],
+  ["TFT14_Controller", TFT14_Controller({})],
+  ["TFT14_Bruiser", TFT14_Bruiser({})],
+  ["TFT14_Marksman", TFT14_Marksman({})],
+  ["TFT14_Immortal", TFT14_Immortal({})],
+  ["TFT14_BallisTek", TFT14_BallisTek({})],
+  ["TFT14_Techie", TFT14_Techie({})],
+  ["TFT14_Thirsty", TFT14_Thirsty({})],
+  ["TFT14_Virus", TFT14_Virus({})],
+  ["TFT14_Mob", TFT14_Mob({})],
+  ["TFT14_HotRod", TFT14_HotRod({})],
+  ["TFT14_Suits", TFT14_Suits({})],
 ]);
 
 const styleColors = {
