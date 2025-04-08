@@ -8,7 +8,7 @@ import { Badge } from "../ui/badge";
 import { updateSummoner } from "@/services/updateSummoner";
 import { Button } from "../ui/button";
 import { IconLoader2 } from "@tabler/icons-react";
-import TimeSince from "../timeSince";
+import TimeSince from "../util/timeSince";
 
 const PlayerHeader: React.FC<{ name: string; tag: string }> = ({
   name,
