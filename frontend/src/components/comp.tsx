@@ -7,6 +7,7 @@ import { useQueryClient } from "@tanstack/react-query";
 import { getMatchComps } from "@/services/getMatchComps";
 import { IconChevronUp } from "@tabler/icons-react";
 import { Link } from "@tanstack/react-router";
+import { QUEUE_LABELS } from "@/lib/constants";
 
 const SummonerMatchCard: React.FC<{
   summonerMatch: SummonerMatch;
@@ -98,16 +99,6 @@ const PlacementText: React.FC<{
   );
 };
 
-const queueLabels = {
-  1090: "Normal",
-  1100: "Ranked",
-  1110: "Tutorial",
-  1130: "Hyper Roll",
-  1160: "Double Up",
-  1220: "Tocker's Trials",
-  6100: "Revival",
-};
-
 const PlacementSection: React.FC<{ summonerMatch: SummonerMatch }> = ({
   summonerMatch,
 }) => {
@@ -115,11 +106,9 @@ const PlacementSection: React.FC<{ summonerMatch: SummonerMatch }> = ({
     <div className="flex flex-col">
       <PlacementText placement={summonerMatch.compData.placement} />
       <span>
-        {
-          // @ts-ignore
-          // ignore because we have nullish coalesce
-          queueLabels[summonerMatch.tftMatch.queueId] ?? "Unknown"
-        }
+        {(QUEUE_LABELS as Record<number, string | undefined>)[
+          summonerMatch.tftMatch.queueId
+        ] ?? "Unknown"}
       </span>
       <span className="text-xs text-muted-foreground">
         {formatTimeSince(new Date(summonerMatch.tftMatch.matchDate))}

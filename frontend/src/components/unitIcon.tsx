@@ -3,38 +3,29 @@ import { IconStarFilled } from "@tabler/icons-react";
 import Repeat from "./util/repeat";
 import { cn } from "@/lib/utils";
 
-const getRarityBackground = (rarity: number) => {
-  switch (rarity) {
-    case 0:
-      return "border-common";
-    case 1:
-      return "border-uncommon";
-    case 2:
-      return "border-rare";
-    case 4:
-      return "border-mythic";
-    case 6:
-      return "border-legendary";
-    case 8:
-      return "border-divine";
-  }
-  return "border-muted";
+const rarityStyles: Record<number, string | undefined> = {
+  0: "border-common",
+  1: "border-uncommon",
+  2: "border-rare",
+  4: "border-mythic",
+  6: "border-legendary",
+  8: "border-divine",
 };
 
-const starColors: Record<number, string | undefined> = {
+const tierStyles: Record<number, string | undefined> = {
   2: "text-silver",
   3: "text-gold",
-  4: "text-blue-400",
+  4: "text-platinum",
 };
 
 const UnitIcon: React.FC<{ unit: Unit }> = ({ unit }) => {
   return (
     <div className="relative my-[0.75rem]">
-      {unit.tier >= 1 && (
+      {unit.tier > 1 && (
         <div
           className={cn(
             "absolute top-[-0.75rem] flex w-full justify-center",
-            starColors[unit.tier],
+            tierStyles[unit.tier],
           )}
         >
           <Repeat n={unit.tier}>
@@ -43,7 +34,10 @@ const UnitIcon: React.FC<{ unit: Unit }> = ({ unit }) => {
         </div>
       )}
       <img
-        className={`rounded border ${getRarityBackground(unit.rarity)}`}
+        className={cn(
+          "rounded border",
+          rarityStyles[unit.rarity] ?? "border-muted",
+        )}
         width={48}
         height={48}
         src={`/unit/${unit.characterId}.webp`}

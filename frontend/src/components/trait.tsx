@@ -23,6 +23,7 @@ import TFT14_Virus from "@/components/trait/TFT14_Virus.svg?react";
 import TFT14_Mob from "@/components/trait/TFT14_Mob.svg?react";
 import TFT14_HotRod from "@/components/trait/TFT14_HotRod.svg?react";
 import TFT14_Suits from "@/components/trait/TFT14_Suits.svg?react";
+import { cn } from "@/lib/utils";
 
 const iconMap = new Map([
   ["TFT14_Divinicorp", TFT14_Divinicorp({})],
@@ -52,7 +53,7 @@ const iconMap = new Map([
   ["TFT14_Suits", TFT14_Suits({})],
 ]);
 
-const styleColors = {
+const styleColors: Record<number, string | undefined> = {
   1: "text-bronze bg-bronze border-bronze",
   2: "text-silver bg-silver border-silver",
   3: "text-unique bg-unique border-unique",
@@ -64,18 +65,17 @@ const TraitIcon: React.FC<{
   name: string;
   numUnits: number;
   style: number;
-}> = ({ name, numUnits: tier, style }) => {
+}> = ({ name, numUnits, style }) => {
   const icon = iconMap.get(name);
   return (
     <div
-      className={`grid grid-cols-[0.75rem_auto] items-center gap-1 rounded border bg-opacity-10 px-1 text-xs ${
-        // @ts-ignore
-        // ignore because im a beast
-        styleColors[style]
-      }`}
+      className={cn(
+        "grid grid-cols-[0.75rem_auto] items-center gap-1 rounded border bg-opacity-10 px-1 text-xs",
+        styleColors[style],
+      )}
     >
       {icon}
-      <span>{tier}</span>
+      <span>{numUnits}</span>
     </div>
   );
 };

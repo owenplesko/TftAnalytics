@@ -21,14 +21,13 @@ module.exports = {
     },
     extend: {
       colors: {
-        // tft tier colors
+        // tft colors
         unique: colors.orange[500],
         prismatic: colors.purple[400],
+        platinum: colors.teal[400],
         gold: colors.yellow[400],
         silver: colors.slate[200],
         bronze: colors.yellow[800],
-
-        // tft rarity colors
         common: colors.neutral[400],
         uncommon: colors.green[500],
         rare: colors.blue[500],
