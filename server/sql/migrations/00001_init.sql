@@ -1,4 +1,8 @@
-CREATE TABLE tft_match (
+-- +goose Up
+-- +goose StatementBegin
+SET TIME ZONE 'UTC';
+
+CREATE TABLE IF NOT EXISTS tft_match (
 	id VARCHAR PRIMARY KEY NOT NULL,
 	data_version VARCHAR NOT NULL,
 	game_version VARCHAR NOT NULL,
@@ -9,7 +13,7 @@ CREATE TABLE tft_match (
 	match_date TIMESTAMP NOT NULL
 );
 
-CREATE TABLE tft_summoner (
+CREATE TABLE IF NOT EXISTS tft_summoner (
 	puuid VARCHAR PRIMARY KEY NOT NULL,
 	region VARCHAR NOT NULL,
 	name VARCHAR NOT NULL,
@@ -21,7 +25,7 @@ CREATE TABLE tft_summoner (
 	matches_before_timestamp TIMESTAMPTZ
 );
 
-CREATE TABLE tft_comp (
+CREATE TABLE IF NOT EXISTS tft_comp (
 	match_id VARCHAR NOT NULL REFERENCES tft_match,
 	summoner_puuid VARCHAR NOT NULL,
 	comp_data JSONB NOT NULL,
@@ -30,7 +34,7 @@ CREATE TABLE tft_comp (
 	PRIMARY KEY(match_id, summoner_puuid)
 );
 
-CREATE TABLE tft_summoner_stats (
+CREATE TABLE IF NOT EXISTS tft_summoner_stats (
 	summoner_puuid VARCHAR NOT NULL,
 	queue_id INT,
 	set_number INT NOT NULL,
@@ -45,11 +49,9 @@ CREATE TABLE tft_summoner_stats (
 	UNIQUE(summoner_puuid, set_number, queue_id)
 );
 
-CREATE INDEX idx_name_tag_insensitive ON tft_summoner (REPLACE(LOWER(name), ' ', ''), REPLACE(LOWER(tag), ' ', ''));
-CREATE INDEX idx_region_update ON tft_summoner (region, matches_after_timestamp ASC NULLS FIRST);
-CREATE INDEX idx_match_history ON tft_comp (summoner_puuid, match_date DESC);
-
-SET TIME ZONE 'UTC';
+CREATE INDEX IF NOT EXISTS idx_name_tag_insensitive ON tft_summoner (REPLACE(LOWER(name), ' ', ''), REPLACE(LOWER(tag), ' ', ''));
+CREATE INDEX IF NOT EXISTS idx_region_update ON tft_summoner (region, matches_before_timestamp ASC NULLS FIRST);
+CREATE INDEX IF NOT EXISTS idx_match_history ON tft_comp (summoner_puuid, match_date DESC);
 
 CREATE
 OR REPLACE PROCEDURE update_tft_summoner_stats (IN in_summoner_puuid VARCHAR) LANGUAGE plpgsql AS $$
@@ -112,8 +114,10 @@ BEGIN
         total_seconds_ingame = tft_summoner_stats.total_seconds_ingame + EXCLUDED.total_seconds_ingame;
 
     -- Update summoner's last update timestamp
-    UPDATE tft_summoner
+    UPDATE tt_summoner
     SET stats_update_timestamp = update_new
     WHERE puuid = in_summoner_puuid;
 END;
 $$;
+-- +goose StatementEnd
+

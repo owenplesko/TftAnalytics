@@ -10,13 +10,18 @@ import (
 	"time"
 
 	"context"
+	"embed"
+	"github.com/jackc/pgx/v5/pgxpool"
+	"github.com/jackc/pgx/v5/stdlib"
+	"github.com/joho/godotenv"
+	"github.com/pressly/goose/v3"
+	"github.com/redis/go-redis/v9"
 	"log"
 	"os"
-
-	"github.com/jackc/pgx/v5/pgxpool"
-	"github.com/joho/godotenv"
-	"github.com/redis/go-redis/v9"
 )
+
+//go:embed sql/migrations/*.sql
+var embedMigrations embed.FS
 
 func main() {
 	// load .env file
@@ -35,7 +40,23 @@ func main() {
 	if err = pool.Ping(context.Background()); err != nil {
 		panic(err)
 	}
-	log.Println("Db connection successful")
+	log.Println("DB connection successful")
+
+	// run database migrations
+	goose.SetBaseFS(embedMigrations)
+
+	if err := goose.SetDialect("postgres"); err != nil {
+		panic(err)
+	}
+
+	dbConn := stdlib.OpenDBFromPool(pool)
+	if err := goose.Up(dbConn, "sql/migrations"); err != nil {
+		panic(err)
+	}
+	if err := dbConn.Close(); err != nil {
+		panic(err)
+	}
+	log.Println("DB migrations successful")
 
 	// create leaderboard connection
 	rdb := redis.NewClient(&redis.Options{
