@@ -3,6 +3,7 @@ package services
 import (
 	"TFTAnalyticsServer/internal/db"
 	"TFTAnalyticsServer/internal/leaderboard"
+	"TFTAnalyticsServer/internal/services/internal/dedupe"
 	"TFTAnalyticsServer/pkg/riot"
 	"time"
 
@@ -14,7 +15,7 @@ type Service struct {
 	queries            *db.Queries
 	leaderboard        *leaderboard.Leaderboard
 	riot               *riot.Riot
-	serviceStatus      map[string]string
+	deduplicator       *dedupe.Deduplicator
 	matchesAfterCutoff time.Time
 }
 
@@ -24,7 +25,7 @@ func New(pool *pgxpool.Pool, leaderboard *leaderboard.Leaderboard, riot *riot.Ri
 		queries:            db.New(pool),
 		leaderboard:        leaderboard,
 		riot:               riot,
-		serviceStatus:      make(map[string]string),
+		deduplicator:       dedupe.New(),
 		matchesAfterCutoff: time.Date(2025, 4, 1, 0, 0, 0, 0, time.UTC),
 	}
 }
