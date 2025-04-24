@@ -1,12 +1,13 @@
 package api
 
 import (
-	"TFTAnalyticsServer/pkg/riot"
 	"context"
 	"encoding/json"
 	"errors"
 	"log"
 	"net/http"
+
+	"github.com/owenplesko/TftAnalytics/pkg/riot"
 )
 
 func (controller Api) getSummonerByNameTag(w http.ResponseWriter, r *http.Request) {

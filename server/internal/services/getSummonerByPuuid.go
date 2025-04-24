@@ -1,9 +1,10 @@
 package services
 
 import (
-	"TFTAnalyticsServer/internal/db"
 	"context"
 	"fmt"
+
+	"github.com/owenplesko/TftAnalytics/internal/db"
 )
 
 func (service *Service) GetSummonerByPuuid(ctx context.Context, puuid string) (db.TftSummoner, error) {

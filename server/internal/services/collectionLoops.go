@@ -1,11 +1,12 @@
 package services
 
 import (
-	"TFTAnalyticsServer/internal/db"
-	"TFTAnalyticsServer/pkg/riot"
 	"context"
 	"log"
 	"time"
+
+	"github.com/owenplesko/TftAnalytics/internal/db"
+	"github.com/owenplesko/TftAnalytics/pkg/riot"
 )
 
 func (service *Service) MatchCollectionLoop(ctx context.Context, region string) {

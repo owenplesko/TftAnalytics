@@ -1,10 +1,11 @@
 package services
 
 import (
-	"TFTAnalyticsServer/internal/db"
 	"context"
 	"errors"
 	"fmt"
+
+	"github.com/owenplesko/TftAnalytics/internal/db"
 
 	"github.com/jackc/pgx/v5"
 )

@@ -1,10 +1,11 @@
 package services
 
 import (
-	"TFTAnalyticsServer/internal/leaderboard"
 	"context"
 	"fmt"
 	"log"
+
+	"github.com/owenplesko/TftAnalytics/internal/leaderboard"
 )
 
 func (service *Service) CollectRankEntries(ctx context.Context, region, tier, division string) error {

@@ -1,9 +1,10 @@
 package services
 
 import (
-	"TFTAnalyticsServer/internal/leaderboard"
 	"context"
 	"fmt"
+
+	"github.com/owenplesko/TftAnalytics/internal/leaderboard"
 )
 
 func (service *Service) GetSummonerRank(ctx context.Context, region string, summonerId string) (leaderboard.Rank, error) {

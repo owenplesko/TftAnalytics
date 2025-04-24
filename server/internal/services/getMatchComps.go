@@ -1,9 +1,10 @@
 package services
 
 import (
-	"TFTAnalyticsServer/internal/db"
 	"context"
 	"fmt"
+
+	"github.com/owenplesko/TftAnalytics/internal/db"
 )
 
 func (service *Service) GetMatchComps(ctx context.Context, matchId string) ([]db.GetMatchCompsRow, error) {

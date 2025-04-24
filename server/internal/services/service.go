@@ -1,13 +1,13 @@
 package services
 
 import (
-	"TFTAnalyticsServer/internal/db"
-	"TFTAnalyticsServer/internal/leaderboard"
-	"TFTAnalyticsServer/internal/services/internal/dedupe"
-	"TFTAnalyticsServer/pkg/riot"
 	"time"
 
 	"github.com/jackc/pgx/v5/pgxpool"
+	"github.com/owenplesko/TftAnalytics/internal/db"
+	"github.com/owenplesko/TftAnalytics/internal/leaderboard"
+	"github.com/owenplesko/TftAnalytics/internal/services/internal/dedupe"
+	"github.com/owenplesko/TftAnalytics/pkg/riot"
 )
 
 type Service struct {

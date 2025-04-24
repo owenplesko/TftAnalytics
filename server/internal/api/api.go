@@ -1,11 +1,12 @@
 package api
 
 import (
-	"TFTAnalyticsServer/internal/db"
-	"TFTAnalyticsServer/internal/services"
 	"fmt"
 	"log"
 	"net/http"
+
+	"github.com/owenplesko/TftAnalytics/internal/db"
+	"github.com/owenplesko/TftAnalytics/internal/services"
 )
 
 type Api struct {

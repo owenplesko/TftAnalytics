@@ -1,8 +1,9 @@
 package api
 
 import (
-	"TFTAnalyticsServer/pkg/riot/scheduler"
 	"net/http"
+
+	"github.com/owenplesko/TftAnalytics/pkg/riot/scheduler"
 )
 
 // TODO: if admin priority = 2

@@ -1,11 +1,12 @@
 package services
 
 import (
-	"TFTAnalyticsServer/internal/db"
-	"TFTAnalyticsServer/pkg/riot"
 	"context"
 	"fmt"
 	"log"
+
+	"github.com/owenplesko/TftAnalytics/internal/db"
+	"github.com/owenplesko/TftAnalytics/pkg/riot"
 )
 
 func (service *Service) CollectSummonerByPuuid(ctx context.Context, region, puuid string) error {

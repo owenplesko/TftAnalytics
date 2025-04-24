@@ -1,12 +1,13 @@
 package services
 
 import (
-	"TFTAnalyticsServer/internal/db"
-	"TFTAnalyticsServer/pkg/riot"
 	"context"
 	"fmt"
 	"log"
 	"sync"
+
+	"github.com/owenplesko/TftAnalytics/internal/db"
+	"github.com/owenplesko/TftAnalytics/pkg/riot"
 )
 
 func (service *Service) CollectSummonerByNameTag(ctx context.Context, cluster, name, tag string) error {

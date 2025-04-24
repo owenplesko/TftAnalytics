@@ -1,28 +1,51 @@
 package services
 
 import (
-	"TFTAnalyticsServer/internal/db"
-	"TFTAnalyticsServer/pkg/riot"
 	"context"
 	"fmt"
-	"github.com/jackc/pgx/v5/pgtype"
 	"log"
 	"time"
+
+	"github.com/jackc/pgx/v5/pgtype"
+	"github.com/owenplesko/TftAnalytics/internal/db"
+	"github.com/owenplesko/TftAnalytics/pkg/riot"
 )
 
 func (service *Service) CollectMatchHistory(ctx context.Context, region, puuid string, matchesAfter time.Time) error {
+	return <-service.deduplicator.Do(matchHistoryTask{
+		service:      service,
+		ctx:          ctx,
+		region:       region,
+		puuid:        puuid,
+		matchesAfter: matchesAfter,
+	})
+}
+
+type matchHistoryTask struct {
+	service      *Service
+	ctx          context.Context
+	region       string
+	puuid        string
+	matchesAfter time.Time
+}
+
+func (task matchHistoryTask) ID() string {
+	return fmt.Sprintf("MATCH_HISTORY_%s_%s", task.region, task.puuid)
+}
+
+func (task matchHistoryTask) Do() error {
 	count := riot.MATCH_HISTORY_MAX_COUNT
 
 	matchesBefore := time.Now()
-	if matchesAfter.Before(service.matchesAfterCutoff) {
-		matchesAfter = service.matchesAfterCutoff
+	if task.matchesAfter.Before(task.service.matchesAfterCutoff) {
+		task.matchesAfter = task.service.matchesAfterCutoff
 	}
 
 	matchIds := make([]string, 0, count)
 
 	for {
 		startIndex := len(matchIds)
-		res, err := service.riot.GetMatchHistoryInTimeRange(ctx, riot.RegionToCluster[region], puuid, count, matchesAfter, matchesBefore, startIndex)
+		res, err := task.service.riot.GetMatchHistoryInTimeRange(task.ctx, riot.RegionToCluster[task.region], task.puuid, count, task.matchesAfter, matchesBefore, startIndex)
 		if err != nil {
 			return fmt.Errorf("Riot.GetMatchHistory failed with err: %w", err)
 		}
@@ -35,7 +58,7 @@ func (service *Service) CollectMatchHistory(ctx context.Context, region, puuid s
 	}
 
 	for _, matchId := range matchIds {
-		exists, err := service.queries.MatchExists(ctx, matchId)
+		exists, err := task.service.queries.MatchExists(task.ctx, matchId)
 		if err != nil {
 			log.Printf("error getting match exists: %v", err)
 		}
@@ -43,15 +66,15 @@ func (service *Service) CollectMatchHistory(ctx context.Context, region, puuid s
 			continue
 		}
 
-		err = service.CollectMatchDetails(ctx, region, matchId)
+		err = task.service.CollectMatchDetails(task.ctx, task.region, matchId)
 		if err != nil {
 			// TODO: explore returning CollectMatchDetails err
-			log.Printf("error in CollectMatchHistory collecting match %v for summoner with puuid %v: CollectMatchDetails failed with err: %v", matchId, puuid, err)
+			log.Printf("error in CollectMatchHistory collecting match %v for summoner with puuid %v: CollectMatchDetails failed with err: %v", matchId, task.puuid, err)
 		}
 	}
 
-	err := service.queries.SetMatchesBeforeTimestamp(ctx, db.SetMatchesBeforeTimestampParams{
-		Puuid: puuid,
+	err := task.service.queries.SetMatchesBeforeTimestamp(task.ctx, db.SetMatchesBeforeTimestampParams{
+		Puuid: task.puuid,
 		MatchesBeforeTimestamp: pgtype.Timestamp{
 			Time:  matchesBefore,
 			Valid: true,

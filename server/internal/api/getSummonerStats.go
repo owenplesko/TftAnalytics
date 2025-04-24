@@ -1,7 +1,6 @@
 package api
 
 import (
-	"TFTAnalyticsServer/internal/db"
 	"encoding/json"
 	"log"
 	"net/http"
@@ -9,6 +8,7 @@ import (
 
 	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgtype"
+	"github.com/owenplesko/TftAnalytics/internal/db"
 )
 
 func (controller Api) getSummonerStats(w http.ResponseWriter, r *http.Request) {

@@ -1,10 +1,11 @@
 package riot
 
 import (
-	"TFTAnalyticsServer/pkg/riot/scheduler"
 	"context"
 	"fmt"
 	"time"
+
+	"github.com/owenplesko/TftAnalytics/pkg/riot/scheduler"
 )
 
 type RateLimiter map[string]*scheduler.Scheduler

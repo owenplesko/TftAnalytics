@@ -1,23 +1,24 @@
 package main
 
 import (
-	"TFTAnalyticsServer/internal/api"
-	"TFTAnalyticsServer/internal/db"
-	"TFTAnalyticsServer/internal/leaderboard"
-	"TFTAnalyticsServer/internal/services"
-	"TFTAnalyticsServer/pkg/riot"
 	"strconv"
 	"time"
 
 	"context"
 	"embed"
+	"log"
+	"os"
+
 	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/jackc/pgx/v5/stdlib"
 	"github.com/joho/godotenv"
+	"github.com/owenplesko/TftAnalytics/internal/api"
+	"github.com/owenplesko/TftAnalytics/internal/db"
+	"github.com/owenplesko/TftAnalytics/internal/leaderboard"
+	"github.com/owenplesko/TftAnalytics/internal/services"
+	"github.com/owenplesko/TftAnalytics/pkg/riot"
 	"github.com/pressly/goose/v3"
 	"github.com/redis/go-redis/v9"
-	"log"
-	"os"
 )
 
 //go:embed sql/migrations/*.sql

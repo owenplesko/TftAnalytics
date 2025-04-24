@@ -1,9 +1,10 @@
 package scheduler
 
 import (
-	"TFTAnalyticsServer/pkg/collections"
 	"context"
 	"time"
+
+	"github.com/owenplesko/TftAnalytics/pkg/collections"
 )
 
 type Scheduler struct {
