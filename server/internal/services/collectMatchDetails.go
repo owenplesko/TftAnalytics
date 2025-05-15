@@ -7,18 +7,19 @@ import (
 	"time"
 
 	"github.com/owenplesko/TftAnalytics/internal/db"
+	"github.com/owenplesko/TftAnalytics/pkg/dedupe"
 	"github.com/owenplesko/TftAnalytics/pkg/riot"
 
 	"github.com/jackc/pgx/v5/pgtype"
 )
 
 func (service *Service) CollectMatchDetails(ctx context.Context, region, matchId string) error {
-	return <-service.deduplicator.Do(MatchDetailsTask{
+	return dedupe.Run(service.deduplicator, MatchDetailsTask{
 		service: service,
 		ctx:     ctx,
 		region:  region,
 		matchId: matchId,
-	})
+	}).Await()
 }
 
 type MatchDetailsTask struct {
@@ -32,7 +33,7 @@ func (task MatchDetailsTask) ID() string {
 	return fmt.Sprintf("MATCH_DETAILS_%s_%s", task.region, task.matchId)
 }
 
-func (task MatchDetailsTask) Do() error {
+func (task MatchDetailsTask) Run() error {
 	match, err := task.service.riot.GetMatchDetails(task.ctx, riot.RegionToCluster[task.region], task.matchId)
 	if err != nil {
 		return fmt.Errorf("Riot.GetMatchDetails failed with err: %w", err)

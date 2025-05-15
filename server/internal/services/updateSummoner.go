@@ -5,16 +5,17 @@ import (
 	"errors"
 	"fmt"
 
+	"github.com/owenplesko/TftAnalytics/pkg/dedupe"
 	"github.com/owenplesko/TftAnalytics/pkg/riot"
 )
 
 // TODO revamp this to have states and better error handling and stuff
 func (service *Service) UpdateSummoner(ctx context.Context, puuid string) error {
-	return <-service.deduplicator.Do(updateSummonerTask{
+	return dedupe.Run(service.deduplicator, updateSummonerTask{
 		service: service,
 		ctx:     ctx,
 		puuid:   puuid,
-	})
+	}).Await()
 }
 
 type updateSummonerTask struct {
@@ -27,7 +28,7 @@ func (task updateSummonerTask) ID() string {
 	return fmt.Sprintf("UPDATE_SUMMONER_%s", task.puuid)
 }
 
-func (task updateSummonerTask) Do() error {
+func (task updateSummonerTask) Run() error {
 	summoner, err := task.service.GetSummonerByPuuid(task.ctx, task.puuid)
 	if err != nil {
 		return fmt.Errorf("GetSummonerByPuuid failed with err: %w", err)

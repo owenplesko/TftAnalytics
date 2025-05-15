@@ -8,17 +8,18 @@ import (
 
 	"github.com/jackc/pgx/v5/pgtype"
 	"github.com/owenplesko/TftAnalytics/internal/db"
+	"github.com/owenplesko/TftAnalytics/pkg/dedupe"
 	"github.com/owenplesko/TftAnalytics/pkg/riot"
 )
 
 func (service *Service) CollectMatchHistory(ctx context.Context, region, puuid string, matchesAfter time.Time) error {
-	return <-service.deduplicator.Do(matchHistoryTask{
+	return dedupe.Run(service.deduplicator, matchHistoryTask{
 		service:      service,
 		ctx:          ctx,
 		region:       region,
 		puuid:        puuid,
 		matchesAfter: matchesAfter,
-	})
+	}).Await()
 }
 
 type matchHistoryTask struct {
@@ -33,7 +34,7 @@ func (task matchHistoryTask) ID() string {
 	return fmt.Sprintf("MATCH_HISTORY_%s_%s", task.region, task.puuid)
 }
 
-func (task matchHistoryTask) Do() error {
+func (task matchHistoryTask) Run() error {
 	count := riot.MATCH_HISTORY_MAX_COUNT
 
 	matchesBefore := time.Now()
