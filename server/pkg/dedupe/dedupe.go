@@ -16,6 +16,31 @@ func New() *Deduplicator {
 }
 
 func Run[T any](dedupe *Deduplicator, task Task[T]) awaitResult[T] {
+	res := getOrInitResult[T](dedupe, task)
+
+	go func() {
+		val := task.Run()
+		dedupe.remove(task)
+		res.Announce(val)
+	}()
+
+	return res
+}
+
+func RunDelayedCompletion[T any](dedupe *Deduplicator, task DelayedCompletionTask[T]) awaitResult[T] {
+	res := getOrInitResult[T](dedupe, task)
+
+	go func() {
+		complete := func() { dedupe.remove(task) }
+		val := task.Run(complete)
+		res.Announce(val)
+	}()
+
+	return res
+
+}
+
+func getOrInitResult[T any](dedupe *Deduplicator, task identifyable) *result[T] {
 	dedupe.mu.Lock()
 	defer dedupe.mu.Unlock()
 
@@ -29,15 +54,12 @@ func Run[T any](dedupe *Deduplicator, task Task[T]) awaitResult[T] {
 	res := newResult[T]()
 	dedupe.results[id] = res
 
-	go func() {
-		val := task.Run()
-
-		dedupe.mu.Lock()
-		defer dedupe.mu.Unlock()
-
-		res.Announce(val)
-		delete(dedupe.results, id)
-	}()
-
 	return res
+}
+
+func (dedupe *Deduplicator) remove(task identifyable) {
+	dedupe.mu.Lock()
+	defer dedupe.mu.Unlock()
+
+	delete(dedupe.results, task.ID())
 }
