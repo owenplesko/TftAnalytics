@@ -6,10 +6,31 @@ import (
 	"log"
 
 	"github.com/owenplesko/TftAnalytics/internal/leaderboard"
+	"github.com/owenplesko/TftAnalytics/pkg/dedupe"
 )
 
 func (service *Service) CollectApexRankEntries(ctx context.Context, region, tier string) error {
-	rankPage, err := service.riot.GetApexRankPage(ctx, region, tier)
+	return dedupe.Run(service.deduplicator, ApexRankEntriesTask{
+		service: service,
+		ctx:     ctx,
+		region:  region,
+		tier:    tier,
+	}).Await()
+}
+
+type ApexRankEntriesTask struct {
+	service *Service
+	ctx     context.Context
+	region  string
+	tier    string
+}
+
+func (task ApexRankEntriesTask) ID() string {
+	return fmt.Sprintf("APEX_RANK_ENTRIES_%s_%s", task.region, task.tier)
+}
+
+func (task ApexRankEntriesTask) Run() error {
+	rankPage, err := task.service.riot.GetApexRankPage(task.ctx, task.region, task.tier)
 	if err != nil {
 		log.Println(err.Error())
 		return err
@@ -20,19 +41,19 @@ func (service *Service) CollectApexRankEntries(ctx context.Context, region, tier
 		setRankParams[i] = leaderboard.SetRankParams{
 			SummonerId: rankEntry.SummonerId,
 			RankData: leaderboard.RankData{
-				Tier:         tier,
+				Tier:         task.tier,
 				Rank:         rankEntry.Rank,
 				LeaguePoints: int(rankEntry.LeaguePoints),
 			},
 		}
 	}
 
-	err = service.leaderboard.SetRank(ctx, region, setRankParams...)
+	err = task.service.leaderboard.SetRank(task.ctx, task.region, setRankParams...)
 	if err != nil {
 		return fmt.Errorf("Leaderboard.SetRank failed with err: %w", err)
 	}
 
-	log.Printf("collected rank %v entries on region %v\n", tier, region)
+	log.Printf("collected rank %v entries on region %v\n", task.tier, task.region)
 
 	return nil
 }

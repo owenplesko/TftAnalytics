@@ -7,21 +7,45 @@ import (
 	"sync"
 
 	"github.com/owenplesko/TftAnalytics/internal/db"
+	"github.com/owenplesko/TftAnalytics/pkg/dedupe"
 	"github.com/owenplesko/TftAnalytics/pkg/riot"
 )
 
 func (service *Service) CollectSummonerByNameTag(ctx context.Context, cluster, name, tag string) error {
-	account, err := service.riot.GetAccountByName(ctx, cluster, name, tag)
+	return dedupe.Run(service.deduplicator, SummonerByNameTagTask{
+		service: service,
+		ctx:     ctx,
+		cluster: cluster,
+		name:    name,
+		tag:     tag,
+	}).Await()
+}
+
+type SummonerByNameTagTask struct {
+	service *Service
+	ctx     context.Context
+	cluster string
+	name    string
+	tag     string
+}
+
+func (task SummonerByNameTagTask) ID() string {
+	// cluster is not a part of id
+	return fmt.Sprintf("SUMMONER_BY_NAME_TAG_%s_%s", task.name, task.tag)
+}
+
+func (task SummonerByNameTagTask) Run() error {
+	account, err := task.service.riot.GetAccountByName(task.ctx, task.cluster, task.name, task.tag)
 	if err != nil {
 		return fmt.Errorf("Riot.GetAccountByName failed with err: %w", err)
 	}
 
-	summoner, region, err := service.findSummonerAndRegion(ctx, account.Puuid)
+	summoner, region, err := task.service.findSummonerAndRegion(task.ctx, account.Puuid)
 	if err != nil {
 		return fmt.Errorf("findSummonerRegion failed err: %w", err)
 	}
 
-	err = service.queries.UpsertSummoner(ctx, db.UpsertSummonerParams{
+	err = task.service.queries.UpsertSummoner(task.ctx, db.UpsertSummonerParams{
 		Puuid:         account.Puuid,
 		Region:        region,
 		Name:          account.Name,
@@ -37,6 +61,7 @@ func (service *Service) CollectSummonerByNameTag(ctx context.Context, cluster, n
 	log.Printf("collected summoner %v#%v on region %v\n", account.Name, account.Tag, region)
 
 	return nil
+
 }
 
 type regionSuccessRes struct {
@@ -44,6 +69,7 @@ type regionSuccessRes struct {
 	region   string
 }
 
+// TODO: maybe make this an actual service?
 // TODO: explore passing riot errors on no region found
 // should implement request retrying for riot requests first tho..
 func (service *Service) findSummonerAndRegion(ctx context.Context, puuid string) (*riot.RiotSummonerRes, string, error) {
