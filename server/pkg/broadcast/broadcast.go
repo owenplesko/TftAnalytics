@@ -1,4 +1,4 @@
-package sync
+package broadcast
 
 import "sync"
 
@@ -8,7 +8,7 @@ type Broadcast[T any] struct {
 	closed bool
 }
 
-func New[T any](in chan T) *Broadcast[T] {
+func New[T any]() *Broadcast[T] {
 	return &Broadcast[T]{}
 }
 
