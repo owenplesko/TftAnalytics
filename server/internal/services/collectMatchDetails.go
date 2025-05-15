@@ -14,7 +14,7 @@ import (
 )
 
 func (service *Service) CollectMatchDetails(ctx context.Context, region, matchId string) error {
-	return dedupe.Run(service.deduplicator, MatchDetailsTask{
+	return dedupe.Run(service.deduplicator, matchDetailsTask{
 		service: service,
 		ctx:     ctx,
 		region:  region,
@@ -22,18 +22,18 @@ func (service *Service) CollectMatchDetails(ctx context.Context, region, matchId
 	}).Await()
 }
 
-type MatchDetailsTask struct {
+type matchDetailsTask struct {
 	service *Service
 	ctx     context.Context
 	region  string
 	matchId string
 }
 
-func (task MatchDetailsTask) ID() string {
+func (task matchDetailsTask) ID() string {
 	return fmt.Sprintf("MATCH_DETAILS_%s_%s", task.region, task.matchId)
 }
 
-func (task MatchDetailsTask) Run() error {
+func (task matchDetailsTask) Run() error {
 	match, err := task.service.riot.GetMatchDetails(task.ctx, riot.RegionToCluster[task.region], task.matchId)
 	if err != nil {
 		return fmt.Errorf("Riot.GetMatchDetails failed with err: %w", err)

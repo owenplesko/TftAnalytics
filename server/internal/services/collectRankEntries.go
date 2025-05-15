@@ -10,7 +10,7 @@ import (
 )
 
 func (service *Service) CollectRankEntries(ctx context.Context, region, tier, division string) error {
-	return dedupe.Run(service.deduplicator, RankEntriesTask{
+	return dedupe.Run(service.deduplicator, rankEntriesTask{
 		service:  service,
 		ctx:      ctx,
 		region:   region,
@@ -19,7 +19,7 @@ func (service *Service) CollectRankEntries(ctx context.Context, region, tier, di
 	}).Await()
 }
 
-type RankEntriesTask struct {
+type rankEntriesTask struct {
 	service  *Service
 	ctx      context.Context
 	region   string
@@ -27,11 +27,11 @@ type RankEntriesTask struct {
 	division string
 }
 
-func (task RankEntriesTask) ID() string {
+func (task rankEntriesTask) ID() string {
 	return fmt.Sprintf("RANK_ENTRIES_%s_%s_%s", task.region, task.tier, task.division)
 }
 
-func (task RankEntriesTask) Run() error {
+func (task rankEntriesTask) Run() error {
 	page := 0
 	for {
 		page++

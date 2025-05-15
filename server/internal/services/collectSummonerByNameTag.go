@@ -12,7 +12,7 @@ import (
 )
 
 func (service *Service) CollectSummonerByNameTag(ctx context.Context, cluster, name, tag string) error {
-	return dedupe.Run(service.deduplicator, SummonerByNameTagTask{
+	return dedupe.Run(service.deduplicator, summonerByNameTagTask{
 		service: service,
 		ctx:     ctx,
 		cluster: cluster,
@@ -21,7 +21,7 @@ func (service *Service) CollectSummonerByNameTag(ctx context.Context, cluster, n
 	}).Await()
 }
 
-type SummonerByNameTagTask struct {
+type summonerByNameTagTask struct {
 	service *Service
 	ctx     context.Context
 	cluster string
@@ -29,12 +29,12 @@ type SummonerByNameTagTask struct {
 	tag     string
 }
 
-func (task SummonerByNameTagTask) ID() string {
+func (task summonerByNameTagTask) ID() string {
 	// cluster is not a part of id
 	return fmt.Sprintf("SUMMONER_BY_NAME_TAG_%s_%s", task.name, task.tag)
 }
 
-func (task SummonerByNameTagTask) Run() error {
+func (task summonerByNameTagTask) Run() error {
 	account, err := task.service.riot.GetAccountByName(task.ctx, task.cluster, task.name, task.tag)
 	if err != nil {
 		return fmt.Errorf("Riot.GetAccountByName failed with err: %w", err)

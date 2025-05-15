@@ -11,7 +11,7 @@ import (
 )
 
 func (service *Service) CollectSummonerByPuuid(ctx context.Context, region, puuid string) error {
-	return dedupe.Run(service.deduplicator, SummonerByPuuidTask{
+	return dedupe.Run(service.deduplicator, summonerByPuuidTask{
 		service: service,
 		ctx:     ctx,
 		region:  region,
@@ -19,18 +19,18 @@ func (service *Service) CollectSummonerByPuuid(ctx context.Context, region, puui
 	}).Await()
 }
 
-type SummonerByPuuidTask struct {
+type summonerByPuuidTask struct {
 	service *Service
 	ctx     context.Context
 	region  string
 	puuid   string
 }
 
-func (task SummonerByPuuidTask) ID() string {
+func (task summonerByPuuidTask) ID() string {
 	return fmt.Sprintf("SUMMONER_BY_PUUID_%s_%s", task.region, task.puuid)
 }
 
-func (task SummonerByPuuidTask) Run() error {
+func (task summonerByPuuidTask) Run() error {
 	account, err := task.service.riot.GetAccountByPuuid(task.ctx, riot.RegionToCluster[task.region], task.puuid)
 	if err != nil {
 		return fmt.Errorf("Riot.GetAccountByPuuid failed with err: %w", err)

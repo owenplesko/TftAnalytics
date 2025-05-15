@@ -10,7 +10,7 @@ import (
 )
 
 func (service *Service) CollectSummonerRank(ctx context.Context, region, summonerId string) error {
-	return dedupe.Run(service.deduplicator, SummonerRankTask{
+	return dedupe.Run(service.deduplicator, summonerRankTask{
 		service:    service,
 		ctx:        ctx,
 		region:     region,
@@ -18,18 +18,18 @@ func (service *Service) CollectSummonerRank(ctx context.Context, region, summone
 	}).Await()
 }
 
-type SummonerRankTask struct {
+type summonerRankTask struct {
 	service    *Service
 	ctx        context.Context
 	region     string
 	summonerId string
 }
 
-func (task SummonerRankTask) ID() string {
+func (task summonerRankTask) ID() string {
 	return fmt.Sprintf("SUMMONER_RANK_%s_%s", task.region, task.summonerId)
 }
 
-func (task SummonerRankTask) Run() error {
+func (task summonerRankTask) Run() error {
 	rankEntry, err := task.service.riot.GetRank(task.ctx, task.region, task.summonerId)
 	if err != nil {
 		return fmt.Errorf("Riot.GetRank failed with err: %w", err)

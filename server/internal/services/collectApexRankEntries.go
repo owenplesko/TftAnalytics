@@ -10,7 +10,7 @@ import (
 )
 
 func (service *Service) CollectApexRankEntries(ctx context.Context, region, tier string) error {
-	return dedupe.Run(service.deduplicator, ApexRankEntriesTask{
+	return dedupe.Run(service.deduplicator, apexRankEntriesTask{
 		service: service,
 		ctx:     ctx,
 		region:  region,
@@ -18,18 +18,18 @@ func (service *Service) CollectApexRankEntries(ctx context.Context, region, tier
 	}).Await()
 }
 
-type ApexRankEntriesTask struct {
+type apexRankEntriesTask struct {
 	service *Service
 	ctx     context.Context
 	region  string
 	tier    string
 }
 
-func (task ApexRankEntriesTask) ID() string {
+func (task apexRankEntriesTask) ID() string {
 	return fmt.Sprintf("APEX_RANK_ENTRIES_%s_%s", task.region, task.tier)
 }
 
-func (task ApexRankEntriesTask) Run() error {
+func (task apexRankEntriesTask) Run() error {
 	rankPage, err := task.service.riot.GetApexRankPage(task.ctx, task.region, task.tier)
 	if err != nil {
 		log.Println(err.Error())
