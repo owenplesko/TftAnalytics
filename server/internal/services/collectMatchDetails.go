@@ -34,6 +34,11 @@ func (task matchDetailsTask) ID() string {
 }
 
 func (task matchDetailsTask) Run() error {
+	exists, _ := task.service.queries.MatchExists(task.ctx, task.matchId)
+	if !exists {
+		return nil
+	}
+
 	match, err := task.service.riot.GetMatchDetails(task.ctx, riot.RegionToCluster[task.region], task.matchId)
 	if err != nil {
 		return fmt.Errorf("Riot.GetMatchDetails failed with err: %w", err)

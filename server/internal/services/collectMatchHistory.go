@@ -59,15 +59,7 @@ func (task matchHistoryTask) Run() error {
 	}
 
 	for _, matchId := range matchIds {
-		exists, err := task.service.queries.MatchExists(task.ctx, matchId)
-		if err != nil {
-			log.Printf("error getting match exists: %v", err)
-		}
-		if exists {
-			continue
-		}
-
-		err = task.service.CollectMatchDetails(task.ctx, task.region, matchId)
+		err := task.service.CollectMatchDetails(task.ctx, task.region, matchId)
 		if err != nil {
 			// TODO: explore returning CollectMatchDetails err
 			log.Printf("error in CollectMatchHistory collecting match %v for summoner with puuid %v: CollectMatchDetails failed with err: %v", matchId, task.puuid, err)
