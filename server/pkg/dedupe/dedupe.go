@@ -20,7 +20,7 @@ func Run[T any](dedupe *Deduplicator, task Task[T]) awaitResult[T] {
 
 	go func() {
 		val := task.Run()
-		dedupe.remove(task)
+		removeResult(dedupe, task)
 		res.Announce(val)
 	}()
 
@@ -31,7 +31,7 @@ func RunDelayedCompletion[T any](dedupe *Deduplicator, task DelayedCompletionTas
 	res := getOrInitResult[T](dedupe, task)
 
 	go func() {
-		complete := func() { dedupe.remove(task) }
+		complete := func() { removeResult(dedupe, task) }
 		val := task.Run(complete)
 		res.Announce(val)
 	}()
@@ -57,7 +57,7 @@ func getOrInitResult[T any](dedupe *Deduplicator, task identifyable) *result[T] 
 	return res
 }
 
-func (dedupe *Deduplicator) remove(task identifyable) {
+func removeResult(dedupe *Deduplicator, task identifyable) {
 	dedupe.mu.Lock()
 	defer dedupe.mu.Unlock()
 

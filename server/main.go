@@ -19,6 +19,7 @@ import (
 	"github.com/owenplesko/TftAnalytics/pkg/riot"
 	"github.com/pressly/goose/v3"
 	"github.com/redis/go-redis/v9"
+	"golang.org/x/time/rate"
 )
 
 //go:embed sql/migrations/*.sql
@@ -70,12 +71,12 @@ func main() {
 	log.Println("Leaderboard connection successful")
 
 	// create riot client
-	rate, err := strconv.ParseFloat(os.Getenv("RIOT_RATE"), 32)
+	riotRate, err := strconv.ParseFloat(os.Getenv("RIOT_RATE"), 32)
 	if err != nil {
 		panic("RIOT_RATE not set properly")
 	}
-	rateDuration := time.Duration(rate) * time.Millisecond
-	riotClient := riot.New(os.Getenv("RIOT_KEY"), rateDuration)
+	limit := rate.Every(time.Duration(riotRate) * time.Millisecond)
+	riotClient := riot.New(os.Getenv("RIOT_KEY"), limit)
 
 	// create service
 	service := services.New(pool, leaderboard, riotClient)

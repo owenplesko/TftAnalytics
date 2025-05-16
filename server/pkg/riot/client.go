@@ -7,18 +7,28 @@ import (
 	"log"
 	"net/http"
 	"strings"
-	"time"
+
+	"golang.org/x/time/rate"
 )
 
 type Riot struct {
-	apiKey      string
-	rateLimiter RateLimiter
+	apiKey   string
+	limiters map[string]*rate.Limiter
 }
 
-func New(apiKey string, rateDuration time.Duration) *Riot {
+func New(apiKey string, limit rate.Limit) *Riot {
+	limiters := make(map[string]*rate.Limiter)
+
+	for cluster := range ClusterToRegions {
+		limiters[cluster] = rate.NewLimiter(limit, 1)
+	}
+	for region := range RegionToCluster {
+		limiters[region] = rate.NewLimiter(limit, 1)
+	}
+
 	return &Riot{
-		apiKey:      apiKey,
-		rateLimiter: newRateLimiter(rateDuration),
+		apiKey:   apiKey,
+		limiters: limiters,
 	}
 }
 
@@ -29,7 +39,12 @@ func (riot *Riot) request(ctx context.Context, server string, route string, targ
 	req, _ := http.NewRequest("GET", url, nil)
 	req.Header.Set("X-Riot-Token", riot.apiKey)
 
-	err := riot.rateLimiter.Wait(ctx, server)
+	limiter, ok := riot.limiters[server]
+	if !ok {
+		return fmt.Errorf("no limiter found for server %s", server)
+	}
+
+	err := limiter.Wait(ctx)
 	if err != nil {
 		return err
 	}

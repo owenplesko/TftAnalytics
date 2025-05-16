@@ -6,7 +6,7 @@ import (
 	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/owenplesko/TftAnalytics/internal/db"
 	"github.com/owenplesko/TftAnalytics/internal/leaderboard"
-	"github.com/owenplesko/TftAnalytics/internal/services/internal/dedupe"
+	"github.com/owenplesko/TftAnalytics/pkg/dedupe"
 	"github.com/owenplesko/TftAnalytics/pkg/riot"
 )
 
