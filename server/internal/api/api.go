@@ -25,7 +25,6 @@ func (controller Api) ListenAndServe(port int) {
 	router.HandleFunc("/v1/match/{matchid}/comps", controller.getMatchComps)
 
 	root := http.NewServeMux()
-	root.Handle("/", setCors(setSchedulerPriority(router)))
 
 	log.Printf("api listening on port: %d\n", port)
 	err := http.ListenAndServe(fmt.Sprintf(":%d", port), root)

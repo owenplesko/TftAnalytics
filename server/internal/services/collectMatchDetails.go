@@ -35,7 +35,7 @@ func (task matchDetailsTask) ID() string {
 
 func (task matchDetailsTask) Run() error {
 	exists, _ := task.service.queries.MatchExists(task.ctx, task.matchId)
-	if !exists {
+	if exists {
 		return nil
 	}
 
