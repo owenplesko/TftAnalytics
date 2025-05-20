@@ -12,36 +12,66 @@ import (
 )
 
 const getSummonerStats = `-- name: GetSummonerStats :one
+WITH
+	selected_data AS (
+		SELECT
+			(comp_data ->> 'placement')::INT AS placement,
+			(comp_data ->> 'timeEliminated')::FLOAT AS seconds_ingame
+		FROM
+			tft_comp
+			JOIN tft_match ON tft_comp.match_id = tft_match.id
+		WHERE
+			summoner_puuid = $1
+			AND set_number = $2
+			AND (
+				$3::INT IS NULL OR
+				$3::INT = queue_id
+			)
+	),
+	aggregate_stats AS (
+		SELECT
+			COUNT(*) AS comp_count,
+			COUNT(*) FILTER (
+				WHERE
+					placement <= 4
+			) AS top_4_count,
+			COUNT(*) FILTER (
+				WHERE
+					placement = 1
+			) AS top_1_count,
+			AVG(placement) AS avg_placement,
+			SUM(seconds_ingame) AS total_seconds_ingame
+		FROM
+			selected_data
+	),
+	derived_stats AS (
+		SELECT
+			top_1_count::float / comp_count AS top_1_rate,
+			top_4_count::float / comp_count AS top_4_rate
+		FROM
+			aggregate_stats
+	)
 SELECT
-    comp_count,
-    avg_placement,
-    top_4_count,
-    top_4_rate,
-    top_1_count,
-    top_1_rate,
-	total_seconds_ingame
+	comp_count, top_4_count, top_1_count, avg_placement, total_seconds_ingame, top_1_rate, top_4_rate
 FROM
-    tft_summoner_stats
-WHERE
-    summoner_puuid = $1 
-    AND set_number = $2
-    AND (queue_id = $3 OR ($3 IS NULL AND queue_id IS NULL))
+	aggregate_stats
+	CROSS JOIN derived_stats
 `
 
 type GetSummonerStatsParams struct {
 	SummonerPuuid string      `json:"summonerPuuid"`
 	SetNumber     int32       `json:"setNumber"`
-	QueueID       pgtype.Int4 `json:"queueId"`
+	QueueID       pgtype.Int4 `json:"QueueID"`
 }
 
 type GetSummonerStatsRow struct {
-	CompCount          int32   `json:"compCount"`
+	CompCount          int64   `json:"compCount"`
+	Top4Count          int64   `json:"top4Count"`
+	Top1Count          int64   `json:"top1Count"`
 	AvgPlacement       float64 `json:"avgPlacement"`
-	Top4Count          int32   `json:"top4Count"`
-	Top4Rate           float64 `json:"top4Rate"`
-	Top1Count          int32   `json:"top1Count"`
-	Top1Rate           float64 `json:"top1Rate"`
-	TotalSecondsIngame float64 `json:"totalSecondsIngame"`
+	TotalSecondsIngame int64   `json:"totalSecondsIngame"`
+	Top1Rate           int32   `json:"top1Rate"`
+	Top4Rate           int32   `json:"top4Rate"`
 }
 
 func (q *Queries) GetSummonerStats(ctx context.Context, arg GetSummonerStatsParams) (GetSummonerStatsRow, error) {
@@ -49,21 +79,12 @@ func (q *Queries) GetSummonerStats(ctx context.Context, arg GetSummonerStatsPara
 	var i GetSummonerStatsRow
 	err := row.Scan(
 		&i.CompCount,
-		&i.AvgPlacement,
 		&i.Top4Count,
-		&i.Top4Rate,
 		&i.Top1Count,
-		&i.Top1Rate,
+		&i.AvgPlacement,
 		&i.TotalSecondsIngame,
+		&i.Top1Rate,
+		&i.Top4Rate,
 	)
 	return i, err
-}
-
-const updateSummonerStats = `-- name: UpdateSummonerStats :exec
-CALL update_tft_summoner_stats($1)
-`
-
-func (q *Queries) UpdateSummonerStats(ctx context.Context, inSummonerPuuid string) error {
-	_, err := q.db.Exec(ctx, updateSummonerStats, inSummonerPuuid)
-	return err
 }

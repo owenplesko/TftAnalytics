@@ -48,11 +48,5 @@ func (task updateSummonerTask) Run() error {
 		return fmt.Errorf("CollectMatchHistory failed with err: %w", err)
 	}
 
-	err = task.service.queries.UpdateSummonerStats(task.ctx, task.puuid)
-	if err != nil {
-		return fmt.Errorf("Queries.UpdateSummonerStats failed with err: %w", err)
-	}
-
 	return nil
-
 }
