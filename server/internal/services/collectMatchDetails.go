@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"log"
+	"regexp"
 	"time"
 
 	"github.com/owenplesko/TftAnalytics/internal/db"
@@ -63,6 +64,17 @@ func (task matchDetailsTask) Run() error {
 	return nil
 }
 
+func extractPatchNumber(input string) (string, error) {
+	re := regexp.MustCompile(`<Releases/(\d+\.\d+)>`)
+	matches := re.FindStringSubmatch(input)
+
+	if len(matches) < 2 {
+		return "", fmt.Errorf("patch number not found")
+	}
+
+	return matches[1], nil
+}
+
 func (service *Service) storeMatchDetails(ctx context.Context, matchDetails *riot.Match) error {
 	var err error
 
@@ -73,18 +85,23 @@ func (service *Service) storeMatchDetails(ctx context.Context, matchDetails *rio
 	}
 	defer tx.Rollback(ctx)
 
-	qtx := service.queries.WithTx(tx)
-
 	// insert match
+	patchNumber, err := extractPatchNumber(matchDetails.Info.GameVersion)
+	if err != nil {
+		return err
+	}
+
 	matchDate := pgtype.Timestamp{
 		Time:  time.UnixMilli(matchDetails.Info.Date),
 		Valid: true,
 	}
 
+	qtx := service.queries.WithTx(tx)
+
 	err = qtx.CreateMatch(ctx, db.CreateMatchParams{
 		ID:          matchDetails.MetaData.MatchId,
 		DataVersion: matchDetails.MetaData.DataVersion,
-		GameVersion: matchDetails.Info.GameVersion,
+		GameVersion: patchNumber,
 		QueueID:     matchDetails.Info.QueueId,
 		GameType:    matchDetails.Info.GameType,
 		SetName:     matchDetails.Info.SetName,
