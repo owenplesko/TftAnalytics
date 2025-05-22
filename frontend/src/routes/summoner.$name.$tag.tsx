@@ -49,7 +49,6 @@ function Player() {
       <QueueSelector setQueueId={setQueueId} />
       <QueueSummary
         region={loader.region}
-        summonerId={loader.summonerId}
         puuid={loader.puuid}
         setNumber={loader.setNumber}
         queueId={queueId}

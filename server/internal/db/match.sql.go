@@ -24,11 +24,11 @@ INSERT INTO tft_comp (
 `
 
 type CreateCompParams struct {
-	MatchID       string           `json:"matchId"`
-	SummonerPuuid string           `json:"summonerPuuid"`
-	CompData      CompData         `json:"compData"`
-	MatchDate     pgtype.Timestamp `json:"matchDate"`
-	Rank          string           `json:"rank"`
+	MatchID       string             `json:"matchId"`
+	SummonerPuuid string             `json:"summonerPuuid"`
+	CompData      CompData           `json:"compData"`
+	MatchDate     pgtype.Timestamptz `json:"matchDate"`
+	Rank          string             `json:"rank"`
 }
 
 func (q *Queries) CreateComp(ctx context.Context, arg CreateCompParams) error {
@@ -58,14 +58,14 @@ INSERT INTO tft_match (
 `
 
 type CreateMatchParams struct {
-	ID          string           `json:"id"`
-	DataVersion string           `json:"dataVersion"`
-	GameVersion string           `json:"gameVersion"`
-	QueueID     int32            `json:"queueId"`
-	GameType    string           `json:"gameType"`
-	SetName     string           `json:"setName"`
-	SetNumber   int32            `json:"setNumber"`
-	MatchDate   pgtype.Timestamp `json:"matchDate"`
+	ID          string             `json:"id"`
+	DataVersion string             `json:"dataVersion"`
+	GameVersion string             `json:"gameVersion"`
+	QueueID     int32              `json:"queueId"`
+	GameType    string             `json:"gameType"`
+	SetName     string             `json:"setName"`
+	SetNumber   int32              `json:"setNumber"`
+	MatchDate   pgtype.Timestamptz `json:"matchDate"`
 }
 
 func (q *Queries) CreateMatch(ctx context.Context, arg CreateMatchParams) error {

@@ -13,9 +13,9 @@ func (controller Api) getSummonerRank(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 
 	region := r.PathValue("region")
-	summonerId := r.PathValue("summonerId")
+	puuid := r.PathValue("puuid")
 
-	rankEntry, err := controller.Service.GetSummonerRank(ctx, region, summonerId)
+	rankEntry, err := controller.Service.GetSummonerRank(ctx, region, puuid)
 	if errors.Is(err, redis.Nil) {
 		http.Error(w, "rank not found", http.StatusNotFound)
 		return

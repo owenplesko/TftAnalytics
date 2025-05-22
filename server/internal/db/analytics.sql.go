@@ -16,7 +16,7 @@ WITH
 	selected_data AS (
 		SELECT
 			(comp_data ->> 'placement')::INT AS placement,
-			(comp_data ->> 'timeEliminated')::FLOAT AS seconds_ingame
+			(comp_data -> 'timeEliminated')::FLOAT AS seconds_ingame
 		FROM
 			tft_comp
 			JOIN tft_match ON tft_comp.match_id = tft_match.id
@@ -46,16 +46,16 @@ WITH
 	),
 	derived_stats AS (
 		SELECT
-			top_1_count::float / comp_count AS top_1_rate,
-			top_4_count::float / comp_count AS top_4_rate
+			top_1_count::FLOAT / comp_count AS top_1_rate,
+			top_4_count::FLOAT / comp_count AS top_4_rate
 		FROM
 			aggregate_stats
 	)
 SELECT
-	comp_count, top_4_count, top_1_count, avg_placement, total_seconds_ingame, top_1_rate, top_4_rate
+	/* sqlc infering some float values as ints, so manually cast types here */
+	comp_count, top_4_count, top_1_count, avg_placement::FLOAT, total_seconds_ingame::FLOAT, top_1_rate::FLOAT, top_4_rate::FLOAT
 FROM
-	aggregate_stats
-	CROSS JOIN derived_stats
+	aggregate_stats CROSS JOIN derived_stats
 `
 
 type GetSummonerStatsParams struct {
@@ -69,9 +69,9 @@ type GetSummonerStatsRow struct {
 	Top4Count          int64   `json:"top4Count"`
 	Top1Count          int64   `json:"top1Count"`
 	AvgPlacement       float64 `json:"avgPlacement"`
-	TotalSecondsIngame int64   `json:"totalSecondsIngame"`
-	Top1Rate           int32   `json:"top1Rate"`
-	Top4Rate           int32   `json:"top4Rate"`
+	TotalSecondsIngame float64 `json:"totalSecondsIngame"`
+	Top1Rate           float64 `json:"top1Rate"`
+	Top4Rate           float64 `json:"top4Rate"`
 }
 
 func (q *Queries) GetSummonerStats(ctx context.Context, arg GetSummonerStatsParams) (GetSummonerStatsRow, error) {

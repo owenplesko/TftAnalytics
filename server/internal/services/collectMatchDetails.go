@@ -98,7 +98,7 @@ func (service *Service) storeMatchDetails(ctx context.Context, matchDetails *rio
 	// insert match
 	qtx := service.queries.WithTx(tx)
 
-	matchDate := pgtype.Timestamp{
+	matchDate := pgtype.Timestamptz{
 		Time:  time.UnixMilli(matchDetails.Info.Date),
 		Valid: true,
 	}

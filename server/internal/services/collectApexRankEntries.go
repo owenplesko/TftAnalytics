@@ -39,7 +39,7 @@ func (task apexRankEntriesTask) Run() error {
 	setRankParams := make([]leaderboard.SetRankParams, len(rankPage.Entries))
 	for i, rankEntry := range rankPage.Entries {
 		setRankParams[i] = leaderboard.SetRankParams{
-			SummonerId: rankEntry.SummonerId,
+			Puuid: rankEntry.Puuid,
 			RankData: leaderboard.RankData{
 				Tier:         task.tier,
 				Rank:         rankEntry.Rank,

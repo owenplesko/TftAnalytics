@@ -8,7 +8,6 @@ export const summonerSchema = z.object({
   summonerId: z.string(),
   profileIconId: z.number(),
   summonerLevel: z.number(),
-  statsUpdateTimestamp: z.string().datetime({ offset: true }).nullable(),
   matchesBeforeTimestamp: z.string().datetime({ offset: true }).nullable(),
 });
 
@@ -70,7 +69,7 @@ export const matchSchema = z.object({
   queueId: z.number(),
   gameType: z.string(),
   setNumber: z.number(),
-  matchDate: z.string().datetime(),
+  matchDate: z.string().datetime({ offset: true }),
 });
 
 export const summonerMatchSchema = z.object({

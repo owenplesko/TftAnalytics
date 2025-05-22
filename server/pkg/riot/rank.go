@@ -15,11 +15,12 @@ type RankPage struct {
 }
 
 type ApexRankEntry struct {
+	SummonerID   string `json:"summonerId"`
+	Puuid        string `json:"puuid"`
+	LeaguePoints int    `json:"leaguePoints"`
 	Rank         string `json:"rank"`
-	SummonerId   string `json:"summonerId"`
-	LeaguePoints int32  `json:"leaguePoints"`
-	Wins         int32  `json:"wins"`
-	Losses       int32  `json:"losses"`
+	Wins         int    `json:"wins"`
+	Losses       int    `json:"losses"`
 	Veteran      bool   `json:"veteran"`
 	Inactive     bool   `json:"inactive"`
 	FreshBlood   bool   `json:"freshBlood"`
@@ -33,9 +34,9 @@ type RankEntry struct {
 	Tier         string `json:"tier"`
 	Rank         string `json:"rank"`
 	SummonerId   string `json:"summonerId"`
-	LeaguePoints int32  `json:"leaguePoints"`
-	Wins         int32  `json:"wins"`
-	Losses       int32  `json:"losses"`
+	LeaguePoints int    `json:"leaguePoints"`
+	Wins         int    `json:"wins"`
+	Losses       int    `json:"losses"`
 	Veteran      bool   `json:"veteran"`
 	Inactive     bool   `json:"inactive"`
 	FreshBlood   bool   `json:"freshBlood"`
@@ -65,14 +66,15 @@ var Divisions = []string{
 	"IV",
 }
 
-func (c *Riot) GetRank(ctx context.Context, region string, summonerId string) (RankEntry, error) {
+func (c *Riot) GetRank(ctx context.Context, region string, puuid string) (RankEntry, error) {
 	var rankRes []RankEntry
-	route := fmt.Sprintf("tft/league/v1/entries/by-summoner/%v", summonerId)
+	route := fmt.Sprintf("tft/league/v1/by-puuid/%v", puuid)
 	err := c.request(ctx, region, route, &rankRes)
 	if err != nil {
 		return RankEntry{}, err
 	}
 
+	// TODO: return all rank entries
 	for _, rank := range rankRes {
 		if rank.QueueType == "RANKED_TFT" {
 			return rank, nil

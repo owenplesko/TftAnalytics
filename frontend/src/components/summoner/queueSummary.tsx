@@ -5,14 +5,13 @@ import { useSuspenseQuery } from "@tanstack/react-query";
 
 const QueueSummary: React.FC<{
   region: string;
-  summonerId: string;
   puuid: string;
   queueId: number | null;
   setNumber: number;
-}> = ({ region, summonerId, puuid, queueId, setNumber }) => {
+}> = ({ region, puuid, queueId, setNumber }) => {
   return (
     <div className="mr-auto flex flex-col items-center justify-center gap-2 rounded border bg-card p-4">
-      <RankSummary region={region} summonerId={summonerId} />
+      <RankSummary region={region} puuid={puuid} />
       <QueueStatsSummary
         puuid={puuid}
         queueId={queueId}
@@ -25,9 +24,9 @@ export default QueueSummary;
 
 const RankSummary: React.FC<{
   region: string;
-  summonerId: string;
-}> = ({ region, summonerId }) => {
-  const query = useSuspenseQuery(getSummonerRank(region, summonerId));
+  puuid: string;
+}> = ({ region, puuid }) => {
+  const query = useSuspenseQuery(getSummonerRank(region, puuid));
 
   if (query.isError)
     return <span className="text-destructive">error loading rank</span>;

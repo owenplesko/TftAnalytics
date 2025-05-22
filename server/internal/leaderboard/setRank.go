@@ -8,8 +8,8 @@ import (
 )
 
 type SetRankParams struct {
-	SummonerId string
-	RankData   RankData
+	Puuid    string
+	RankData RankData
 }
 
 func (leaderboard Leaderboard) SetRank(ctx context.Context, leaderboardName string, params ...SetRankParams) error {
@@ -28,7 +28,7 @@ func (leaderboard Leaderboard) setLeaderboardScores(ctx context.Context, leaderb
 
 	for i, param := range params {
 		zParams[i] = redis.Z{
-			Member: param.SummonerId,
+			Member: param.Puuid,
 			Score:  float64(getRankScore(param.RankData)),
 		}
 	}
@@ -47,7 +47,7 @@ func (leaderboard Leaderboard) setRankData(ctx context.Context, params ...SetRan
 	pipe := leaderboard.rdb.Pipeline()
 	for _, param := range params {
 		bytes, _ := json.Marshal(param.RankData)
-		pipe.Do(ctx, "JSON.SET", "rank:"+param.SummonerId, "$", bytes)
+		pipe.Do(ctx, "JSON.SET", "rank:"+param.Puuid, "$", bytes)
 	}
 	_, err := pipe.Exec(ctx)
 	return err

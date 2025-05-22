@@ -9,22 +9,22 @@ import (
 )
 
 type TftComp struct {
-	MatchID       string           `json:"matchId"`
-	SummonerPuuid string           `json:"summonerPuuid"`
-	CompData      CompData         `json:"compData"`
-	MatchDate     pgtype.Timestamp `json:"matchDate"`
-	Rank          string           `json:"rank"`
+	MatchID       string             `json:"matchId"`
+	SummonerPuuid string             `json:"summonerPuuid"`
+	CompData      CompData           `json:"compData"`
+	MatchDate     pgtype.Timestamptz `json:"matchDate"`
+	Rank          string             `json:"rank"`
 }
 
 type TftMatch struct {
-	ID          string           `json:"id"`
-	DataVersion string           `json:"dataVersion"`
-	GameVersion string           `json:"gameVersion"`
-	QueueID     int32            `json:"queueId"`
-	GameType    string           `json:"gameType"`
-	SetName     string           `json:"setName"`
-	SetNumber   int32            `json:"setNumber"`
-	MatchDate   pgtype.Timestamp `json:"matchDate"`
+	ID          string             `json:"id"`
+	DataVersion string             `json:"dataVersion"`
+	GameVersion string             `json:"gameVersion"`
+	QueueID     int32              `json:"queueId"`
+	GameType    string             `json:"gameType"`
+	SetName     string             `json:"setName"`
+	SetNumber   int32              `json:"setNumber"`
+	MatchDate   pgtype.Timestamptz `json:"matchDate"`
 }
 
 type TftSummoner struct {

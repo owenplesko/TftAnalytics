@@ -46,7 +46,7 @@ func (task rankEntriesTask) Run() error {
 		setRankParams := make([]leaderboard.SetRankParams, len(rankEntries))
 		for i, rankEntry := range rankEntries {
 			setRankParams[i] = leaderboard.SetRankParams{
-				SummonerId: rankEntry.SummonerId,
+				Puuid: rankEntry.Puuid,
 				RankData: leaderboard.RankData{
 					Tier:         rankEntry.Tier,
 					Rank:         rankEntry.Rank,

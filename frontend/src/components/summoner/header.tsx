@@ -66,8 +66,8 @@ const PlayerHeader: React.FC<{ name: string; tag: string }> = ({
       </Button>
       <span className="text-muted-foreground">
         {"Updated "}
-        {query.data.statsUpdateTimestamp ? (
-          <TimeSince date={new Date(query.data.statsUpdateTimestamp)} />
+        {query.data.matchesBeforeTimestamp ? (
+          <TimeSince date={new Date(query.data.matchesBeforeTimestamp)} />
         ) : (
           "never"
         )}

@@ -7,13 +7,13 @@ import (
 	"github.com/redis/go-redis/v9"
 )
 
-func (leaderboard Leaderboard) GetRank(ctx context.Context, region string, summonerId string) (Rank, error) {
-	leaderboardPosition, err := leaderboard.getLeaderboardPosition(ctx, region, summonerId)
+func (leaderboard Leaderboard) GetRank(ctx context.Context, region string, puuid string) (Rank, error) {
+	leaderboardPosition, err := leaderboard.getLeaderboardPosition(ctx, region, puuid)
 	if err != nil {
 		return Rank{}, err
 	}
 
-	rankData, err := leaderboard.getRankData(ctx, summonerId)
+	rankData, err := leaderboard.getRankData(ctx, puuid)
 	if err != nil {
 		return Rank{}, err
 	}
@@ -26,10 +26,10 @@ func (leaderboard Leaderboard) GetRank(ctx context.Context, region string, summo
 	return rank, nil
 }
 
-func (leaderboard Leaderboard) getRankData(ctx context.Context, summonerId string) (RankData, error) {
+func (leaderboard Leaderboard) getRankData(ctx context.Context, puuid string) (RankData, error) {
 	var rankData RankData
 
-	jsonRaw, err := leaderboard.rdb.JSONGet(ctx, "rank:"+summonerId).Result()
+	jsonRaw, err := leaderboard.rdb.JSONGet(ctx, "rank:"+puuid).Result()
 	if err != nil {
 		return rankData, err
 	}
@@ -43,10 +43,10 @@ func (leaderboard Leaderboard) getRankData(ctx context.Context, summonerId strin
 	return rankData, err
 }
 
-func (leaderboard Leaderboard) getLeaderboardPosition(ctx context.Context, region string, summonerId string) (LeaderboardPosition, error) {
+func (leaderboard Leaderboard) getLeaderboardPosition(ctx context.Context, region string, puuid string) (LeaderboardPosition, error) {
 	leaderboardName := "leaderboard:" + region
 
-	position, err := leaderboard.rdb.ZRevRank(ctx, leaderboardName, summonerId).Result()
+	position, err := leaderboard.rdb.ZRevRank(ctx, leaderboardName, puuid).Result()
 	if err != nil {
 		return LeaderboardPosition{}, err
 	}

@@ -3,7 +3,7 @@ WITH
 	selected_data AS (
 		SELECT
 			(comp_data ->> 'placement')::INT AS placement,
-			(comp_data ->> 'timeEliminated')::FLOAT AS seconds_ingame
+			(comp_data -> 'timeEliminated')::FLOAT AS seconds_ingame
 		FROM
 			tft_comp
 			JOIN tft_match ON tft_comp.match_id = tft_match.id
@@ -33,13 +33,13 @@ WITH
 	),
 	derived_stats AS (
 		SELECT
-			top_1_count::float / comp_count AS top_1_rate,
-			top_4_count::float / comp_count AS top_4_rate
+			top_1_count::FLOAT / comp_count AS top_1_rate,
+			top_4_count::FLOAT / comp_count AS top_4_rate
 		FROM
 			aggregate_stats
 	)
 SELECT
-	*
+	/* sqlc infering some float values as ints, so manually cast types here */
+	comp_count, top_4_count, top_1_count, avg_placement::FLOAT, total_seconds_ingame::FLOAT, top_1_rate::FLOAT, top_4_rate::FLOAT
 FROM
-	aggregate_stats
-	CROSS JOIN derived_stats;
+	aggregate_stats CROSS JOIN derived_stats;
