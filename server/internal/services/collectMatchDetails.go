@@ -2,6 +2,7 @@ package services
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"log"
 	"regexp"
@@ -12,6 +13,7 @@ import (
 	"github.com/owenplesko/TftAnalytics/pkg/riot"
 
 	"github.com/jackc/pgx/v5/pgtype"
+	"github.com/redis/go-redis/v9"
 )
 
 func (service *Service) CollectMatchDetails(ctx context.Context, region, matchId string) error {
@@ -54,7 +56,7 @@ func (task matchDetailsTask) Run() error {
 		}
 	}
 
-	err = task.service.storeMatchDetails(task.ctx, match)
+	err = task.service.storeMatchDetails(task.ctx, task.region, match)
 	if err != nil {
 		return fmt.Errorf("storeMatchDetails failed with err: %w", err)
 	}
@@ -75,7 +77,7 @@ func extractPatchNumber(input string) (string, error) {
 	return matches[1], nil
 }
 
-func (service *Service) storeMatchDetails(ctx context.Context, matchDetails *riot.Match) error {
+func (service *Service) storeMatchDetails(ctx context.Context, region string, matchDetails *riot.Match) error {
 	// get relevant data before starting transaction
 	patchNumber, err := extractPatchNumber(matchDetails.Info.GameVersion)
 	if err != nil {
@@ -83,9 +85,16 @@ func (service *Service) storeMatchDetails(ctx context.Context, matchDetails *rio
 	}
 
 	ranks := make([]string, len(matchDetails.MetaData.Participants))
-	for i, _ := range matchDetails.MetaData.Participants {
-		// TODO: get rank from leaderboard once leaderboard switches from summonerID to puuid
-		ranks[i] = "unknown"
+	for i, puuid := range matchDetails.MetaData.Participants {
+		rankEntry, err := service.leaderboard.GetRank(ctx, region, puuid)
+
+		tier := rankEntry.Data.Tier
+		if errors.Is(err, redis.Nil) {
+			tier = "unknown"
+		} else if err != nil {
+			return err
+		}
+		ranks[i] = tier
 	}
 
 	// comp and matches inserted in one transaction
