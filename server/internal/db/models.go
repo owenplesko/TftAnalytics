@@ -13,6 +13,7 @@ type TftComp struct {
 	SummonerPuuid string           `json:"summonerPuuid"`
 	CompData      CompData         `json:"compData"`
 	MatchDate     pgtype.Timestamp `json:"matchDate"`
+	Rank          string           `json:"rank"`
 }
 
 type TftMatch struct {
@@ -34,6 +35,5 @@ type TftSummoner struct {
 	SummonerID             string             `json:"summonerId"`
 	ProfileIconID          int32              `json:"profileIconId"`
 	SummonerLevel          int32              `json:"summonerLevel"`
-	StatsUpdateTimestamp   pgtype.Timestamptz `json:"statsUpdateTimestamp"`
 	MatchesBeforeTimestamp pgtype.Timestamptz `json:"matchesBeforeTimestamp"`
 }

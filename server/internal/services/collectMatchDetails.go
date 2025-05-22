@@ -76,7 +76,17 @@ func extractPatchNumber(input string) (string, error) {
 }
 
 func (service *Service) storeMatchDetails(ctx context.Context, matchDetails *riot.Match) error {
-	var err error
+	// get relevant data before starting transaction
+	patchNumber, err := extractPatchNumber(matchDetails.Info.GameVersion)
+	if err != nil {
+		return err
+	}
+
+	ranks := make([]string, len(matchDetails.MetaData.Participants))
+	for i, _ := range matchDetails.MetaData.Participants {
+		// TODO: get rank from leaderboard once leaderboard switches from summonerID to puuid
+		ranks[i] = "unknown"
+	}
 
 	// comp and matches inserted in one transaction
 	tx, err := service.pool.Begin(ctx)
@@ -86,17 +96,12 @@ func (service *Service) storeMatchDetails(ctx context.Context, matchDetails *rio
 	defer tx.Rollback(ctx)
 
 	// insert match
-	patchNumber, err := extractPatchNumber(matchDetails.Info.GameVersion)
-	if err != nil {
-		return err
-	}
+	qtx := service.queries.WithTx(tx)
 
 	matchDate := pgtype.Timestamp{
 		Time:  time.UnixMilli(matchDetails.Info.Date),
 		Valid: true,
 	}
-
-	qtx := service.queries.WithTx(tx)
 
 	err = qtx.CreateMatch(ctx, db.CreateMatchParams{
 		ID:          matchDetails.MetaData.MatchId,
@@ -113,7 +118,7 @@ func (service *Service) storeMatchDetails(ctx context.Context, matchDetails *rio
 	}
 
 	// insert comps
-	for _, compDetails := range matchDetails.Info.Comps {
+	for i, compDetails := range matchDetails.Info.Comps {
 		if compDetails.Puuid == "BOT" {
 			continue
 		}
@@ -123,6 +128,7 @@ func (service *Service) storeMatchDetails(ctx context.Context, matchDetails *rio
 			SummonerPuuid: compDetails.Puuid,
 			CompData:      db.CompData(compDetails),
 			MatchDate:     matchDate,
+			Rank:          ranks[i],
 		})
 		if err != nil {
 			return fmt.Errorf("qtx.CreateComp failed with err: %w", err)

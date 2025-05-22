@@ -25,9 +25,10 @@ INSERT INTO tft_comp (
     match_id,
 	summoner_puuid,
 	comp_data,
-	match_date
+	match_date,
+	rank
 ) VALUES (
-    $1, $2, $3, $4
+    $1, $2, $3, $4, $5
 );
 
 -- name: MatchExists :one

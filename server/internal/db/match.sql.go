@@ -16,9 +16,10 @@ INSERT INTO tft_comp (
     match_id,
 	summoner_puuid,
 	comp_data,
-	match_date
+	match_date,
+	rank
 ) VALUES (
-    $1, $2, $3, $4
+    $1, $2, $3, $4, $5
 )
 `
 
@@ -27,6 +28,7 @@ type CreateCompParams struct {
 	SummonerPuuid string           `json:"summonerPuuid"`
 	CompData      CompData         `json:"compData"`
 	MatchDate     pgtype.Timestamp `json:"matchDate"`
+	Rank          string           `json:"rank"`
 }
 
 func (q *Queries) CreateComp(ctx context.Context, arg CreateCompParams) error {
@@ -35,6 +37,7 @@ func (q *Queries) CreateComp(ctx context.Context, arg CreateCompParams) error {
 		arg.SummonerPuuid,
 		arg.CompData,
 		arg.MatchDate,
+		arg.Rank,
 	)
 	return err
 }
@@ -81,7 +84,7 @@ func (q *Queries) CreateMatch(ctx context.Context, arg CreateMatchParams) error 
 
 const getMatchComps = `-- name: GetMatchComps :many
 SELECT 
-	tft_summoner.puuid, tft_summoner.region, tft_summoner.name, tft_summoner.tag, tft_summoner.summoner_id, tft_summoner.profile_icon_id, tft_summoner.summoner_level, tft_summoner.stats_update_timestamp, tft_summoner.matches_before_timestamp, comp_data
+	tft_summoner.puuid, tft_summoner.region, tft_summoner.name, tft_summoner.tag, tft_summoner.summoner_id, tft_summoner.profile_icon_id, tft_summoner.summoner_level, tft_summoner.matches_before_timestamp, comp_data
 FROM
 	tft_comp
 	JOIN tft_summoner ON summoner_puuid = puuid
@@ -110,7 +113,6 @@ func (q *Queries) GetMatchComps(ctx context.Context, matchID string) ([]GetMatch
 			&i.TftSummoner.SummonerID,
 			&i.TftSummoner.ProfileIconID,
 			&i.TftSummoner.SummonerLevel,
-			&i.TftSummoner.StatsUpdateTimestamp,
 			&i.TftSummoner.MatchesBeforeTimestamp,
 			&i.CompData,
 		); err != nil {
