@@ -37,3 +37,12 @@ type TftSummoner struct {
 	SummonerLevel          int32              `json:"summonerLevel"`
 	MatchesBeforeTimestamp pgtype.Timestamptz `json:"matchesBeforeTimestamp"`
 }
+
+type UnitPlacement struct {
+	SetNumber    int32       `json:"setNumber"`
+	GameVersion  string      `json:"gameVersion"`
+	Rank         string      `json:"rank"`
+	AvgPlacement float64     `json:"avgPlacement"`
+	Unit         interface{} `json:"unit"`
+	Frequency    int64       `json:"frequency"`
+}
