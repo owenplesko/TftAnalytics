@@ -14,5 +14,7 @@ FROM
 WHERE tft_comp.match_date >= date_trunc('day', CURRENT_TIMESTAMP - INTERVAL '7 days')
 GROUP BY
 	set_number, game_version, rank, unit;
+CREATE UNIQUE INDEX unit_placement_unique_idx
+ON unit_placement (set_number, game_version, rank, unit);
 -- +goose StatementEnd
 

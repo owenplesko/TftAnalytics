@@ -1,6 +1,8 @@
 package schedule
 
 import (
+	"context"
+
 	"github.com/owenplesko/TftAnalytics/internal/services"
 	"github.com/robfig/cron/v3"
 )
@@ -11,7 +13,10 @@ type Schedule struct {
 }
 
 func New(service *services.Service) *Schedule {
+	ctx := context.Background()
+
 	c := cron.New()
+	c.AddFunc("0 0 * * *", func() { service.RefreshUnitPlacement(ctx) })
 
 	return &Schedule{
 		c:       c,

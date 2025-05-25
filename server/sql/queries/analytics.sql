@@ -1,3 +1,6 @@
+-- name: RefreshUnitPlacement :exec
+REFRESH MATERIALIZED VIEW CONCURRENTLY unit_placement;
+
 -- name: GetSummonerStats :one
 WITH
 	selected_data AS (

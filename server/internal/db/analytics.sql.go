@@ -88,3 +88,12 @@ func (q *Queries) GetSummonerStats(ctx context.Context, arg GetSummonerStatsPara
 	)
 	return i, err
 }
+
+const refreshUnitPlacement = `-- name: RefreshUnitPlacement :exec
+REFRESH MATERIALIZED VIEW CONCURRENTLY unit_placement
+`
+
+func (q *Queries) RefreshUnitPlacement(ctx context.Context) error {
+	_, err := q.db.Exec(ctx, refreshUnitPlacement)
+	return err
+}
