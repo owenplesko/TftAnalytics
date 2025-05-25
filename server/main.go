@@ -15,6 +15,7 @@ import (
 	"github.com/owenplesko/TftAnalytics/internal/api"
 	"github.com/owenplesko/TftAnalytics/internal/db"
 	"github.com/owenplesko/TftAnalytics/internal/leaderboard"
+	"github.com/owenplesko/TftAnalytics/internal/schedule"
 	"github.com/owenplesko/TftAnalytics/internal/services"
 	"github.com/owenplesko/TftAnalytics/pkg/riot"
 	"github.com/pressly/goose/v3"
@@ -80,6 +81,9 @@ func main() {
 
 	// create service
 	service := services.New(pool, leaderboard, riotClient)
+
+	schedule := schedule.New(service)
+	schedule.Start()
 
 	// start collection loops
 	for region := range riot.RegionToCluster {
