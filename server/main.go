@@ -13,6 +13,7 @@ import (
 	"github.com/jackc/pgx/v5/stdlib"
 	"github.com/joho/godotenv"
 	"github.com/owenplesko/TftAnalytics/internal/api"
+	"github.com/owenplesko/TftAnalytics/internal/crawler"
 	"github.com/owenplesko/TftAnalytics/internal/db"
 	"github.com/owenplesko/TftAnalytics/internal/leaderboard"
 	"github.com/owenplesko/TftAnalytics/internal/schedule"
@@ -82,12 +83,13 @@ func main() {
 	// create service
 	service := services.New(pool, leaderboard, riotClient)
 
+	// create and start schedule
 	schedule := schedule.New(service)
 	schedule.Start()
 
 	// start collection loops
 	for region := range riot.RegionToCluster {
-		go service.MatchCollectionLoop(context.Background(), region)
+		go crawler.NewMatchCrawler(service, region).Begin()
 	}
 
 	// start api

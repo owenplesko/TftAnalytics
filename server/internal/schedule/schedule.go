@@ -19,7 +19,7 @@ func New(service *services.Service) *Schedule {
 	c := cron.New()
 	c.AddFunc("0 0 * * *", func() { service.RefreshUnitPlacement(ctx) })
 
-	for _, region := range riot.RegionToCluster {
+	for region := range riot.RegionToCluster {
 		c.AddFunc("*/20 * * * *", func() { service.CollectAllRankEntries(ctx, region) })
 	}
 
