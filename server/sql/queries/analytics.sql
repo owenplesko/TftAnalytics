@@ -2,47 +2,20 @@
 REFRESH MATERIALIZED VIEW CONCURRENTLY unit_placement;
 
 -- name: GetSummonerStats :one
-WITH
-	selected_data AS (
-		SELECT
-			(comp_data ->> 'placement')::INT AS placement,
-			(comp_data -> 'timeEliminated')::FLOAT AS seconds_ingame
-		FROM
-			tft_comp
-			JOIN tft_match ON tft_comp.match_id = tft_match.id
-		WHERE
-			summoner_puuid = $1
-			AND set_number = $2
-			AND (
-				sqlc.narg('QueueID')::INT IS NULL OR
-				sqlc.narg('QueueID')::INT = queue_id
-			)
-	),
-	aggregate_stats AS (
-		SELECT
-			COUNT(*) AS comp_count,
-			COUNT(*) FILTER (
-				WHERE
-					placement <= 4
-			) AS top_4_count,
-			COUNT(*) FILTER (
-				WHERE
-					placement = 1
-			) AS top_1_count,
-			AVG(placement) AS avg_placement,
-			SUM(seconds_ingame) AS total_seconds_ingame
-		FROM
-			selected_data
-	),
-	derived_stats AS (
-		SELECT
-			top_1_count::FLOAT / comp_count AS top_1_rate,
-			top_4_count::FLOAT / comp_count AS top_4_rate
-		FROM
-			aggregate_stats
-	)
 SELECT
-	/* sqlc infering some float values as ints, so manually cast types here */
-	comp_count, top_4_count, top_1_count, avg_placement::FLOAT, total_seconds_ingame::FLOAT, top_1_rate::FLOAT, top_4_rate::FLOAT
+  COUNT(*) AS comp_count,
+  COUNT(*) FILTER (WHERE (comp_data ->> 'placement')::INT <= 4) AS top_4_count,
+  COUNT(*) FILTER (WHERE (comp_data ->> 'placement')::INT = 1) AS top_1_count,
+  AVG((comp_data ->> 'placement')::INT) AS avg_placement,
+  COALESCE(SUM((comp_data -> 'timeEliminated')::FLOAT), 0) AS total_seconds_ingame
 FROM
-	aggregate_stats CROSS JOIN derived_stats;
+  tft_comp
+  JOIN tft_match ON tft_comp.match_id = tft_match.id
+WHERE
+  summoner_puuid = $1
+  AND set_number = $2
+  AND (
+    sqlc.narg('QueueID')::INT IS NULL OR
+    sqlc.narg('QueueID')::INT = queue_id
+);
+

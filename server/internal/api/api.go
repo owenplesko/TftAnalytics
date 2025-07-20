@@ -25,6 +25,6 @@ func (controller Api) ListenAndServe(port int) {
 	router.HandleFunc("/v1/match/{matchid}/comps", controller.getMatchComps)
 
 	log.Printf("api listening on port: %d\n", port)
-	err := http.ListenAndServe(fmt.Sprintf(":%d", port), router)
+	err := http.ListenAndServe(fmt.Sprintf(":%d", port), setCors(router))
 	log.Fatalf("api failed with err: %v", err)
 }

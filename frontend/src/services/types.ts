@@ -14,10 +14,8 @@ export const summonerSchema = z.object({
 export const summonerStatsSchema = z.object({
   compCount: z.number(),
   totalSecondsIngame: z.number(),
-  avgPlacement: z.number(),
+  avgPlacement: z.number().nullable(),
   top4Count: z.number(),
-  top4Rate: z.number(),
-  top1Rate: z.number(),
   top1Count: z.number()
 })
 

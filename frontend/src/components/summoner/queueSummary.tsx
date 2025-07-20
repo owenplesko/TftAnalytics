@@ -70,17 +70,17 @@ const QueueStatsSummary: React.FC<{
       <div className="flex flex-row gap-2">
         {[
           [
-            query.data.avgPlacement.toPrecision(3),
+            query.data.avgPlacement?.toPrecision(3) ?? '-',
             "Avg Place",
             `${query.data.compCount} games`,
           ],
           [
-            `${query.data.top4Rate.toPrecision(3)}%`,
+            query.data.compCount !== 0 ? `${(query.data.top4Count / query.data.compCount).toPrecision(3)}%` : '-',
             "Top 4",
             `${query.data.top4Count} games`,
           ],
           [
-            `${query.data.top1Rate.toPrecision(3)}%`,
+            query.data.compCount !== 0 ? `${(query.data.top1Count / query.data.compCount).toPrecision(3)}%` : '-',
             "Top 1",
             `${query.data.top1Count} games`,
           ],

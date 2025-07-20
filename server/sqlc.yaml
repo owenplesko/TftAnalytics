@@ -1,6 +1,11 @@
 version: "2"
+servers:
+  - engine: "postgresql"
+    uri: "postgres://postgres@localhost:5432/postgres?sslmode=disable"
 sql:
   - engine: "postgresql"
+    database:
+      managed: true
     queries: "sql/queries"
     schema: "sql/migrations"
     gen:
@@ -13,4 +18,4 @@ sql:
         overrides:
           - column: "tft_comp.comp_data"
             go_type:
-              type: "CompData"
+              type: "CompData"  
