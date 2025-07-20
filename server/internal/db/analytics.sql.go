@@ -57,6 +57,37 @@ func (q *Queries) GetSummonerStats(ctx context.Context, arg GetSummonerStatsPara
 	return i, err
 }
 
+const getUnitPlacements = `-- name: GetUnitPlacements :many
+SELECT set_number, game_version, rank, avg_placement, unit, frequency FROM unit_placement
+`
+
+func (q *Queries) GetUnitPlacements(ctx context.Context) ([]UnitPlacement, error) {
+	rows, err := q.db.Query(ctx, getUnitPlacements)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []UnitPlacement
+	for rows.Next() {
+		var i UnitPlacement
+		if err := rows.Scan(
+			&i.SetNumber,
+			&i.GameVersion,
+			&i.Rank,
+			&i.AvgPlacement,
+			&i.Unit,
+			&i.Frequency,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
 const refreshUnitPlacement = `-- name: RefreshUnitPlacement :exec
 REFRESH MATERIALIZED VIEW CONCURRENTLY unit_placement
 `

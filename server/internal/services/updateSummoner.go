@@ -34,7 +34,7 @@ func (task updateSummonerTask) Run() error {
 		return fmt.Errorf("GetSummonerByPuuid failed with err: %w", err)
 	}
 
-	err = task.service.CollectSummonerRank(task.ctx, summoner.Region, summoner.SummonerID)
+	err = task.service.CollectSummonerRank(task.ctx, summoner.Region, summoner.Puuid)
 	// riot.ErrNotFound is an expected error and should not cause UpdateSummonerInfo to fail
 	if err != nil && !errors.Is(err, riot.ErrNotFound) {
 		return fmt.Errorf("CollectSummonerRank failed with err: %w", err)

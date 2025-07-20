@@ -1,6 +1,9 @@
 -- name: RefreshUnitPlacement :exec
 REFRESH MATERIALIZED VIEW CONCURRENTLY unit_placement;
 
+-- name: GetUnitPlacements :many
+SELECT * FROM unit_placement;
+
 -- name: GetSummonerStats :one
 SELECT
   COUNT(*) AS comp_count,
