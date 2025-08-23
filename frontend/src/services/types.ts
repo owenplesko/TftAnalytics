@@ -113,3 +113,15 @@ export const rankSchema = z.object({
 });
 
 export type Rank = z.infer<typeof rankSchema>;
+
+
+export const unitStatSchema = z.object({
+  setNumber: z.number().int(),
+  gameVersion: z.string(),
+  rank: z.string(),
+  avgPlacement: z.number(),
+  unit: z.string(),
+  frequency: z.number().int(),
+});
+
+export type UnitStat = z.infer<typeof unitStatSchema>

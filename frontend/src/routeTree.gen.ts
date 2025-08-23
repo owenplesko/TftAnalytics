@@ -11,10 +11,17 @@
 // Import Routes
 
 import { Route as rootRoute } from './routes/__root'
+import { Route as UnitsImport } from './routes/units'
 import { Route as IndexImport } from './routes/index'
 import { Route as SummonerNameTagImport } from './routes/summoner.$name.$tag'
 
 // Create/Update Routes
+
+const UnitsRoute = UnitsImport.update({
+  id: '/units',
+  path: '/units',
+  getParentRoute: () => rootRoute,
+} as any)
 
 const IndexRoute = IndexImport.update({
   id: '/',
@@ -39,6 +46,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexImport
       parentRoute: typeof rootRoute
     }
+    '/units': {
+      id: '/units'
+      path: '/units'
+      fullPath: '/units'
+      preLoaderRoute: typeof UnitsImport
+      parentRoute: typeof rootRoute
+    }
     '/summoner/$name/$tag': {
       id: '/summoner/$name/$tag'
       path: '/summoner/$name/$tag'
@@ -53,36 +67,41 @@ declare module '@tanstack/react-router' {
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/units': typeof UnitsRoute
   '/summoner/$name/$tag': typeof SummonerNameTagRoute
 }
 
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/units': typeof UnitsRoute
   '/summoner/$name/$tag': typeof SummonerNameTagRoute
 }
 
 export interface FileRoutesById {
   __root__: typeof rootRoute
   '/': typeof IndexRoute
+  '/units': typeof UnitsRoute
   '/summoner/$name/$tag': typeof SummonerNameTagRoute
 }
 
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/summoner/$name/$tag'
+  fullPaths: '/' | '/units' | '/summoner/$name/$tag'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/summoner/$name/$tag'
-  id: '__root__' | '/' | '/summoner/$name/$tag'
+  to: '/' | '/units' | '/summoner/$name/$tag'
+  id: '__root__' | '/' | '/units' | '/summoner/$name/$tag'
   fileRoutesById: FileRoutesById
 }
 
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  UnitsRoute: typeof UnitsRoute
   SummonerNameTagRoute: typeof SummonerNameTagRoute
 }
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  UnitsRoute: UnitsRoute,
   SummonerNameTagRoute: SummonerNameTagRoute,
 }
 
@@ -97,11 +116,15 @@ export const routeTree = rootRoute
       "filePath": "__root.tsx",
       "children": [
         "/",
+        "/units",
         "/summoner/$name/$tag"
       ]
     },
     "/": {
       "filePath": "index.tsx"
+    },
+    "/units": {
+      "filePath": "units.tsx"
     },
     "/summoner/$name/$tag": {
       "filePath": "summoner.$name.$tag.tsx"

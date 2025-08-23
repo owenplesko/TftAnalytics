@@ -44,7 +44,7 @@ function Player() {
   const [queueId, setQueueId] = useState<number | null>(null);
 
   return (
-    <div className="flex w-[1000px] flex-col gap-4 pt-4">
+    <div className="flex w-[1000px] flex-col gap-4">
       <PlayerHeader name={loader.name} tag={loader.tag} />
       <QueueSelector setQueueId={setQueueId} />
       <QueueSummary
