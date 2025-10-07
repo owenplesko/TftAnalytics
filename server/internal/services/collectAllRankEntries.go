@@ -10,7 +10,7 @@ import (
 )
 
 func (service *Service) CollectAllRankEntries(ctx context.Context, region string) error {
-	return dedupe.Run(service.deduplicator, apexRankEntriesTask{
+	return dedupe.Run(service.deduplicator, allRankEntriesTask{
 		service: service,
 		ctx:     ctx,
 		region:  region,
@@ -28,16 +28,16 @@ func (task allRankEntriesTask) ID() string {
 }
 
 // TODO: error handling can be better here
-func (task allRankEntriesTask) Run(ctx context.Context) error {
+func (task allRankEntriesTask) Run() error {
 	for _, tier := range riot.ApexTiers {
-		err := task.service.CollectApexRankEntries(ctx, task.region, tier)
+		err := task.service.CollectApexRankEntries(task.ctx, task.region, tier)
 		if err != nil {
 			log.Printf("CollectApexRankEntries failed with err: %v", err)
 		}
 	}
 	for _, tier := range riot.Tiers {
 		for _, division := range riot.Divisions {
-			err := task.service.CollectRankEntries(ctx, task.region, tier, division)
+			err := task.service.CollectRankEntries(task.ctx, task.region, tier, division)
 			if err != nil {
 				log.Printf("CollectRankEntries failed with err: %v", err)
 			}
