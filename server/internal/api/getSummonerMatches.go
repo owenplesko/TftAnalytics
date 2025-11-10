@@ -54,7 +54,7 @@ func (controller Api) getSummonerMatches(w http.ResponseWriter, r *http.Request)
 	}
 
 	// TODO: extract this constant somewhere
-	setNumber := 14
+	setNumber := 15
 
 	matches, err := controller.Queries.GetSummonerMatchHistory(ctx, db.GetSummonerMatchHistoryParams{
 		SummonerPuuid: puuid,
