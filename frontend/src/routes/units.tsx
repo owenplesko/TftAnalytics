@@ -18,6 +18,8 @@ import {
   useReactTable,
 } from "@tanstack/react-table";
 import { ArrowUpDown } from "lucide-react";
+import { unitData } from "../data/unitData";
+import UnitIcon from "@/components/unitIcon";
 
 export const Route = createFileRoute("/units")({
   component: UnitStatsPage,
@@ -37,7 +39,15 @@ const columnHelper = createColumnHelper<UnitStat>();
 const columns = [
   columnHelper.accessor("unit", {
     header: "Unit",
-    cell: (props) => props.getValue(),
+    cell: (props) => {
+      const apiName = props.getValue().toLowerCase();
+      return (
+        <>
+          <UnitIcon apiName={apiName} />
+          {unitData[apiName]?.name ?? apiName}
+        </>
+      );
+    },
     enableSorting: false,
   }),
   columnHelper.accessor("avgPlacement", {

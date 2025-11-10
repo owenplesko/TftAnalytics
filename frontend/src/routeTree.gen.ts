@@ -12,6 +12,8 @@
 
 import { Route as rootRoute } from './routes/__root'
 import { Route as UnitsImport } from './routes/units'
+import { Route as TraitsImport } from './routes/traits'
+import { Route as ItemsImport } from './routes/items'
 import { Route as IndexImport } from './routes/index'
 import { Route as SummonerNameTagImport } from './routes/summoner.$name.$tag'
 
@@ -20,6 +22,18 @@ import { Route as SummonerNameTagImport } from './routes/summoner.$name.$tag'
 const UnitsRoute = UnitsImport.update({
   id: '/units',
   path: '/units',
+  getParentRoute: () => rootRoute,
+} as any)
+
+const TraitsRoute = TraitsImport.update({
+  id: '/traits',
+  path: '/traits',
+  getParentRoute: () => rootRoute,
+} as any)
+
+const ItemsRoute = ItemsImport.update({
+  id: '/items',
+  path: '/items',
   getParentRoute: () => rootRoute,
 } as any)
 
@@ -46,6 +60,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexImport
       parentRoute: typeof rootRoute
     }
+    '/items': {
+      id: '/items'
+      path: '/items'
+      fullPath: '/items'
+      preLoaderRoute: typeof ItemsImport
+      parentRoute: typeof rootRoute
+    }
+    '/traits': {
+      id: '/traits'
+      path: '/traits'
+      fullPath: '/traits'
+      preLoaderRoute: typeof TraitsImport
+      parentRoute: typeof rootRoute
+    }
     '/units': {
       id: '/units'
       path: '/units'
@@ -67,12 +95,16 @@ declare module '@tanstack/react-router' {
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/items': typeof ItemsRoute
+  '/traits': typeof TraitsRoute
   '/units': typeof UnitsRoute
   '/summoner/$name/$tag': typeof SummonerNameTagRoute
 }
 
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/items': typeof ItemsRoute
+  '/traits': typeof TraitsRoute
   '/units': typeof UnitsRoute
   '/summoner/$name/$tag': typeof SummonerNameTagRoute
 }
@@ -80,27 +112,39 @@ export interface FileRoutesByTo {
 export interface FileRoutesById {
   __root__: typeof rootRoute
   '/': typeof IndexRoute
+  '/items': typeof ItemsRoute
+  '/traits': typeof TraitsRoute
   '/units': typeof UnitsRoute
   '/summoner/$name/$tag': typeof SummonerNameTagRoute
 }
 
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/units' | '/summoner/$name/$tag'
+  fullPaths: '/' | '/items' | '/traits' | '/units' | '/summoner/$name/$tag'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/units' | '/summoner/$name/$tag'
-  id: '__root__' | '/' | '/units' | '/summoner/$name/$tag'
+  to: '/' | '/items' | '/traits' | '/units' | '/summoner/$name/$tag'
+  id:
+    | '__root__'
+    | '/'
+    | '/items'
+    | '/traits'
+    | '/units'
+    | '/summoner/$name/$tag'
   fileRoutesById: FileRoutesById
 }
 
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  ItemsRoute: typeof ItemsRoute
+  TraitsRoute: typeof TraitsRoute
   UnitsRoute: typeof UnitsRoute
   SummonerNameTagRoute: typeof SummonerNameTagRoute
 }
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  ItemsRoute: ItemsRoute,
+  TraitsRoute: TraitsRoute,
   UnitsRoute: UnitsRoute,
   SummonerNameTagRoute: SummonerNameTagRoute,
 }
@@ -116,12 +160,20 @@ export const routeTree = rootRoute
       "filePath": "__root.tsx",
       "children": [
         "/",
+        "/items",
+        "/traits",
         "/units",
         "/summoner/$name/$tag"
       ]
     },
     "/": {
       "filePath": "index.tsx"
+    },
+    "/items": {
+      "filePath": "items.tsx"
+    },
+    "/traits": {
+      "filePath": "traits.tsx"
     },
     "/units": {
       "filePath": "units.tsx"

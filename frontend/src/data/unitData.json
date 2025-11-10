@@ -1,0 +1,744 @@
+{
+  "tft5_emblemarmorykey": {
+    "cost": 8,
+    "name": "Tome of Traits",
+    "role": null,
+    "traits": [],
+    "rarity": null
+  },
+  "tft_armorykeycompleted": {
+    "cost": 8,
+    "name": "Completed Item Anvil",
+    "role": null,
+    "traits": [],
+    "rarity": null
+  },
+  "tft_armorykeycomponent": {
+    "cost": 8,
+    "name": "Component Anvil",
+    "role": null,
+    "traits": [],
+    "rarity": null
+  },
+  "tft_armorykeyornn": {
+    "cost": 8,
+    "name": "Artifact Item Anvil",
+    "role": null,
+    "traits": [],
+    "rarity": null
+  },
+  "tft_armorykeysupport": {
+    "cost": 8,
+    "name": "Support item anvil",
+    "role": null,
+    "traits": [],
+    "rarity": null
+  },
+  "tft6_mercenarychest": {
+    "cost": 11,
+    "name": "Mercenary Chest",
+    "role": null,
+    "traits": [],
+    "rarity": null
+  },
+  "tft15_aatrox": {
+    "cost": 1,
+    "name": "Aatrox",
+    "role": "ADTank",
+    "traits": [
+      "Mighty Mech",
+      "Juggernaut",
+      "Heavyweight"
+    ],
+    "rarity": 0
+  },
+  "tft15_ahri": {
+    "cost": 3,
+    "name": "Ahri",
+    "role": "APCaster",
+    "traits": [
+      "Star Guardian",
+      "Sorcerer"
+    ],
+    "rarity": 2
+  },
+  "tft15_akali": {
+    "cost": 4,
+    "name": "Akali",
+    "role": "APFighter",
+    "traits": [
+      "Supreme Cells",
+      "Executioner"
+    ],
+    "rarity": 4
+  },
+  "tft15_ashe": {
+    "cost": 4,
+    "name": "Ashe",
+    "role": "ADCarry",
+    "traits": [
+      "Crystal Gambit",
+      "Duelist"
+    ],
+    "rarity": 4
+  },
+  "tft15_braum": {
+    "cost": 5,
+    "name": "Braum",
+    "role": "ADFighter",
+    "traits": [
+      "The Champ",
+      "Luchador",
+      "Bastion"
+    ],
+    "rarity": 6
+  },
+  "tft15_caitlyn": {
+    "cost": 3,
+    "name": "Caitlyn",
+    "role": "ADCaster",
+    "traits": [
+      "Battle Academia",
+      "Sniper"
+    ],
+    "rarity": 2
+  },
+  "tft15_darius": {
+    "cost": 3,
+    "name": "Darius",
+    "role": "ADFighter",
+    "traits": [
+      "Supreme Cells",
+      "Heavyweight"
+    ],
+    "rarity": 2
+  },
+  "tft15_ezreal": {
+    "cost": 1,
+    "name": "Ezreal",
+    "role": "HCaster",
+    "traits": [
+      "Battle Academia",
+      "Prodigy"
+    ],
+    "rarity": 0
+  },
+  "tft15_garen": {
+    "cost": 1,
+    "name": "Garen",
+    "role": "ADTank",
+    "traits": [
+      "Battle Academia",
+      "Bastion"
+    ],
+    "rarity": 0
+  },
+  "tft15_gwen": {
+    "cost": 5,
+    "name": "Gwen",
+    "role": "APFighter",
+    "traits": [
+      "Soul Fighter",
+      "Sorcerer"
+    ],
+    "rarity": 6
+  },
+  "tft15_janna": {
+    "cost": 2,
+    "name": "Janna",
+    "role": "APCaster",
+    "traits": [
+      "Crystal Gambit",
+      "Protector",
+      "Strategist"
+    ],
+    "rarity": 1
+  },
+  "tft15_jarvaniv": {
+    "cost": 4,
+    "name": "Jarvan IV",
+    "role": "APTank",
+    "traits": [
+      "Mighty Mech",
+      "Strategist"
+    ],
+    "rarity": 4
+  },
+  "tft15_jayce": {
+    "cost": 3,
+    "name": "Jayce",
+    "role": "ADFighter",
+    "traits": [
+      "Battle Academia",
+      "Heavyweight"
+    ],
+    "rarity": 2
+  },
+  "tft15_jhin": {
+    "cost": 2,
+    "name": "Jhin",
+    "role": "ADSpecialist",
+    "traits": [
+      "Wraith",
+      "Sniper"
+    ],
+    "rarity": 1
+  },
+  "tft15_jinx": {
+    "cost": 4,
+    "name": "Jinx",
+    "role": "ADCaster",
+    "traits": [
+      "Star Guardian",
+      "Sniper"
+    ],
+    "rarity": 4
+  },
+  "tft15_ksante": {
+    "cost": 4,
+    "name": "K'Sante",
+    "role": "ADTank",
+    "traits": [
+      "Wraith",
+      "Protector"
+    ],
+    "rarity": 4
+  },
+  "tft15_kaisa": {
+    "cost": 2,
+    "name": "Kai'Sa",
+    "role": "ADCarry",
+    "traits": [
+      "Supreme Cells",
+      "Duelist"
+    ],
+    "rarity": 1
+  },
+  "tft15_kalista": {
+    "cost": 1,
+    "name": "Kalista",
+    "role": "ADCaster",
+    "traits": [
+      "Soul Fighter",
+      "Executioner"
+    ],
+    "rarity": 0
+  },
+  "tft15_katarina": {
+    "cost": 2,
+    "name": "Katarina",
+    "role": "APFighter",
+    "traits": [
+      "Battle Academia",
+      "Executioner"
+    ],
+    "rarity": 1
+  },
+  "tft15_kayle": {
+    "cost": 1,
+    "name": "Kayle",
+    "role": "APSpecialist",
+    "traits": [
+      "Wraith",
+      "Duelist"
+    ],
+    "rarity": 0
+  },
+  "tft15_kennen": {
+    "cost": 1,
+    "name": "Kennen",
+    "role": "APTank",
+    "traits": [
+      "Supreme Cells",
+      "Protector",
+      "Sorcerer"
+    ],
+    "rarity": 0
+  },
+  "tft15_kobuko": {
+    "cost": 2,
+    "name": "Kobuko",
+    "role": "ADTank",
+    "traits": [
+      "Mentor",
+      "Heavyweight"
+    ],
+    "rarity": 1
+  },
+  "tft15_leesin": {
+    "cost": 5,
+    "name": "Lee Sin",
+    "role": "ADFighter",
+    "traits": [
+      "Stance Master"
+    ],
+    "rarity": 6
+  },
+  "tft15_leona": {
+    "cost": 4,
+    "name": "Leona",
+    "role": "APTank",
+    "traits": [
+      "Battle Academia",
+      "Bastion"
+    ],
+    "rarity": 4
+  },
+  "tft15_lulu": {
+    "cost": 3,
+    "name": "Lulu",
+    "role": "APCaster",
+    "traits": [
+      "Monster Trainer"
+    ],
+    "rarity": 2
+  },
+  "tft15_lux": {
+    "cost": 2,
+    "name": "Lux",
+    "role": "APCaster",
+    "traits": [
+      "Soul Fighter",
+      "Sorcerer"
+    ],
+    "rarity": 1
+  },
+  "tft15_malphite": {
+    "cost": 1,
+    "name": "Malphite",
+    "role": "APTank",
+    "traits": [
+      "The Crew",
+      "Protector"
+    ],
+    "rarity": 0
+  },
+  "tft15_malzahar": {
+    "cost": 3,
+    "name": "Malzahar",
+    "role": "APCaster",
+    "traits": [
+      "Wraith",
+      "Prodigy"
+    ],
+    "rarity": 2
+  },
+  "tft15_naafiri": {
+    "cost": 1,
+    "name": "Naafiri",
+    "role": "ADFighter",
+    "traits": [
+      "Soul Fighter",
+      "Juggernaut"
+    ],
+    "rarity": 0
+  },
+  "tft15_poppy": {
+    "cost": 4,
+    "name": "Poppy",
+    "role": "ADTank",
+    "traits": [
+      "Star Guardian",
+      "Heavyweight"
+    ],
+    "rarity": 4
+  },
+  "tft15_rakan": {
+    "cost": 2,
+    "name": "Rakan",
+    "role": "APTank",
+    "traits": [
+      "Battle Academia",
+      "Protector"
+    ],
+    "rarity": 1
+  },
+  "tft15_rell": {
+    "cost": 1,
+    "name": "Rell",
+    "role": "APTank",
+    "traits": [
+      "Star Guardian",
+      "Bastion"
+    ],
+    "rarity": 0
+  },
+  "tft15_ryze": {
+    "cost": 4,
+    "name": "Ryze",
+    "role": "APCaster",
+    "traits": [
+      "Mentor",
+      "Executioner",
+      "Strategist"
+    ],
+    "rarity": 4
+  },
+  "tft15_samira": {
+    "cost": 4,
+    "name": "Samira",
+    "role": "ADCaster",
+    "traits": [
+      "Soul Fighter",
+      "Edgelord"
+    ],
+    "rarity": 4
+  },
+  "tft15_seraphine": {
+    "cost": 5,
+    "name": "Seraphine",
+    "role": "APCaster",
+    "traits": [
+      "Star Guardian",
+      "Prodigy"
+    ],
+    "rarity": 6
+  },
+  "tft15_sett": {
+    "cost": 4,
+    "name": "Sett",
+    "role": "ADTank",
+    "traits": [
+      "Soul Fighter",
+      "Juggernaut"
+    ],
+    "rarity": 4
+  },
+  "tft15_swain": {
+    "cost": 3,
+    "name": "Swain",
+    "role": "APTank",
+    "traits": [
+      "Crystal Gambit",
+      "Bastion",
+      "Sorcerer"
+    ],
+    "rarity": 2
+  },
+  "tft15_syndra": {
+    "cost": 1,
+    "name": "Syndra",
+    "role": "APCaster",
+    "traits": [
+      "Crystal Gambit",
+      "Star Guardian",
+      "Prodigy"
+    ],
+    "rarity": 0
+  },
+  "tft15_udyr": {
+    "cost": 3,
+    "name": "Udyr",
+    "role": "ADTank",
+    "traits": [
+      "Mentor",
+      "Juggernaut",
+      "Duelist"
+    ],
+    "rarity": 2
+  },
+  "tft15_varus": {
+    "cost": 5,
+    "name": "Varus",
+    "role": "ADCaster",
+    "traits": [
+      "Wraith",
+      "Sniper"
+    ],
+    "rarity": 6
+  },
+  "tft15_viego": {
+    "cost": 3,
+    "name": "Viego",
+    "role": "APFighter",
+    "traits": [
+      "Soul Fighter",
+      "Duelist"
+    ],
+    "rarity": 2
+  },
+  "tft15_xayah": {
+    "cost": 2,
+    "name": "Xayah",
+    "role": "ADCarry",
+    "traits": [
+      "Star Guardian",
+      "Edgelord"
+    ],
+    "rarity": 1
+  },
+  "tft15_xinzhao": {
+    "cost": 2,
+    "name": "Xin Zhao",
+    "role": "ADTank",
+    "traits": [
+      "Soul Fighter",
+      "Bastion"
+    ],
+    "rarity": 1
+  },
+  "tft15_yasuo": {
+    "cost": 3,
+    "name": "Yasuo",
+    "role": "ADFighter",
+    "traits": [
+      "Mentor",
+      "Edgelord"
+    ],
+    "rarity": 2
+  },
+  "tft15_yone": {
+    "cost": 5,
+    "name": "Yone",
+    "role": "ADFighter",
+    "traits": [
+      "Mighty Mech",
+      "Edgelord"
+    ],
+    "rarity": 6
+  },
+  "tft15_yuumi": {
+    "cost": 4,
+    "name": "Yuumi",
+    "role": "APCaster",
+    "traits": [
+      "Battle Academia",
+      "Prodigy"
+    ],
+    "rarity": 4
+  },
+  "tft15_zac": {
+    "cost": 1,
+    "name": "Zac",
+    "role": "APTank",
+    "traits": [
+      "Wraith",
+      "Heavyweight"
+    ],
+    "rarity": 0
+  },
+  "tft15_ziggs": {
+    "cost": 3,
+    "name": "Ziggs",
+    "role": "APCarry",
+    "traits": [
+      "The Crew",
+      "Strategist"
+    ],
+    "rarity": 2
+  },
+  "tft15_volibear": {
+    "cost": 4,
+    "name": "Volibear",
+    "role": "ADFighter",
+    "traits": [
+      "Luchador",
+      "Edgelord"
+    ],
+    "rarity": 4
+  },
+  "tft15_kogmaw": {
+    "cost": 3,
+    "name": "Kog'Maw",
+    "role": "APCarry",
+    "traits": [
+      "Monster Trainer"
+    ],
+    "rarity": 2
+  },
+  "tft15_smolder": {
+    "cost": 3,
+    "name": "Smolder",
+    "role": "ADCaster",
+    "traits": [
+      "Monster Trainer"
+    ],
+    "rarity": 2
+  },
+  "tft15_senna": {
+    "cost": 3,
+    "name": "Senna",
+    "role": "ADCaster",
+    "traits": [
+      "Mighty Mech",
+      "Executioner"
+    ],
+    "rarity": 2
+  },
+  "tft15_lucian": {
+    "cost": 1,
+    "name": "Lucian",
+    "role": "APCaster",
+    "traits": [
+      "Mighty Mech",
+      "Sorcerer"
+    ],
+    "rarity": 0
+  },
+  "tft15_gangplank": {
+    "cost": 2,
+    "name": "Gangplank",
+    "role": "ADFighter",
+    "traits": [
+      "Mighty Mech",
+      "Duelist"
+    ],
+    "rarity": 1
+  },
+  "tft15_drmundo": {
+    "cost": 2,
+    "name": "Dr. Mundo",
+    "role": "ADTank",
+    "traits": [
+      "Luchador",
+      "Juggernaut"
+    ],
+    "rarity": 1
+  },
+  "tft15_gnar": {
+    "cost": 1,
+    "name": "Gnar",
+    "role": "ADCarry",
+    "traits": [
+      "Luchador",
+      "Sniper"
+    ],
+    "rarity": 0
+  },
+  "tft15_karma": {
+    "cost": 4,
+    "name": "Karma",
+    "role": "APCaster",
+    "traits": [
+      "Mighty Mech",
+      "Sorcerer"
+    ],
+    "rarity": 4
+  },
+  "tft15_vi": {
+    "cost": 2,
+    "name": "Vi",
+    "role": "ADTank",
+    "traits": [
+      "Crystal Gambit",
+      "Juggernaut"
+    ],
+    "rarity": 1
+  },
+  "tft15_galio": {
+    "cost": 11,
+    "name": "The Mighty Mech",
+    "role": "APTank",
+    "traits": [],
+    "rarity": null
+  },
+  "tft15_sivir": {
+    "cost": 1,
+    "name": "Sivir",
+    "role": "ADCaster",
+    "traits": [
+      "The Crew",
+      "Sniper"
+    ],
+    "rarity": 0
+  },
+  "tft15_twistedfate": {
+    "cost": 5,
+    "name": "Twisted Fate",
+    "role": "HCarry",
+    "traits": [
+      "Rogue Captain",
+      "The Crew"
+    ],
+    "rarity": 6
+  },
+  "tft15_shen": {
+    "cost": 2,
+    "name": "Shen",
+    "role": "APTank",
+    "traits": [
+      "The Crew",
+      "Bastion",
+      "Edgelord"
+    ],
+    "rarity": 1
+  },
+  "tft15_rammus": {
+    "cost": 3,
+    "name": "Rammus",
+    "role": "APTank",
+    "traits": [
+      "Monster Trainer"
+    ],
+    "rarity": 2
+  },
+  "tft15_zyra": {
+    "cost": 5,
+    "name": "Zyra",
+    "role": "APCaster",
+    "traits": [
+      "Crystal Gambit",
+      "Rosemother"
+    ],
+    "rarity": 6
+  },
+  "tft15_zyragraspingplant": {
+    "cost": 1,
+    "name": "Grasping Root",
+    "role": "APTank",
+    "traits": [],
+    "rarity": 0
+  },
+  "tft15_zyrathornplant": {
+    "cost": 1,
+    "name": "Deadly Spine",
+    "role": "ADCarry",
+    "traits": [],
+    "rarity": 0
+  },
+  "tft15_neeko": {
+    "cost": 3,
+    "name": "Neeko",
+    "role": "APTank",
+    "traits": [
+      "Star Guardian",
+      "Protector"
+    ],
+    "rarity": 2
+  },
+  "tft15_ekko": {
+    "cost": 5,
+    "name": "Ekko",
+    "role": "APFighter",
+    "traits": [],
+    "rarity": 6
+  },
+  "tft15_petcreepycat": {
+    "cost": 1,
+    "name": "Test Cost",
+    "role": null,
+    "traits": [],
+    "rarity": 0
+  },
+  "tft_bluegolem": {
+    "cost": 1,
+    "name": "Golem",
+    "role": "APTank",
+    "traits": [],
+    "rarity": 0
+  },
+  "tft9_slime_crab": {
+    "cost": 1,
+    "name": "Rift Scuttler",
+    "role": null,
+    "traits": [],
+    "rarity": 0
+  },
+  "tft_trainingdummy": {
+    "cost": 1,
+    "name": "Training Dummy",
+    "role": "ADTank",
+    "traits": [],
+    "rarity": 0
+  }
+}

@@ -1,56 +1,70 @@
-import { Unit } from "@/services/types";
+import { unitData } from "../data/unitData";
 import { IconStarFilled } from "@tabler/icons-react";
 import Repeat from "./util/repeat";
 import { cn } from "@/lib/utils";
 
-const rarityStyles: Record<number, string | undefined> = {
-  0: "border-common",
-  1: "border-uncommon",
-  2: "border-rare",
-  4: "border-mythic",
-  6: "border-legendary",
-  8: "border-divine",
-};
+function rarityStyle(rarity: number | null) {
+  switch (rarity) {
+    case 0:
+      return "border-common";
+    case 1:
+      return "border-uncommon";
+    case 2:
+      return "border-rare";
+    case 4:
+      return "border-mythic";
+    case 6:
+      return "border-legendary";
+    case 8:
+      return "border-divine";
+    default:
+      return "border-border";
+  }
+}
 
-const tierStyles: Record<number, string | undefined> = {
+const starLevelStyles: Record<number, string | undefined> = {
   2: "text-silver",
   3: "text-gold",
   4: "text-platinum",
 };
 
-const UnitIcon: React.FC<{ unit: Unit }> = ({ unit }) => {
+const UnitIcon: React.FC<{
+  apiName: string;
+  items?: string[];
+  starLevel?: number;
+}> = ({ apiName, items = [], starLevel = 0 }) => {
+  const data = unitData[apiName];
+
+  if (!data) return <span>{apiName}</span>;
+
   return (
-    <div className="relative my-[0.75rem]">
-      {unit.tier > 1 && (
+    <div className="relative my-[0.75rem] border-muted">
+      {starLevel > 1 && (
         <div
           className={cn(
             "absolute top-[-0.75rem] flex w-full justify-center",
-            tierStyles[unit.tier],
+            starLevelStyles[starLevel],
           )}
         >
-          <Repeat n={unit.tier}>
+          <Repeat n={starLevel}>
             <IconStarFilled size={12} />
           </Repeat>
         </div>
       )}
       <img
-        className={cn(
-          "rounded border",
-          rarityStyles[unit.rarity] ?? "border-muted",
-        )}
+        className={cn("rounded border", rarityStyle(data.rarity))}
         width={48}
         height={48}
-        src={`/unit/${unit.characterId}.webp`}
+        src={`/assets/unit/${apiName}.webp`}
       />
       <ul className="absolute bottom-[-0.75rem] flex w-full flex-row justify-center">
-        {unit.itemNames.map((item, i) => (
-          // key = index is acceptable because data is static
+        {items.map((item, i) => (
           <li key={i}>
             <img
               className="rounded border"
               width={16}
               height={16}
-              src={`/item/${item}.webp`}
+              src={`/assets/item/${item.toLowerCase()}.webp`}
             />
           </li>
         ))}

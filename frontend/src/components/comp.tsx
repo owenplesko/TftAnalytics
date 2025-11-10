@@ -138,7 +138,7 @@ const TacticianSection: React.FC<{ compData: CompData }> = ({ compData }) => {
     <div className="relative">
       <img
         className="rounded border"
-        src={`/companion/${compData.companion.itemId}.png`}
+        src={`/assets/companion/${compData.companion.itemId}.webp`}
       />
       <span className="absolute bottom-[-0.75rem] right-1/2 h-5 w-5 translate-x-1/2 rounded bg-secondary text-center text-xs leading-5 text-secondary-foreground">
         {compData.level}
@@ -171,7 +171,11 @@ const UnitSection: React.FC<{ compData: CompData }> = ({ compData }) => {
         {compData.units.map((unit, i) => (
           // key = index is acceptable because data is static
           <li key={i}>
-            <UnitIcon unit={unit} />
+            <UnitIcon
+              apiName={unit.characterId.toLowerCase()}
+              items={unit.itemNames}
+              starLevel={unit.tier}
+            />
           </li>
         ))}
       </ul>
