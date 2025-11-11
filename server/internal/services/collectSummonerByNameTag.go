@@ -7,61 +7,42 @@ import (
 	"sync"
 
 	"github.com/owenplesko/TftAnalytics/internal/db"
-	"github.com/owenplesko/TftAnalytics/pkg/dedupe"
 	"github.com/owenplesko/TftAnalytics/pkg/riot"
 )
 
 func (service *Service) CollectSummonerByNameTag(ctx context.Context, cluster, name, tag string) error {
-	return dedupe.Run(service.deduplicator, summonerByNameTagTask{
-		service: service,
-		ctx:     ctx,
-		cluster: cluster,
-		name:    name,
-		tag:     tag,
-	}).Await()
-}
+	key := fmt.Sprintf("SUMMONER_BY_NAME_TAG_%s_%s", name, tag)
 
-type summonerByNameTagTask struct {
-	service *Service
-	ctx     context.Context
-	cluster string
-	name    string
-	tag     string
-}
+	_, err, _ := service.group.Do(key, func() (interface{}, error) {
+		account, err := service.riot.GetAccountByName(ctx, cluster, name, tag)
+		if err != nil {
+			return nil, fmt.Errorf("Riot.GetAccountByName failed with err: %w", err)
+		}
 
-func (task summonerByNameTagTask) ID() string {
-	// cluster is not a part of id
-	return fmt.Sprintf("SUMMONER_BY_NAME_TAG_%s_%s", task.name, task.tag)
-}
+		summoner, region, err := service.findSummonerAndRegion(ctx, account.Puuid)
+		if err != nil {
+			return nil, fmt.Errorf("findSummonerRegion failed err: %w", err)
+		}
 
-func (task summonerByNameTagTask) Run() error {
-	account, err := task.service.riot.GetAccountByName(task.ctx, task.cluster, task.name, task.tag)
-	if err != nil {
-		return fmt.Errorf("Riot.GetAccountByName failed with err: %w", err)
-	}
+		err = service.queries.UpsertSummoner(ctx, db.UpsertSummonerParams{
+			Puuid:         account.Puuid,
+			Region:        region,
+			Name:          account.Name,
+			Tag:           account.Tag,
+			SummonerID:    summoner.SummonerId,
+			ProfileIconID: summoner.ProfileIconId,
+			SummonerLevel: summoner.SummonerLevel,
+		})
+		if err != nil {
+			return nil, fmt.Errorf("Queries.UpsertSummoner failed with err: %w", err)
+		}
 
-	summoner, region, err := task.service.findSummonerAndRegion(task.ctx, account.Puuid)
-	if err != nil {
-		return fmt.Errorf("findSummonerRegion failed err: %w", err)
-	}
+		log.Printf("collected summoner %v#%v on region %v\n", account.Name, account.Tag, region)
 
-	err = task.service.queries.UpsertSummoner(task.ctx, db.UpsertSummonerParams{
-		Puuid:         account.Puuid,
-		Region:        region,
-		Name:          account.Name,
-		Tag:           account.Tag,
-		SummonerID:    summoner.SummonerId,
-		ProfileIconID: summoner.ProfileIconId,
-		SummonerLevel: summoner.SummonerLevel,
+		return nil, nil
 	})
-	if err != nil {
-		return fmt.Errorf("Queries.UpsertSummoner failed with err: %w", err)
-	}
 
-	log.Printf("collected summoner %v#%v on region %v\n", account.Name, account.Tag, region)
-
-	return nil
-
+	return err
 }
 
 type regionSuccessRes struct {
@@ -69,9 +50,6 @@ type regionSuccessRes struct {
 	region   string
 }
 
-// TODO: maybe make this an actual service?
-// TODO: explore passing riot errors on no region found
-// should implement request retrying for riot requests first tho..
 func (service *Service) findSummonerAndRegion(ctx context.Context, puuid string) (*riot.RiotSummonerRes, string, error) {
 	wg := sync.WaitGroup{}
 	successChan := make(chan regionSuccessRes)

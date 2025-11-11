@@ -9,7 +9,6 @@ import (
 	"time"
 
 	"github.com/owenplesko/TftAnalytics/internal/db"
-	"github.com/owenplesko/TftAnalytics/pkg/dedupe"
 	"github.com/owenplesko/TftAnalytics/pkg/riot"
 
 	"github.com/jackc/pgx/v5/pgtype"
@@ -17,53 +16,38 @@ import (
 )
 
 func (service *Service) CollectMatchDetails(ctx context.Context, region, matchId string) error {
-	return dedupe.Run(service.deduplicator, matchDetailsTask{
-		service: service,
-		ctx:     ctx,
-		region:  region,
-		matchId: matchId,
-	}).Await()
-}
+	key := fmt.Sprintf("MATCH_DETAILS_%s_%s", region, matchId)
+	_, err, _ := service.group.Do(key, func() (interface{}, error) {
+		exists, _ := service.queries.MatchExists(ctx, matchId)
+		if exists {
+			return nil, nil
+		}
 
-type matchDetailsTask struct {
-	service *Service
-	ctx     context.Context
-	region  string
-	matchId string
-}
+		match, err := service.riot.GetMatchDetails(ctx, riot.RegionToCluster[region], matchId)
+		if err != nil {
+			return nil, fmt.Errorf("Riot.GetMatchDetails failed with err: %w", err)
+		}
 
-func (task matchDetailsTask) ID() string {
-	return fmt.Sprintf("MATCH_DETAILS_%s_%s", task.region, task.matchId)
-}
-
-func (task matchDetailsTask) Run() error {
-	exists, _ := task.service.queries.MatchExists(task.ctx, task.matchId)
-	if exists {
-		return nil
-	}
-
-	match, err := task.service.riot.GetMatchDetails(task.ctx, riot.RegionToCluster[task.region], task.matchId)
-	if err != nil {
-		return fmt.Errorf("Riot.GetMatchDetails failed with err: %w", err)
-	}
-
-	for _, puuid := range match.MetaData.Participants {
-		if exists, _ := task.service.queries.SummonerExistsByPuuid(task.ctx, puuid); !exists {
-			err = task.service.CollectSummonerByPuuid(task.ctx, task.region, puuid)
-			if err != nil {
-				log.Printf("error in CollectMatchDetails collecting summoner with puuid %v from match %v: CollectSummonerByPuuid failed with err: %v", puuid, task.matchId, err)
+		for _, puuid := range match.MetaData.Participants {
+			if exists, _ := service.queries.SummonerExistsByPuuid(ctx, puuid); !exists {
+				err = service.CollectSummonerByPuuid(ctx, region, puuid)
+				if err != nil {
+					log.Printf("error in CollectMatchDetails collecting summoner with puuid %v from match %v: CollectSummonerByPuuid failed with err: %v", puuid, matchId, err)
+				}
 			}
 		}
-	}
 
-	err = task.service.storeMatchDetails(task.ctx, task.region, match)
-	if err != nil {
-		return fmt.Errorf("storeMatchDetails failed with err: %w", err)
-	}
+		err = service.storeMatchDetails(ctx, region, match)
+		if err != nil {
+			return nil, fmt.Errorf("storeMatchDetails failed with err: %w", err)
+		}
 
-	log.Printf("collected match %v on region %v\n", task.matchId, task.region)
+		log.Printf("collected match %v on region %v\n", matchId, region)
 
-	return nil
+		return nil, nil
+
+	})
+	return err
 }
 
 func extractPatchNumber(input string) (string, error) {

@@ -8,74 +8,58 @@ import (
 
 	"github.com/jackc/pgx/v5/pgtype"
 	"github.com/owenplesko/TftAnalytics/internal/db"
-	"github.com/owenplesko/TftAnalytics/pkg/dedupe"
 	"github.com/owenplesko/TftAnalytics/pkg/riot"
 )
 
 func (service *Service) CollectMatchHistory(ctx context.Context, region, puuid string, matchesAfter time.Time) error {
-	return dedupe.Run(service.deduplicator, matchHistoryTask{
-		service:      service,
-		ctx:          ctx,
-		region:       region,
-		puuid:        puuid,
-		matchesAfter: matchesAfter,
-	}).Await()
-}
+	key := fmt.Sprintf("MATCH_HISTORY_%s_%s", region, puuid)
 
-type matchHistoryTask struct {
-	service      *Service
-	ctx          context.Context
-	region       string
-	puuid        string
-	matchesAfter time.Time
-}
+	_, err, _ := service.group.Do(key, func() (interface{}, error) {
+		count := riot.MATCH_HISTORY_MAX_COUNT
 
-func (task matchHistoryTask) ID() string {
-	return fmt.Sprintf("MATCH_HISTORY_%s_%s", task.region, task.puuid)
-}
+		matchesBefore := time.Now()
+		if matchesAfter.Before(service.matchesAfterCutoff) {
+			matchesAfter = service.matchesAfterCutoff
+		}
 
-func (task matchHistoryTask) Run() error {
-	count := riot.MATCH_HISTORY_MAX_COUNT
+		matchIds := make([]string, 0, count)
 
-	matchesBefore := time.Now()
-	if task.matchesAfter.Before(task.service.matchesAfterCutoff) {
-		task.matchesAfter = task.service.matchesAfterCutoff
-	}
+		for {
+			startIndex := len(matchIds)
+			res, err := service.riot.GetMatchHistoryInTimeRange(ctx, riot.RegionToCluster[region], puuid, count, matchesAfter, matchesBefore, startIndex)
+			if err != nil {
+				return nil, fmt.Errorf("Riot.GetMatchHistory failed with err: %w", err)
+			}
 
-	matchIds := make([]string, 0, count)
+			if len(res) == 0 {
+				break
+			}
 
-	for {
-		startIndex := len(matchIds)
-		res, err := task.service.riot.GetMatchHistoryInTimeRange(task.ctx, riot.RegionToCluster[task.region], task.puuid, count, task.matchesAfter, matchesBefore, startIndex)
+			matchIds = append(matchIds, res...)
+		}
+
+		for _, matchId := range matchIds {
+			err := service.CollectMatchDetails(ctx, region, matchId)
+			if err != nil {
+				// TODO: explore returning CollectMatchDetails err
+				log.Printf("error in CollectMatchHistory collecting match %v for summoner with puuid %v: CollectMatchDetails failed with err: %v", matchId, puuid, err)
+			}
+		}
+
+		err := service.queries.SetMatchesBeforeTimestamp(ctx, db.SetMatchesBeforeTimestampParams{
+			Puuid: puuid,
+			MatchesBeforeTimestamp: pgtype.Timestamp{
+				Time:  matchesBefore,
+				Valid: true,
+			},
+		})
 		if err != nil {
-			return fmt.Errorf("Riot.GetMatchHistory failed with err: %w", err)
+			return nil, fmt.Errorf("Queries.SetMatchesAfterTimestamp failed with err: %w", err)
 		}
 
-		if len(res) == 0 {
-			break
-		}
+		return nil, nil
 
-		matchIds = append(matchIds, res...)
-	}
-
-	for _, matchId := range matchIds {
-		err := task.service.CollectMatchDetails(task.ctx, task.region, matchId)
-		if err != nil {
-			// TODO: explore returning CollectMatchDetails err
-			log.Printf("error in CollectMatchHistory collecting match %v for summoner with puuid %v: CollectMatchDetails failed with err: %v", matchId, task.puuid, err)
-		}
-	}
-
-	err := task.service.queries.SetMatchesBeforeTimestamp(task.ctx, db.SetMatchesBeforeTimestampParams{
-		Puuid: task.puuid,
-		MatchesBeforeTimestamp: pgtype.Timestamp{
-			Time:  matchesBefore,
-			Valid: true,
-		},
 	})
-	if err != nil {
-		return fmt.Errorf("Queries.SetMatchesAfterTimestamp failed with err: %w", err)
-	}
-
-	return nil
+	return err
 }
+

@@ -6,56 +6,40 @@ import (
 	"log"
 
 	"github.com/owenplesko/TftAnalytics/internal/db"
-	"github.com/owenplesko/TftAnalytics/pkg/dedupe"
 	"github.com/owenplesko/TftAnalytics/pkg/riot"
 )
 
 func (service *Service) CollectSummonerByPuuid(ctx context.Context, region, puuid string) error {
-	return dedupe.Run(service.deduplicator, summonerByPuuidTask{
-		service: service,
-		ctx:     ctx,
-		region:  region,
-		puuid:   puuid,
-	}).Await()
-}
+	key := fmt.Sprintf("SUMMONER_BY_PUUID_%s_%s", region, puuid)
 
-type summonerByPuuidTask struct {
-	service *Service
-	ctx     context.Context
-	region  string
-	puuid   string
-}
+	_, err, _ := service.group.Do(key, func() (interface{}, error) {
+		account, err := service.riot.GetAccountByPuuid(ctx, riot.RegionToCluster[region], puuid)
+		if err != nil {
+			return nil, fmt.Errorf("Riot.GetAccountByPuuid failed with err: %w", err)
+		}
 
-func (task summonerByPuuidTask) ID() string {
-	return fmt.Sprintf("SUMMONER_BY_PUUID_%s_%s", task.region, task.puuid)
-}
+		summoner, err := service.riot.GetSummonerByPuuid(ctx, region, puuid)
+		if err != nil {
+			return nil, fmt.Errorf("Riot.GetSummonerByPuuid failed with err: %w", err)
+		}
 
-func (task summonerByPuuidTask) Run() error {
-	account, err := task.service.riot.GetAccountByPuuid(task.ctx, riot.RegionToCluster[task.region], task.puuid)
-	if err != nil {
-		return fmt.Errorf("Riot.GetAccountByPuuid failed with err: %w", err)
-	}
+		err = service.queries.UpsertSummoner(ctx, db.UpsertSummonerParams{
+			Puuid:         summoner.Puuid,
+			Region:        region,
+			Name:          account.Name,
+			Tag:           account.Tag,
+			SummonerID:    summoner.SummonerId,
+			ProfileIconID: summoner.ProfileIconId,
+			SummonerLevel: summoner.SummonerLevel,
+		})
+		if err != nil {
+			return nil, fmt.Errorf("Queries.UpsertSummoner failed with err: %w", err)
+		}
 
-	summoner, err := task.service.riot.GetSummonerByPuuid(task.ctx, task.region, task.puuid)
-	if err != nil {
-		return fmt.Errorf("Riot.GetSummonerByPuuid failed with err: %w", err)
-	}
+		log.Printf("collected summoner %v#%v on region %v\n", account.Name, account.Tag, region)
 
-	err = task.service.queries.UpsertSummoner(task.ctx, db.UpsertSummonerParams{
-		Puuid:         summoner.Puuid,
-		Region:        task.region,
-		Name:          account.Name,
-		Tag:           account.Tag,
-		SummonerID:    summoner.SummonerId,
-		ProfileIconID: summoner.ProfileIconId,
-		SummonerLevel: summoner.SummonerLevel,
+		return nil, nil
 	})
-	if err != nil {
-		return fmt.Errorf("Queries.UpsertSummoner failed with err: %w", err)
-	}
 
-	log.Printf("collected summoner %v#%v on region %v\n", account.Name, account.Tag, task.region)
-
-	return nil
-
+	return err
 }

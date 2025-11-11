@@ -6,8 +6,8 @@ import (
 	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/owenplesko/TftAnalytics/internal/db"
 	"github.com/owenplesko/TftAnalytics/internal/leaderboard"
-	"github.com/owenplesko/TftAnalytics/pkg/dedupe"
 	"github.com/owenplesko/TftAnalytics/pkg/riot"
+	"golang.org/x/sync/singleflight"
 )
 
 type Service struct {
@@ -15,7 +15,7 @@ type Service struct {
 	queries            *db.Queries
 	leaderboard        *leaderboard.Leaderboard
 	riot               *riot.Riot
-	deduplicator       *dedupe.Deduplicator
+	group              *singleflight.Group
 	matchesAfterCutoff time.Time
 }
 
@@ -25,7 +25,7 @@ func New(pool *pgxpool.Pool, leaderboard *leaderboard.Leaderboard, riot *riot.Ri
 		queries:            db.New(pool),
 		leaderboard:        leaderboard,
 		riot:               riot,
-		deduplicator:       dedupe.New(),
+		group:              new(singleflight.Group),
 		matchesAfterCutoff: time.Date(2025, 4, 1, 0, 0, 0, 0, time.UTC),
 	}
 }
