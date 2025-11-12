@@ -58,7 +58,7 @@ func (controller Api) getSummonerMatches(w http.ResponseWriter, r *http.Request)
 
 	matches, err := controller.Queries.GetSummonerMatchHistory(ctx, db.GetSummonerMatchHistoryParams{
 		SummonerPuuid: puuid,
-		Limit:         int64(limit),
+		Limit:         int32(limit),
 		Before: pgtype.Timestamp{
 			Time:  before,
 			Valid: true,

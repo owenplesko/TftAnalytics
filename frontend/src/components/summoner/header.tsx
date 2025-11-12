@@ -22,7 +22,6 @@ const PlayerHeader: React.FC<{ name: string; tag: string }> = ({
     mutationKey: ["UPDATE_SUMMONER", query.data.puuid],
     mutationFn: updateSummoner,
     onSuccess: () => {
-      query.refetch();
       queryClient.invalidateQueries({
         predicate: ({ queryKey }) =>
           queryKey.includes(query.data.puuid) ||
