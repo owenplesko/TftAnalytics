@@ -24,6 +24,7 @@ func (controller Api) ListenAndServe(port int) {
 	router.HandleFunc("/v1/summoner/by-puuid/{puuid}/stats", controller.getSummonerStats)
 	router.HandleFunc("/v1/match/{matchid}/comps", controller.getMatchComps)
 	router.HandleFunc("/v1/stats/units", controller.getUnitPlacements)
+	router.HandleFunc("/v1/stats/units/refresh", controller.refreshUnitStats)
 
 	log.Printf("api listening on port: %d\n", port)
 	err := http.ListenAndServe(fmt.Sprintf(":%d", port), setCors(router))
