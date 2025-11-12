@@ -8,7 +8,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import UnitIcon from "@/components/unitIcon";
-import { getUnitStats } from "@/services/getUnitStats";
+import { GET_UNIT_STATS_KEY, getUnitStats } from "@/services/getUnitStats";
 import { refreshUnitStats } from "@/services/refreshUnitStats";
 import { UnitStat } from "@/services/types";
 import { useMutation, useQueryClient, useSuspenseQuery } from "@tanstack/react-query";
@@ -68,7 +68,7 @@ function UnitStatsTable() {
   const refreshStatsMutation = useMutation({
     mutationKey: ["REFRESH_UNIT_STATS"], mutationFn: refreshUnitStats,
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["REFRESH_UNIT_STATS"] })
+      queryClient.invalidateQueries({ queryKey: [GET_UNIT_STATS_KEY] })
     }
   })
 
