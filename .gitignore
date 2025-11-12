@@ -3,6 +3,9 @@ node_modules/
 npm-debug.log
 yarn-error.log
 
+# Python
+__pycache__/
+
 # Editor directories and files
 .vscode/*
 .DS_Store
@@ -13,6 +16,7 @@ yarn-error.log
 
 # TFT Assets
 frontend/public/assets/
+scripts/assets/
 
 # Build artifacts
 frontend/dist/
